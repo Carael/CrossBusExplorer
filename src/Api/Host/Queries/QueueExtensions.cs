@@ -3,7 +3,7 @@ using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.Host.Queries;
 
 [ExtendObjectType("Query")]
-public class ServiceBusQueryExtensions
+public class QueueExtensions
 {
     public IAsyncEnumerable<QueueInfo> GetQueuesAsync(
         [Service] IQueueService queueService,

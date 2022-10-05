@@ -3,6 +3,7 @@ using Azure;
 using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using QueueProperties = Azure.Messaging.ServiceBus.Administration.QueueProperties;
 
 namespace CrossBusExplorer.ServiceBus;
 
@@ -13,7 +14,7 @@ public class QueueService : IQueueService
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ServiceBusAdministrationClient administrationClient =
-            await GetClientAsync(connectionString, cancellationToken);
+            new ServiceBusAdministrationClient(connectionString);
 
         AsyncPageable<QueueProperties> queuesPageable =
             administrationClient.GetQueuesAsync(cancellationToken);
@@ -42,17 +43,17 @@ public class QueueService : IQueueService
         }
     }
     public async Task<QueueDetails> GetQueueAsync(
-        string name, 
+        string name,
         string connectionString,
         CancellationToken cancellationToken)
     {
         ServiceBusAdministrationClient administrationClient =
-            await GetClientAsync(connectionString, cancellationToken);
+            new ServiceBusAdministrationClient(connectionString);
 
         var queueResponse = await administrationClient.GetQueueAsync(name, cancellationToken);
 
         var queue = queueResponse.Value;
-        
+
         Response<QueueRuntimeProperties> runtimePropertiesResponse =
             await administrationClient.GetQueueRuntimePropertiesAsync(
                 queue.Name,
@@ -63,21 +64,31 @@ public class QueueService : IQueueService
         return new QueueDetails(
             GetQueueInfo(queue, queueRuntimeProperties),
             GetQueueSettings(queue),
-            queue.AutoDeleteOnIdle,
+            GetQueueTimeSettings(queue),
+            GetQueueProperties(queue));
+    }
+    private QueueTimeSettings GetQueueTimeSettings(QueueProperties queue) =>
+        new QueueTimeSettings(queue.AutoDeleteOnIdle,
             queue.DefaultMessageTimeToLive,
             queue.DuplicateDetectionHistoryTimeWindow,
-            queue.LockDuration,
+            queue.LockDuration);
+
+    private Contracts.Types.QueueProperties GetQueueProperties(QueueProperties queue) =>
+        new Contracts.Types.QueueProperties(
             queue.MaxSizeInMegabytes,
             queue.MaxDeliveryCount,
             queue.UserMetadata,
             queue.ForwardTo,
-            queue.ForwardDeadLetteredMessagesTo
-            
-        );
-    }
+            queue.ForwardDeadLetteredMessagesTo);
+
     private QueueSettings GetQueueSettings(QueueProperties queue) =>
-        new QueueSettings(queue.EnablePartitioning);
-    
+        new QueueSettings(
+            queue.EnableBatchedOperations,
+            queue.DeadLetteringOnMessageExpiration,
+            queue.EnablePartitioning,
+            queue.RequiresDuplicateDetection,
+            queue.RequiresSession);
+
 
     private QueueInfo GetQueueInfo(
         QueueProperties queue,
@@ -95,11 +106,4 @@ public class QueueService : IQueueService
             queueRuntimeProperties.TransferMessageCount,
             queueRuntimeProperties.TransferMessageCount,
             queueRuntimeProperties.TotalMessageCount);
-
-    private async Task<ServiceBusAdministrationClient> GetClientAsync(
-        string connectionString,
-        CancellationToken cancellationToken)
-    {
-        return new ServiceBusAdministrationClient(connectionString);
-    }
 }

@@ -1,12 +1,14 @@
 using CrossBusExplorer.Host.Queries;
 using CrossBusExplorer.ServiceBus;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddServiceBusServices()
     .AddGraphQLServer()
     .AddQueryType()
-    .AddTypeExtension<ServiceBusQueryExtensions>()
+    .AddTypeExtension<QueueExtensions>()
+    .AddTypeExtension<MessageExtensions>()
     .AddMutationConventions();
 
 var app = builder.Build();

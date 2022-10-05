@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServiceBusServices(this IServiceCollection collection)
     {
         return collection
-            .AddSingleton<IQueueService, QueueService>();
+            .AddSingleton<IQueueService, QueueService>()
+            .AddSingleton<IMessageService, MessageService>();
     }
 }
