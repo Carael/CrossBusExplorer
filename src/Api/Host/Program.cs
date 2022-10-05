@@ -8,10 +8,10 @@ builder.Services
     .AddServiceBusServices()
     .AddGraphQLServer()
     .AddQueryType()
-    // .AddMutationType()
+    .AddMutationType()
     .AddTypeExtension<QueueQueryExtensions>()
     .AddTypeExtension<MessageQueryExtensions>()
-    // .AddTypeExtension<QueueMutationExtensions>()
+    .AddTypeExtension<QueueMutationExtensions>()
     .AddMutationConventions();
 
 var app = builder.Build();

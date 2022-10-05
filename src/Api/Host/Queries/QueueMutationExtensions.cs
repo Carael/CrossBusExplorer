@@ -10,20 +10,20 @@ public class QueueQueryExtensions
         string connectionString,
         CancellationToken cancellationToken)
     {
-        return queueService.GetQueuesAsync(
+        return queueService.GetAsync(
             connectionString,
             cancellationToken);
     }
 
     public Task<QueueDetails> GetQueueAsync(
         [Service] IQueueService queueService,
-        string name,
         string connectionString,
+        string name,
         CancellationToken cancellationToken)
     {
-        return queueService.GetQueueAsync(
-            name,
+        return queueService.GetAsync(
             connectionString,
+            name,
             cancellationToken);
     }
 }

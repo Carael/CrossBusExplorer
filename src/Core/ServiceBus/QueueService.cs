@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Azure;
+using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
@@ -10,7 +11,7 @@ namespace CrossBusExplorer.ServiceBus;
 
 public class QueueService : IQueueService
 {
-    public async IAsyncEnumerable<QueueInfo> GetQueuesAsync(
+    public async IAsyncEnumerable<QueueInfo> GetAsync(
         string connectionString,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -43,9 +44,9 @@ public class QueueService : IQueueService
             await enumerator.DisposeAsync();
         }
     }
-    public async Task<QueueDetails> GetQueueAsync(
-        string name,
+    public async Task<QueueDetails> GetAsync(
         string connectionString,
+        string name,
         CancellationToken cancellationToken)
     {
         ServiceBusAdministrationClient administrationClient =
@@ -59,8 +60,59 @@ public class QueueService : IQueueService
             await administrationClient.GetQueueRuntimePropertiesAsync(
                 queue.Name,
                 cancellationToken);
-        
+
         return queue.ToQueueDetails(runtimePropertiesResponse.Value);
     }
+    public async Task<OperationResult> DeleteAsync(
+        string connectionString,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            ServiceBusAdministrationClient administrationClient =
+                new ServiceBusAdministrationClient(connectionString);
 
+            var response = await administrationClient.DeleteQueueAsync(name, cancellationToken);
+
+            return new OperationResult(!response.IsError);
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+    }
+    public async Task<OperationResult<QueueDetails>> CreateAsync(
+        string connectionString,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        //TODO: support CreateQueueOptions
+        try
+        {
+            ServiceBusAdministrationClient administrationClient =
+                new ServiceBusAdministrationClient(connectionString);
+            
+            var response = await administrationClient.CreateQueueAsync(
+                name,
+                cancellationToken);
+
+            Response<QueueRuntimeProperties> runtimePropertiesResponse =
+                await administrationClient.GetQueueRuntimePropertiesAsync(
+                    response.Value.Name,
+                    cancellationToken);
+            
+            return new OperationResult<QueueDetails>(
+                true,
+                response.Value.ToQueueDetails(runtimePropertiesResponse.Value));
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+    }
 }
