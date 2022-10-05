@@ -19,5 +19,16 @@ namespace CrossBusExplorer.ServiceBus.Contracts
             string connectionString, 
             string name,
             CancellationToken cancellationToken);
+        
+        Task<OperationResult<QueueDetails>> CloneAsync(
+            string connectionString, 
+            string name,
+            string sourceName,
+            CancellationToken cancellationToken);
+        
+        Task<OperationResult<QueueDetails>> UpdateAsync(
+            string connectionString, 
+            string name,
+            CancellationToken cancellationToken);
     }
 }

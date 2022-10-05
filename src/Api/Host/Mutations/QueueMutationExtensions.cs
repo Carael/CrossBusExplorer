@@ -8,21 +8,42 @@ public class QueueMutationExtensions
 {
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult> DeleteQueueAsync(
-        [Service]IQueueService queueService,
+        [Service] IQueueService queueService,
         string connectionString,
         string name,
         CancellationToken cancellationToken)
     {
         return await queueService.DeleteAsync(connectionString, name, cancellationToken);
     }
-    
+
+    [Error<ServiceBusOperationException>]
+    public async Task<OperationResult<QueueDetails>> UpdateQueueAsync(
+        [Service] IQueueService queueService,
+        string connectionString,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        return await queueService.UpdateAsync(connectionString, name, cancellationToken);
+    }
+
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult<QueueDetails>> CreateQueueAsync(
-        [Service]IQueueService queueService,
+        [Service] IQueueService queueService,
         string connectionString,
         string name,
         CancellationToken cancellationToken)
     {
         return await queueService.CreateAsync(connectionString, name, cancellationToken);
+    }
+
+    [Error<ServiceBusOperationException>]
+    public async Task<OperationResult<QueueDetails>> CloneQueueAsync(
+        [Service] IQueueService queueService,
+        string connectionString,
+        string name,
+        string sourceName,
+        CancellationToken cancellationToken)
+    {
+        return await queueService.CloneAsync(connectionString, name, sourceName, cancellationToken);
     }
 }

@@ -94,9 +94,60 @@ public class QueueService : IQueueService
         {
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connectionString);
+
+            // var createQueueOptions = new CreateQueueOptions();
             
             var response = await administrationClient.CreateQueueAsync(
                 name,
+                cancellationToken);
+
+            Response<QueueRuntimeProperties> runtimePropertiesResponse =
+                await administrationClient.GetQueueRuntimePropertiesAsync(
+                    response.Value.Name,
+                    cancellationToken);
+            
+            return new OperationResult<QueueDetails>(
+                true,
+                response.Value.ToQueueDetails(runtimePropertiesResponse.Value));
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+    }
+    public Task<OperationResult<QueueDetails>> CloneAsync(
+        string connectionString, 
+        string name, 
+        string sourceName,
+        CancellationToken cancellationToken)
+    {
+        //TODO: implement
+        throw new NotImplementedException();
+    }
+    public async Task<OperationResult<QueueDetails>> UpdateAsync(
+        string connectionString,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        //TODO: support all QueueProperties
+        
+        try
+        {
+            ServiceBusAdministrationClient administrationClient =
+                new ServiceBusAdministrationClient(connectionString);
+            
+            var getQueueResponse = await administrationClient.CreateQueueAsync(
+                name,
+                cancellationToken);
+
+            var queueProperties = getQueueResponse.Value;
+
+            queueProperties.ForwardTo = "asdad";
+            
+            var response = await administrationClient.UpdateQueueAsync(
+                queueProperties,
                 cancellationToken);
 
             Response<QueueRuntimeProperties> runtimePropertiesResponse =
