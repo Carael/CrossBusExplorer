@@ -49,6 +49,7 @@ public class MessageService : IMessageService
             TimeSpan.FromSeconds(5),
             cancellationToken);
     }
+    
     private Message MapToMessage(ServiceBusReceivedMessage receivedMessage)
     {
         return new Message(

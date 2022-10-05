@@ -1,3 +1,4 @@
+using CrossBusExplorer.Host.Mutations;
 using CrossBusExplorer.Host.Queries;
 using CrossBusExplorer.ServiceBus;
 
@@ -7,8 +8,10 @@ builder.Services
     .AddServiceBusServices()
     .AddGraphQLServer()
     .AddQueryType()
-    .AddTypeExtension<QueueExtensions>()
-    .AddTypeExtension<MessageExtensions>()
+    // .AddMutationType()
+    .AddTypeExtension<QueueQueryExtensions>()
+    .AddTypeExtension<MessageQueryExtensions>()
+    // .AddTypeExtension<QueueMutationExtensions>()
     .AddMutationConventions();
 
 var app = builder.Build();
