@@ -3,7 +3,6 @@ namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 public record QueueInfo(
     string Name, 
     QueueStatus Status,
-    // bool IsReadOnly,
     long SizeInBytes,
     DateTimeOffset CreatedAt,
     DateTimeOffset AccessedAt,

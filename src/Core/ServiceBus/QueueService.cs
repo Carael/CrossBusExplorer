@@ -15,7 +15,7 @@ public class QueueService : IQueueService
         ServiceBusAdministrationClient administrationClient =
             await GetClientAsync(connectionString, cancellationToken);
 
-        Azure.AsyncPageable<QueueProperties> queuesPageable =
+        AsyncPageable<QueueProperties> queuesPageable =
             administrationClient.GetQueuesAsync(cancellationToken);
 
         IAsyncEnumerator<QueueProperties> enumerator =
@@ -60,10 +60,25 @@ public class QueueService : IQueueService
 
         QueueRuntimeProperties queueRuntimeProperties = runtimePropertiesResponse.Value;
 
-        return new QueueDetails(GetQueueInfo(queue, queueRuntimeProperties));
-
+        return new QueueDetails(
+            GetQueueInfo(queue, queueRuntimeProperties),
+            GetQueueSettings(queue),
+            queue.AutoDeleteOnIdle,
+            queue.DefaultMessageTimeToLive,
+            queue.DuplicateDetectionHistoryTimeWindow,
+            queue.LockDuration,
+            queue.MaxSizeInMegabytes,
+            queue.MaxDeliveryCount,
+            queue.UserMetadata,
+            queue.ForwardTo,
+            queue.ForwardDeadLetteredMessagesTo
+            
+        );
     }
+    private QueueSettings GetQueueSettings(QueueProperties queue) =>
+        new QueueSettings(queue.EnablePartitioning);
     
+
     private QueueInfo GetQueueInfo(
         QueueProperties queue,
         QueueRuntimeProperties queueRuntimeProperties) =>
