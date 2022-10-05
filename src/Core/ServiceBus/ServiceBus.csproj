@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>CrossBusExplorer.ServiceBus</RootNamespace>
+        <AssemblyName>CrossBusExplorer.ServiceBus</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ServiceBus.Contracts\ServiceBus.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.10.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    </ItemGroup>
+
+</Project>
