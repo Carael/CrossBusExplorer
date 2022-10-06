@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using CreateQueueOptions = CrossBusExplorer.ServiceBus.Contracts.Types.CreateQueueOptions;
 using QueueProperties = CrossBusExplorer.ServiceBus.Contracts.Types.QueueProperties;
 namespace CrossBusExplorer.ServiceBus.Mappings;
 
@@ -31,6 +32,102 @@ public static class QueueMappings
             GetQueueTimeSettings(properties),
             GetQueueProperties(properties));
 
+    public static Azure.Messaging.ServiceBus.Administration.CreateQueueOptions
+        MapToCreateQueueOptions(this CreateQueueOptions createQueueOptions)
+    {
+        var options =
+            new Azure.Messaging.ServiceBus.Administration.CreateQueueOptions(
+                createQueueOptions.Name);
+        
+        options.MaxSizeInMegabytes = createQueueOptions.MaxSizeInMegabytes;
+
+        if (createQueueOptions.EnablePartitioning.HasValue)
+        {
+            options.EnablePartitioning = createQueueOptions.EnablePartitioning.Value;
+        }
+
+        if (createQueueOptions.LockDuration.HasValue)
+        {
+            options.LockDuration = createQueueOptions.LockDuration.Value;
+        }
+
+        if (createQueueOptions.RequiresDuplicateDetection.HasValue)
+        {
+            options.RequiresDuplicateDetection =
+                createQueueOptions.RequiresDuplicateDetection.Value;
+        }
+
+        if (createQueueOptions.RequiresSession.HasValue)
+        {
+            options.RequiresSession = createQueueOptions.RequiresSession.Value;
+        }
+
+        if (createQueueOptions.DefaultMessageTimeToLive.HasValue)
+        {
+            options.DefaultMessageTimeToLive = createQueueOptions.DefaultMessageTimeToLive.Value;
+        }
+
+        if (createQueueOptions.AutoDeleteOnIdle.HasValue)
+        {
+            options.AutoDeleteOnIdle = createQueueOptions.AutoDeleteOnIdle.Value;
+        }
+
+        if (createQueueOptions.DeadLetteringOnMessageExpiration.HasValue)
+        {
+            options.DeadLetteringOnMessageExpiration =
+                createQueueOptions.DeadLetteringOnMessageExpiration.Value;
+        }
+
+        if (createQueueOptions.DuplicateDetectionHistoryTimeWindow.HasValue)
+        {
+            options.DuplicateDetectionHistoryTimeWindow =
+                createQueueOptions.DuplicateDetectionHistoryTimeWindow.Value;
+        }
+
+        if (createQueueOptions.MaxDeliveryCount.HasValue)
+        {
+            options.MaxDeliveryCount = createQueueOptions.MaxDeliveryCount.Value;
+        }
+
+        if (createQueueOptions.EnableBatchedOperations.HasValue)
+        {
+            options.EnableBatchedOperations = createQueueOptions.EnableBatchedOperations.Value;
+        }
+
+        if (createQueueOptions.Status.HasValue)
+        {
+            options.Status = new EntityStatus(createQueueOptions.Status.ToString());
+        }
+
+        if (createQueueOptions.ForwardTo != null)
+        {
+            options.ForwardTo = createQueueOptions.ForwardTo;
+        }
+
+        if (createQueueOptions.ForwardDeadLetteredMessagesTo != null)
+        {
+            options.ForwardDeadLetteredMessagesTo =
+                createQueueOptions.ForwardDeadLetteredMessagesTo;
+        }
+
+        if (createQueueOptions.EnablePartitioning.HasValue)
+        {
+            options.EnablePartitioning = createQueueOptions.EnablePartitioning.Value;
+        }
+
+        if (createQueueOptions.MaxMessageSizeInKilobytes.HasValue)
+        {
+            options.MaxMessageSizeInKilobytes = createQueueOptions.MaxMessageSizeInKilobytes.Value;
+        }
+
+        if (createQueueOptions.UserMetadata != null)
+        {
+            options.UserMetadata = createQueueOptions.UserMetadata;
+        }
+
+        return options;
+    }
+
     private static QueueTimeSettings GetQueueTimeSettings(
         Azure.Messaging.ServiceBus.Administration.QueueProperties queue) =>
         new QueueTimeSettings(queue.AutoDeleteOnIdle,
@@ -38,9 +135,9 @@ public static class QueueMappings
             queue.DuplicateDetectionHistoryTimeWindow,
             queue.LockDuration);
 
-    private static Contracts.Types.QueueProperties GetQueueProperties(
+    private static QueueProperties GetQueueProperties(
         Azure.Messaging.ServiceBus.Administration.QueueProperties queue) =>
-        new Contracts.Types.QueueProperties(
+        new QueueProperties(
             queue.MaxSizeInMegabytes,
             queue.MaxDeliveryCount,
             queue.UserMetadata,

@@ -5,6 +5,7 @@ using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
+using CreateQueueOptions = CrossBusExplorer.ServiceBus.Contracts.Types.CreateQueueOptions;
 using QueueProperties = Azure.Messaging.ServiceBus.Administration.QueueProperties;
 
 namespace CrossBusExplorer.ServiceBus;
@@ -86,7 +87,7 @@ public class QueueService : IQueueService
     }
     public async Task<OperationResult<QueueDetails>> CreateAsync(
         string connectionString,
-        string name,
+        CreateQueueOptions options,
         CancellationToken cancellationToken)
     {
         //TODO: support CreateQueueOptions
@@ -95,12 +96,12 @@ public class QueueService : IQueueService
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connectionString);
 
-            // var createQueueOptions = new CreateQueueOptions();
+            var createQueueOptions = options.MapToCreateQueueOptions();
             
             var response = await administrationClient.CreateQueueAsync(
-                name,
+                createQueueOptions,
                 cancellationToken);
-
+            
             Response<QueueRuntimeProperties> runtimePropertiesResponse =
                 await administrationClient.GetQueueRuntimePropertiesAsync(
                     response.Value.Name,

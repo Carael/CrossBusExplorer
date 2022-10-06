@@ -17,7 +17,7 @@ namespace CrossBusExplorer.ServiceBus.Contracts
         
         Task<OperationResult<QueueDetails>> CreateAsync(
             string connectionString, 
-            string name,
+            CreateQueueOptions options,
             CancellationToken cancellationToken);
         
         Task<OperationResult<QueueDetails>> CloneAsync(

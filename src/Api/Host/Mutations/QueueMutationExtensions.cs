@@ -26,14 +26,15 @@ public class QueueMutationExtensions
         return await queueService.UpdateAsync(connectionString, name, cancellationToken);
     }
 
+    [UseMutationConvention()]
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult<QueueDetails>> CreateQueueAsync(
         [Service] IQueueService queueService,
         string connectionString,
-        string name,
+        CreateQueueOptions options,
         CancellationToken cancellationToken)
     {
-        return await queueService.CreateAsync(connectionString, name, cancellationToken);
+        return await queueService.CreateAsync(connectionString, options, cancellationToken);
     }
 
     [Error<ServiceBusOperationException>]
