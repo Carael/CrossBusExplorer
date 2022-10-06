@@ -4,10 +4,8 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>CrossBusExplorer.Common</RootNamespace>
+        <AssemblyName>CrossBusExplorer.Common</AssemblyName>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Compile Remove="Class1.cs" />
-    </ItemGroup>
 
 </Project>

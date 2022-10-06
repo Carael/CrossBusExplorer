@@ -97,30 +97,32 @@ public class QueueService : IQueueService
                 new ServiceBusAdministrationClient(connectionString);
 
             var createQueueOptions = options.MapToCreateQueueOptions();
-            
+
             var response = await administrationClient.CreateQueueAsync(
                 createQueueOptions,
                 cancellationToken);
-            
+
             Response<QueueRuntimeProperties> runtimePropertiesResponse =
                 await administrationClient.GetQueueRuntimePropertiesAsync(
                     response.Value.Name,
                     cancellationToken);
-            
+
             return new OperationResult<QueueDetails>(
                 true,
                 response.Value.ToQueueDetails(runtimePropertiesResponse.Value));
         }
         catch (ServiceBusException ex)
         {
-            //TODO: log
-
             throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new ValidationException(ErrorCodes.InvalidArgument, ex.Message);
         }
     }
     public Task<OperationResult<QueueDetails>> CloneAsync(
-        string connectionString, 
-        string name, 
+        string connectionString,
+        string name,
         string sourceName,
         CancellationToken cancellationToken)
     {
@@ -133,12 +135,12 @@ public class QueueService : IQueueService
         CancellationToken cancellationToken)
     {
         //TODO: support all QueueProperties
-        
+
         try
         {
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connectionString);
-            
+
             var getQueueResponse = await administrationClient.CreateQueueAsync(
                 name,
                 cancellationToken);
@@ -146,7 +148,7 @@ public class QueueService : IQueueService
             var queueProperties = getQueueResponse.Value;
 
             queueProperties.ForwardTo = "asdad";
-            
+
             var response = await administrationClient.UpdateQueueAsync(
                 queueProperties,
                 cancellationToken);
@@ -155,7 +157,7 @@ public class QueueService : IQueueService
                 await administrationClient.GetQueueRuntimePropertiesAsync(
                     response.Value.Name,
                     cancellationToken);
-            
+
             return new OperationResult<QueueDetails>(
                 true,
                 response.Value.ToQueueDetails(runtimePropertiesResponse.Value));
