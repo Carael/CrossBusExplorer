@@ -22,10 +22,10 @@ public class QueueMutationExtensions
     public async Task<OperationResult<QueueDetails>> UpdateQueueAsync(
         [Service] IQueueService queueService,
         string connectionString,
-        string name,
+        UpdateQueueOptions options,
         CancellationToken cancellationToken)
     {
-        return await queueService.UpdateAsync(connectionString, name, cancellationToken);
+        return await queueService.UpdateAsync(connectionString, options, cancellationToken);
     }
     
     [UseMutationConvention(PayloadFieldName = "result")]

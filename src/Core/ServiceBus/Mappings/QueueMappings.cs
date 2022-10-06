@@ -2,6 +2,8 @@ using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CreateQueueOptions = CrossBusExplorer.ServiceBus.Contracts.Types.CreateQueueOptions;
 using QueueProperties = CrossBusExplorer.ServiceBus.Contracts.Types.QueueProperties;
+using SharedAccessAuthorizationRule =
+    CrossBusExplorer.ServiceBus.Contracts.Types.SharedAccessAuthorizationRule;
 namespace CrossBusExplorer.ServiceBus.Mappings;
 
 public static class QueueMappings
@@ -38,7 +40,7 @@ public static class QueueMappings
         var options =
             new Azure.Messaging.ServiceBus.Administration.CreateQueueOptions(
                 createQueueOptions.Name);
-        
+
         options.MaxSizeInMegabytes = createQueueOptions.MaxSizeInMegabytes;
 
         if (createQueueOptions.EnablePartitioning.HasValue)
@@ -125,7 +127,102 @@ public static class QueueMappings
             options.UserMetadata = createQueueOptions.UserMetadata;
         }
 
+        if (createQueueOptions.AuthorizationRules != null)
+        {
+            foreach (var authorizationRule in createQueueOptions.AuthorizationRules)
+            {
+                options.AuthorizationRules.Add(
+                    authorizationRule.MapToSharedAccessAuthorizationRule());
+            }
+        }
+
         return options;
+    }
+
+    public static Azure.Messaging.ServiceBus.Administration.QueueProperties UpdateFromOptions(
+        this Azure.Messaging.ServiceBus.Administration.QueueProperties queue,
+        UpdateQueueOptions options)
+    {
+        if (options.MaxSizeInMegabytes != null)
+        {
+            queue.MaxSizeInMegabytes = options.MaxSizeInMegabytes.Value;
+        }
+
+        if (options.LockDuration.HasValue)
+        {
+            queue.LockDuration = options.LockDuration.Value;
+        }
+
+        if (options.DefaultMessageTimeToLive.HasValue)
+        {
+            queue.DefaultMessageTimeToLive = options.DefaultMessageTimeToLive.Value;
+        }
+
+        if (options.AutoDeleteOnIdle.HasValue)
+        {
+            queue.AutoDeleteOnIdle = options.AutoDeleteOnIdle.Value;
+        }
+
+        if (options.DeadLetteringOnMessageExpiration.HasValue)
+        {
+            queue.DeadLetteringOnMessageExpiration =
+                options.DeadLetteringOnMessageExpiration.Value;
+        }
+
+        if (options.DuplicateDetectionHistoryTimeWindow.HasValue)
+        {
+            queue.DuplicateDetectionHistoryTimeWindow =
+                options.DuplicateDetectionHistoryTimeWindow.Value;
+        }
+
+        if (options.MaxDeliveryCount.HasValue)
+        {
+            queue.MaxDeliveryCount = options.MaxDeliveryCount.Value;
+        }
+
+        if (options.EnableBatchedOperations.HasValue)
+        {
+            queue.EnableBatchedOperations = options.EnableBatchedOperations.Value;
+        }
+
+        if (options.Status.HasValue)
+        {
+            queue.Status = new EntityStatus(options.Status.ToString());
+        }
+
+        if (options.ForwardTo != null)
+        {
+            queue.ForwardTo = options.ForwardTo;
+        }
+
+        if (options.ForwardDeadLetteredMessagesTo != null)
+        {
+            queue.ForwardDeadLetteredMessagesTo =
+                options.ForwardDeadLetteredMessagesTo;
+        }
+
+        if (options.MaxMessageSizeInKilobytes.HasValue)
+        {
+            queue.MaxMessageSizeInKilobytes = options.MaxMessageSizeInKilobytes.Value;
+        }
+
+        if (options.UserMetadata != null)
+        {
+            queue.UserMetadata = options.UserMetadata;
+        }
+
+        if (options.AuthorizationRules != null)
+        {
+            queue.AuthorizationRules.Clear();
+            
+            foreach (var authorizationRule in options.AuthorizationRules)
+            {
+                queue.AuthorizationRules.Add(
+                    authorizationRule.MapToSharedAccessAuthorizationRule());
+            }
+        }
+
+        return queue;
     }
 
     private static QueueTimeSettings GetQueueTimeSettings(
@@ -152,4 +249,13 @@ public static class QueueMappings
             queue.EnablePartitioning,
             queue.RequiresDuplicateDetection,
             queue.RequiresSession);
+
+    private static Azure.Messaging.ServiceBus.Administration.SharedAccessAuthorizationRule
+        MapToSharedAccessAuthorizationRule(
+            this SharedAccessAuthorizationRule rule) =>
+        new Azure.Messaging.ServiceBus.Administration.SharedAccessAuthorizationRule(
+            rule.KeyName,
+            rule.PrimaryKey,
+            rule.SecondaryKey,
+            rule.Rights.Select(p => (Azure.Messaging.ServiceBus.Administration.AccessRights)p));
 }

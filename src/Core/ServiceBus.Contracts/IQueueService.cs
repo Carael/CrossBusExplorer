@@ -24,7 +24,7 @@ namespace CrossBusExplorer.ServiceBus.Contracts
             CancellationToken cancellationToken);
         Task<OperationResult<QueueDetails>> UpdateAsync(
             string connectionString, 
-            string name,
+            UpdateQueueOptions options,
             CancellationToken cancellationToken);
     }
 }
