@@ -1,9 +1,10 @@
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.ServiceBus.Contracts;
 
-public interface ITopicService
+public interface ISubscriptionService
 {
-    IAsyncEnumerable<TopicInfo> GetAsync(
+    IAsyncEnumerable<SubscriptionInfo> GetAsync(
         string connectionString,
+        string topicName,
         CancellationToken cancellationToken);
 }

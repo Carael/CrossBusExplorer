@@ -13,6 +13,8 @@ builder.Services
     .AddTypeExtension<MessageQueryExtensions>()
     .AddTypeExtension<QueueMutationExtensions>()
     .AddTypeExtension<MessagingMutationExtensions>()
+    .AddTypeExtension<TopicQueryExtensions>()
+    .AddTypeExtension<SubscriptionQueryExtensions>()
     .AddMutationConventions();
 
 var app = builder.Build();

@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
         return collection
             .AddSingleton<IQueueService, QueueService>()
             .AddSingleton<ITopicService, TopicService>()
-            .AddSingleton<IMessageService, MessageService>();
+            .AddSingleton<IMessageService, MessageService>()
+            .AddSingleton<ISubscriptionService, SubscriptionService>();
     }
 }

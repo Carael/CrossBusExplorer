@@ -3,15 +3,17 @@ using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.Host.Queries;
 
 [ExtendObjectType("Query")]
-public class TopicQueryExtensions
+public class SubscriptionQueryExtensions
 {
-    public IAsyncEnumerable<TopicInfo> GetTopicsAsync(
-        [Service] ITopicService topicService,
+    public IAsyncEnumerable<SubscriptionInfo> GetSubscriptionsAsync(
+        [Service] ISubscriptionService subscriptionService,
         string connectionString,
+        string topicName,
         CancellationToken cancellationToken)
     {
-        return topicService.GetAsync(
+        return subscriptionService.GetAsync(
             connectionString,
+            topicName,
             cancellationToken);
     }
 }
