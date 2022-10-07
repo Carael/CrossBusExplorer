@@ -55,4 +55,8 @@
       <ProjectReference Include="..\Core\ServiceBus\ServiceBus.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot" />
+    </ItemGroup>
+
 </Project>
