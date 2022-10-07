@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.ServiceBus.Contracts;
 
@@ -13,18 +12,12 @@ public interface IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken);
 
-    Task<Removed> PurgeAsync(string connectionString,
+    Task<Result> PurgeAsync(string connectionString,
         string name,
         SubQueue subQueue,
         CancellationToken cancellationToken);
 
-    IAsyncEnumerable<Removed> PurgeAsyncEnumerable(
-        string connectionString,
-        string name,
-        SubQueue subQueue,
-        CancellationToken cancellationToken);
-
-    Task<Sent> SendMessagesAsync(
+    Task<Result> SendMessagesAsync(
         string connectionString,
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,

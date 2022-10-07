@@ -53,7 +53,7 @@ public class MessageService : IMessageService
         return client.CreateReceiver(queueOrTopicName, receiverOptions);
     }
 
-    public async Task<Removed> PurgeAsync(
+    public async Task<Result> PurgeAsync(
         string connectionString,
         string name,
         SubQueue subQueue,
@@ -75,13 +75,13 @@ public class MessageService : IMessageService
             {
                 removedCount = (await receiver.ReceiveMessagesAsync(
                     1024,
-                    TimeSpan.FromSeconds(15),
+                    TimeSpan.FromSeconds(5),
                     cancellationToken)).Count;
                 totalRemoved += removedCount;
 
             } while (removedCount > 0);
 
-            return new Removed(totalRemoved);
+            return new Result(totalRemoved);
         }
         catch (ServiceBusException ex)
         {
@@ -91,52 +91,26 @@ public class MessageService : IMessageService
         }
     }
 
-    public async IAsyncEnumerable<Removed> PurgeAsyncEnumerable(
-        string connectionString,
-        string name,
-        SubQueue subQueue,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        await using ServiceBusClient client = new ServiceBusClient(connectionString);
-        await using var receiver = client.CreateReceiver(name, new ServiceBusReceiverOptions
-        {
-            SubQueue = (Azure.Messaging.ServiceBus.SubQueue)subQueue,
-            ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
-        });
-
-        var totalRemoved = 0;
-        var removedCount = 0;
-
-        do
-        {
-            removedCount = (await receiver.ReceiveMessagesAsync(
-                1024,
-                TimeSpan.FromSeconds(10),
-                cancellationToken)).Count;
-            totalRemoved += removedCount;
-
-            yield return new Removed(totalRemoved);
-        } while (removedCount > 0);
-    }
-
-    public async Task<Sent> SendMessagesAsync(
+    public async Task<Result> SendMessagesAsync(
         string connectionString,
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,
         CancellationToken cancellationToken)
     {
-        await using ServiceBusClient client = new ServiceBusClient(connectionString);
-        await using var sender = client.CreateSender(queueOrTopicName);
-
-        ServiceBusMessageBatch messageBatch =
-            await sender.CreateMessageBatchAsync(cancellationToken);
-
-        var count = 0;
+        ServiceBusMessageBatch? messageBatch = null;
 
         try
         {
+            await using ServiceBusClient client = new ServiceBusClient(connectionString);
+            await using var sender = client.CreateSender(queueOrTopicName);
+
+            messageBatch =
+                await sender.CreateMessageBatchAsync(cancellationToken);
+
+            var count = 0;
+
             foreach (ServiceBusMessage serviceBusMessage in
-                messages.Select(CreateServiceBusMessage))
+                messages.Select(p => p.ToServiceBusMessage()))
             {
                 if (!messageBatch.TryAddMessage(serviceBusMessage))
                 {
@@ -154,24 +128,30 @@ public class MessageService : IMessageService
 
                 count++;
             }
+
             if (messageBatch.Count > 0)
             {
                 await sender.SendMessagesAsync(messageBatch, cancellationToken);
             }
+
+            return new Result(count);
+        }
+        catch (ArgumentException ex)
+        {
+            //TODO: log
+
+            throw new ValidationException(ErrorCodes.InvalidArgument, ex.Message);
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
         }
         finally
         {
-            messageBatch.Dispose();
+            messageBatch?.Dispose();
         }
-
-        return new Sent(count);
-    }
-
-    private ServiceBusMessage CreateServiceBusMessage(SendMessage sendMessage)
-    {
-        var message = new ServiceBusMessage(sendMessage.Body);
-
-        return message;
     }
 
     private async Task<IReadOnlyList<ServiceBusReceivedMessage>?> ReceiveMessagesAsync(
@@ -190,7 +170,7 @@ public class MessageService : IMessageService
 
         return await receiver.ReceiveMessagesAsync(
             maxMessages,
-            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(5),
             cancellationToken);
     }
 }

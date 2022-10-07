@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
     {
         return collection
             .AddSingleton<IQueueService, QueueService>()
+            .AddSingleton<ITopicService, TopicService>()
             .AddSingleton<IMessageService, MessageService>();
     }
 }

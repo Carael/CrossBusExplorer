@@ -1,12 +1,15 @@
+using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using SubQueue = CrossBusExplorer.ServiceBus.Contracts.Types.SubQueue;
 namespace CrossBusExplorer.Host.Mutations;
 
 [ExtendObjectType("Mutation")]
 public class MessagingMutationExtensions
 {
+    [Error<ServiceBusOperationException>]
     [UseMutationConvention(PayloadFieldName = "result")]
-    public async Task<Removed> PurgeAsync(
+    public async Task<Result> PurgeAsync(
         [Service] IMessageService messageService,
         string connectionString,
         string queueName,
@@ -20,8 +23,10 @@ public class MessagingMutationExtensions
             cancellationToken);
     }
     
+    [Error<ValidationException>]
+    [Error<ServiceBusOperationException>]
     [UseMutationConvention(PayloadFieldName = "result")]
-    public async Task<Sent> SendMessagesAsync(
+    public async Task<Result> SendMessagesAsync(
         [Service] IMessageService messageService,
         string connectionString,
         string queueOrTopicName,

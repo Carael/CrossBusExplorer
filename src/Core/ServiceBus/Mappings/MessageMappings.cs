@@ -34,6 +34,74 @@ public static class MessageMappings
                 receivedMessage.TimeToLive,
                 receivedMessage.To
             ),
-            receivedMessage.ApplicationProperties.ToDictionary(p=>p.Key, p=>p.Value?.ToString()));
+            receivedMessage.ApplicationProperties.ToDictionary(p => p.Key,
+                p => p.Value?.ToString()));
+    }
+
+    public static ServiceBusMessage ToServiceBusMessage(this SendMessage message)
+    {
+        var sbMessage = new ServiceBusMessage(message.Body);
+
+        if (!string.IsNullOrEmpty(message.Subject))
+        {
+            sbMessage.Subject = message.Subject;
+        }
+
+        if (message.ApplicationProperties != null)
+        {
+            foreach (var applicationProperty in message.ApplicationProperties)
+            {
+                sbMessage.ApplicationProperties.Add(
+                    applicationProperty.Key,
+                    applicationProperty.Value);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(message.To))
+        {
+            sbMessage.To = message.To;
+        }
+
+        if (!string.IsNullOrEmpty(message.ContentType))
+        {
+            sbMessage.ContentType = message.ContentType;
+        }
+
+        if (!string.IsNullOrEmpty(message.CorrelationId))
+        {
+            sbMessage.CorrelationId = message.CorrelationId;
+        }
+
+        if (!string.IsNullOrEmpty(message.Id))
+        {
+            sbMessage.MessageId = message.Id;
+        }
+
+        if (!string.IsNullOrEmpty(message.PartitionKey))
+        {
+            sbMessage.PartitionKey = message.PartitionKey;
+        }
+
+        if (!string.IsNullOrEmpty(message.ReplyTo))
+        {
+            sbMessage.ReplyTo = message.ReplyTo;
+        }
+
+        if (!string.IsNullOrEmpty(message.SessionId))
+        {
+            sbMessage.SessionId = message.SessionId;
+        }
+
+        if (message.ScheduledEnqueueTime != null)
+        {
+            sbMessage.ScheduledEnqueueTime = message.ScheduledEnqueueTime.Value;
+        }
+
+        if (message.TimeToLive != null)
+        {
+            sbMessage.TimeToLive = message.TimeToLive.Value;
+        }
+
+        return sbMessage;
     }
 }
