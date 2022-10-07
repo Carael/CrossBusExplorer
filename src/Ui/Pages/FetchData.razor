@@ -1,0 +1,50 @@
+@page "/fetchdata"
+@using CrossBusExplorer.ServiceBus.Contracts
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@inject IQueueService QueueService
+
+
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (QueueService == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Active messages</th>
+				<th>Deadletter messages</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var queue in queues)
+			{
+				<tr>
+					<td>@queue.Name</td>
+					<td>@queue.Status</td>
+					<td>@queue.ActiveMessagesCount</td>
+					<td>@queue.DeadLetterMessagesCount</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private IList<QueueInfo> queues = new List<QueueInfo>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await foreach (var queue in QueueService.GetAsync(Environment.GetEnvironmentVariable("CONNECTION_STRING")!, default))
+		{
+			queues.Add(queue);
+		}
+	}
+}
