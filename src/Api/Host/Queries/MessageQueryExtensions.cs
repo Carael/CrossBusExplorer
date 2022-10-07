@@ -8,7 +8,8 @@ public class MessageQueryExtensions
     public Task<IReadOnlyList<Message>> GetMessagesAsync(
         [Service] IMessageService messageService,
         string connectionString,
-        string queueName,
+        string queueOrTopicName,
+        string? subscriptionName,
         int messagesCount,
         ReceiveMode receiveMode,
         long? fromSequenceNumber,
@@ -16,7 +17,8 @@ public class MessageQueryExtensions
     {
         return messageService.GetMessagesAsync(
             connectionString,
-            queueName,
+            queueOrTopicName,
+            subscriptionName,
             messagesCount,
             receiveMode,
             fromSequenceNumber,

@@ -1,9 +1,7 @@
-using System.Collections;
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
-public record Message(
-    string Id,
-    string? Subject,
+public record SendMessage(
     string Body,
-    MessageSystemProperties SystemProperties,
+    string? Subject,
+    MessageSystemProperties? SystemProperties,
     IReadOnlyDictionary<string, string?>? ApplicationProperties);

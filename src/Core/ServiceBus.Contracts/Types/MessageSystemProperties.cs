@@ -1,7 +1,7 @@
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record MessageSystemProperties(
-    string ContentType, 
+    string? ContentType, 
     string? CorrelationId, 
     string? DeadLetterSource, 
     string? DeadLetterReason, 
