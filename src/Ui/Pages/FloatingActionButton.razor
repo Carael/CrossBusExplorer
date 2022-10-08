@@ -1,0 +1,137 @@
+﻿@page "/fab"
+
+@inject IMBToastService ToastService
+
+
+
+<DemonstrationPage ComponentName="FloatingActionButton"
+                   DemoComponent="@this"
+                   MaterialIOPage="mdc-fab#floating-action-buttons"
+                   Title="Floating Action Button (FAB) Demonstration">
+    <Description>
+        <p>
+            Shows Floating Action Button (FAB) variants.
+        </p>
+    </Description>
+
+    <Controls>
+        <p><MBSwitch @bind-Value="@Exited" Label="Applies the 'mdc-fab--exited' class" /></p>
+    </Controls>
+
+    <PageContent>
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Regular FAB
+                    </h2>
+
+                    <p>
+                        <MBFloatingActionButton Exited="@Exited"
+                                                Icon="access_alarms"
+                                                @onclick="@(() => ButtonClick("Regular FAB"))" />
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Mini FAB
+                    </h2>
+
+                    <p>
+                        <MBFloatingActionButton Exited="@Exited"
+                                                Icon="favorite_border"
+                                                @onclick="@(() => ButtonClick("Mini FAB"))"
+                                                Type="@MBFloatingActionButtonType.Mini" />
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Extended FAB
+                    </h2>
+
+                    <p>
+                        <MBFloatingActionButton Exited="@Exited"
+                                                Label="No Icon"
+                                                @onclick="@(() => ButtonClick("Extended FAB - no icon"))"
+                                                Type="@MBFloatingActionButtonType.ExtendedNoIcon" />
+                    </p>
+
+                    <p>
+                        <MBFloatingActionButton Exited="@Exited"
+                                                Icon="fa-hand-point-left"
+                                                IconFoundry="MBIconHelper.FAFoundry()"
+                                                Label="Leading Icon"
+                                                @onclick="@(() => ButtonClick("Extended FAB - leading icon"))"
+                                                Type="@MBFloatingActionButtonType.ExtendedLeadingIcon" />
+                    </p>
+
+                    <p>
+                        <MBFloatingActionButton Exited="@Exited"
+                                                Icon="fa-hand-point-right"
+                                                IconFoundry="MBIconHelper.FAFoundry()"
+                                                Label="Trailing Icon"
+                                                @onclick="@(() => ButtonClick("Extended FAB - trailing icon"))"
+                                                Type="@MBFloatingActionButtonType.ExtendedTrailingIcon" />
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Hide FAB on click
+                    </h2>
+
+                    <p>
+                        <MBFloatingActionButton Exited="Exited"
+                                                Icon="visibility_off"
+                                                @onclick="@(() => Exited = true)" />
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        This FAB is shown when all the other's are not shown and vice versa.
+                    </h2>
+
+                    <p>
+                        <MBFloatingActionButton Exited="!Exited"
+                                                Icon="visibility"
+                                                @onclick="@(() => Exited = false)" />
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+    </PageContent>
+</DemonstrationPage>
+
+
+
+@code {
+    private bool Exited { get; set; }
+
+    private void ButtonClick(string notification)
+    {
+        ToastService.ShowToast(heading: "Button Clicked", message: notification, level: MBToastLevel.Success, showIcon: false);
+    }
+}

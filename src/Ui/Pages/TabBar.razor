@@ -1,0 +1,91 @@
+﻿@page "/tabbar"
+
+@inject IMBToastService ToastService
+
+
+<DemonstrationPage ComponentName="TabBar"
+                   DemoComponent="@this"
+                   IsGeneric="true"
+                   MaterialIOPage="mdc-tab-bar#tab-bar"
+                   MinDensity="MBDensity.Minus4"
+                   Title="Tab Bar Demonstration">
+    <Description>
+        <p>
+            Demonstrates the core Tab Bar component.
+        </p>
+    </Description>
+
+    <Controls>
+        <p><MBSwitch @bind-Value="@StackIcons" Label="Stack Icons" /></p>
+    </Controls>
+
+    <PageContent>
+        <div @key="@StackIcons" class="mdc-layout-grid__cell--span-12">
+            <div class="mdc-layout-grid__inner">
+
+                <div class="mdc-layout-grid__cell--span-12">
+                    <MBCard AutoStyled="true">
+                        <Primary>
+                            <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                                Regular Tab Bar
+                            </h2>
+
+                            <h3 class="mb-card__subtitle mdc-typography mdc-typography--subtitle2">
+                                Demonstrates a regular tab bar for which you need to control tabbed content. This example uses the Font Awesome foundry for icons.
+                            </h3>
+
+                            <p style="margin-bottom: 2em;">
+                                <MBButton Label="Go to Dog"
+                                          @onclick="@DogButtonClick" />
+                            </p>
+
+                            <MBTabBar @bind-Value="@TabIndex"
+                                      Context="item"
+                                      Items="@TabLabels"
+                                      StackIcons="@StackIcons"
+                                      style="margin: 6px; ">
+
+                                <Icon>
+                                    @{ var name = "fa-" + item; }
+                                    <MBIcon IconFoundry="MBIconHelper.FAFoundry()"
+                                            IconName="@name" />
+                                </Icon>
+
+                                <Label>
+                                    @item
+                                </Label>
+                            </MBTabBar>
+                        </Primary>
+                    </MBCard>
+                </div>
+
+            </div>
+        </div>
+    </PageContent>
+</DemonstrationPage>
+
+
+@code {
+    private int _tabIndex = 0;
+    private int TabIndex
+    {
+        get => _tabIndex;
+        set
+        {
+            if (value != _tabIndex)
+            {
+                _tabIndex = value;
+
+                ToastService.ShowToast(heading: "Tab Clicked", message: $"Item {_tabIndex} / {TabLabels[_tabIndex]}", level: MBToastLevel.Success, showIcon: false);
+            }
+        }
+    }
+
+
+    private bool StackIcons { get; set; } = false;
+
+
+    private string[] TabLabels { get; set; } = { "cat", "dog", "horse-head", "dove", "hippo", "kiwi-bird", "dragon" };
+
+    private void DogButtonClick() => TabIndex = 1;
+}

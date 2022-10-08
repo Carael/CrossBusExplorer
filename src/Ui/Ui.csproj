@@ -56,7 +56,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot" />
+      <PackageReference Include="Material.Blazor" Version="3.0.1" />
+        <PackageReference Include="Nager.Date" Version="1.33.1" />
+
     </ItemGroup>
 
 </Project>

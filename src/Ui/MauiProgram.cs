@@ -1,4 +1,5 @@
 using CrossBusExplorer.ServiceBus;
+using Material.Blazor;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Ui.Data;
 
@@ -23,6 +24,8 @@ public static class MauiProgram
 		
 		builder.Services.AddSingleton<WeatherForecastService>();
 		builder.Services.AddServiceBusServices();
+		builder.Services.AddMBServices();
+
 
 		return builder.Build();
 	}

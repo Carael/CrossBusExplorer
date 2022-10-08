@@ -1,0 +1,53 @@
+﻿@page "/icon"
+
+@inject IMBToastService ToastService
+
+
+
+<DemonstrationPage ComponentName="Icon"
+                   DemoComponent="@this"
+                   DetailedArticle="Icon"
+                   Title="Icon Demonstration">
+    <Description>
+        <p>
+            Shows several icons.
+        </p>
+    </Description>
+
+    <PageContent>
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Icon
+                    </h2>
+
+                    <p>
+                        <MBIcon IconName="access_alarms" />
+                        Material Icons (default foundry)
+                    </p>
+                    <p>
+                        <MBIcon IconFoundry="@MBIconHelper.MIFoundry(MBIconMITheme.TwoTone)"
+                                IconName="access_alarms" />
+                        Material Two-Tone Icons
+                    </p>
+                    <p>
+                        <MBIcon IconFoundry="@MBIconHelper.FAFoundry()"
+                                IconName="fa-dog" />
+                        FontAwesome Foundry
+                    </p>
+                    <p>
+                        <MBIcon IconFoundry="@MBIconHelper.FAFoundry(relativeSize: MBIconFARelativeSize.FiveTimes)"
+                                IconName="fa-cat" />
+                        FontAwesome Foundry with relativeSize: 5x
+                    </p>
+                    <p>
+                        <MBIcon IconFoundry="@MBIconHelper.OIFoundry()"
+                                IconName="check" />
+                        Open Iconic foundry
+                    </p>
+                </Primary>
+            </MBCard>
+        </div>
+    </PageContent>
+</DemonstrationPage>

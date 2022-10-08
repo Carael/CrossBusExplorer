@@ -1,0 +1,38 @@
+﻿@page "/divider"
+
+
+@inject IMBToastService ToastService
+
+
+
+<DemonstrationPage ComponentName="Divider"
+                   DemoComponent="@this"
+                   MaterialIOPage="mdc-dialog#dialogs"
+                   Title="Divider Demonstration">
+    <Description>
+        <p>
+            Divider samples.
+        </p>
+    </Description>
+
+    <PageContent>
+        <div class="mdc-layout-grid__cell--span-4">
+            <MBCard AutoStyled="true">
+                <PrimaryAction>
+                    <div class="mb-card__autostyled">
+                        <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                            Dividers
+                        </h2>
+                        <p>The following is a vanilla divider</p>
+                        <MBDivider />
+                        <p>The following is an inset divider</p>
+                        <MBDivider Inset="true" />
+                        <p>The following is a padded divider</p>
+                        <MBDivider Padded="true" />
+                        <p>last paragraph</p>
+                    </div>
+                </PrimaryAction>
+            </MBCard>
+        </div>
+    </PageContent>
+</DemonstrationPage>

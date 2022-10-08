@@ -1,0 +1,303 @@
+﻿@page "/list"
+
+@inject IMBToastService ToastService
+
+
+<style>
+    .overflow-auto {
+        overflow: auto;
+        width: 100%;
+    }
+
+    .my-list {
+        min-width: 100%;
+    }
+</style>
+
+
+
+<DemonstrationPage ComponentName="List"
+                   DemoComponent="@this"
+                   IsGeneric="true"
+                   MaterialIOPage="mdc-list#lists"
+                   MinDensity="MBDensity.Minus4"
+                   RequiresDisableSelection="true"
+                   Title="List Demonstration">
+    <Description>
+        <p>
+            Demonstrates lists.
+        </p>
+    </Description>
+
+    <Controls>
+        <p>
+            <MBRadioButtonGroup @bind-Value="@ListType"
+                                Items="@ListTypes" />
+        </p>
+
+        <p>
+            <MBSwitch @bind-Value="@HideLineTwo"
+                      Label="Hide line two" />
+        </p>
+
+        <p>
+            <MBSwitch @bind-Value="@HideLineThree"
+                      Label="Hide line three" />
+        </p>
+
+        <p>
+            <MBSwitch @bind-Value="@KeyboardInteractions"
+                      Label="Allow keyboard interactions" />
+        </p>
+
+        <p>
+            <MBSwitch @bind-Value="@Ripple"
+                      Label="Apply ripple" />
+        </p>
+    </Controls>
+
+    <PageContent>
+
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Single Line List with a Primary Action
+                    </h2>
+
+                    <div class="overflow-auto">
+                        <p>
+                            <MBList Items="@SingleLineProducts"
+                                    Context="product"
+                                    GetKeysFunc="@((item) => item.ProductId)"
+                                    HideLineThree="@HideLineThree"
+                                    HideLineTwo="@HideLineTwo"
+                                    KeyboardInteractions="@KeyboardInteractions"
+                                    ListStyle="MBListStyle.Outlined"
+                                    ListType="@ListType"
+                                    OnClick="OnSingleLinePrimaryClick"
+                                    Ripple="@Ripple"
+                                    ShowSeparators="false">
+
+                                <Title>@product.DisplayName</Title>
+
+                                <PrimaryActions>
+                                    <div style="width: 10rem">
+                                        <MBCheckbox @bind-Value="@product.IsInStock" />
+                                    </div>
+                                </PrimaryActions>
+
+                            </MBList>
+                        </p>
+                    </div>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Single Line List with a Secondary Action
+                    </h2>
+
+                    <h3 class="mb-card__subtitle mdc-typography mdc-typography--subtitle2">
+                        Single line lists are the only variant capable of responding to the density subsystem (radio buttons above).
+                    </h3>
+
+                    <div class="overflow-auto">
+                        <p>
+                            <MBList Context="product"
+                                    HideLineThree="@HideLineThree"
+                                    HideLineTwo="@HideLineTwo"
+                                    Items="@SingleLineProducts"
+                                    KeyboardInteractions="@KeyboardInteractions"
+                                    ListStyle="MBListStyle.Outlined"
+                                    ListType="@ListType"
+                                    OnClick="OnSingleLineClick"
+                                    Ripple="@Ripple"
+                                    ShowSeparators="true">
+
+                                <Icon><MBIcon IconName="local_grocery_store" /></Icon>
+                                <Title>@product.DisplayName</Title>
+                                <SecondaryActions>
+                                    <div style="width: 10rem">
+                                        <MBSwitch @bind-Value="@product.IsInStock"
+                                                  Label="@(product.IsInStock ? "In stock" : "Out of stock")" />
+                                    </div>
+                                </SecondaryActions>
+                            </MBList>
+                        </p>
+                    </div>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Two Line List
+                    </h2>
+
+                    <h3 class="mb-card__subtitle mdc-typography mdc-typography--subtitle2">
+                        Two line lists are a standard Material Theme component.
+                    </h3>
+
+                    <div class="overflow-auto">
+                        <p>
+                            <MBList Items="@TwoLineProducts"
+                                    Context="product"
+                                    HideLineThree="@HideLineThree"
+                                    HideLineTwo="@HideLineTwo"
+                                    KeyboardInteractions="@KeyboardInteractions"
+                                    ListStyle="MBListStyle.Outlined"
+                                    ListType="@ListType"
+                                    Ripple="@Ripple"
+                                    OnClick="OnTwoLineClick"
+                                    ShowSeparators="true">
+
+                                <Icon><MBIcon IconName="local_grocery_store" /></Icon>
+                                <Title>@product.DisplayName</Title>
+                                <LineTwo>@product.LineTwo</LineTwo>
+                                <SecondaryActions>
+                                    <div style="width: 10rem">
+                                        <MBSwitch @bind-Value="@product.IsInStock"
+                                                  Label="@(product.IsInStock ? "In stock" : "Out of stock")" />
+                                    </div>
+                                </SecondaryActions>
+                            </MBList>
+                        </p>
+                    </div>
+                </Primary>
+            </MBCard>
+        </div>
+
+
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBCard AutoStyled="true">
+                <Primary>
+                    <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                        Three Line List
+                    </h2>
+
+                    <h3 class="mb-card__subtitle mdc-typography mdc-typography--subtitle2">
+                        Three line lists are in the material theme specification but not implemented by material components web. This is a Material.Blazor interpretation of three line lists.
+                        There is some improvement to be made to dense forms of the three line list.
+                    </h3>
+
+                    <div class="overflow-auto">
+                        <p>
+                            <MBList Items="@ThreeLineProducts"
+                                    Context="product"
+                                    GetKeysFunc="@((item) => item.ProductId)"
+                                    HideLineThree="@HideLineThree"
+                                    HideLineTwo="@HideLineTwo"
+                                    KeyboardInteractions="@KeyboardInteractions"
+                                    ListStyle="MBListStyle.Outlined"
+                                    ListType="@ListType"
+                                    OnClick="OnThreeLineClick"
+                                    Ripple="@Ripple"
+                                    ShowSeparators="true">
+
+                                <Icon>
+                                    <MBIcon IconName="local_grocery_store" />
+                                </Icon>
+                                <Title>@product.DisplayName</Title>
+                                <LineTwo>@product.LineTwo</LineTwo>
+                                <LineThree>@product.LineThree</LineThree>
+                                <SecondaryActions>
+                                    <div style="width: 10rem">
+                                        <MBSwitch @bind-Value="@product.IsInStock"
+                                                  Label="@(product.IsInStock ? "In stock" : "Out of stock")" />
+                                    </div>
+                                </SecondaryActions>
+                            </MBList>
+                        </p>
+                    </div>
+                </Primary>
+            </MBCard>
+        </div>
+
+    </PageContent>
+</DemonstrationPage>
+
+
+
+@code {
+    private IEnumerable<MBSelectElement<MBListType>> ListTypes => from t in (MBListType[])Enum.GetValues(typeof(MBListType))
+                                                                  select new MBSelectElement<MBListType>
+                                                                  {
+                                                                      SelectedValue = t,
+                                                                      Label = t.ToString(),
+                                                                      Disabled = false
+                                                                  };
+
+
+
+    private IEnumerable<Product> SingleLineProducts = new System.Collections.Generic.List<Product>
+{
+        new Product { ProductId = 1, DisplayName = "Curly-wurly straw", LineTwo = "Amaze your friends with this cheap plastic tube", LineThree = "Line three", IsInStock = true },
+        new Product { ProductId = 2, DisplayName = "Pepsi Connoisseur (12mo subscription)", LineTwo = "Covers all developments in the world of Pepsi™", LineThree = "Line three", IsInStock = false },
+        new Product { ProductId = 3, DisplayName = "Recarbonator Pro", LineTwo = "Revitalize your old beverages in just hours", LineThree = "Line three", IsInStock = true },
+    };
+
+
+    private IEnumerable<Product> TwoLineProducts = new System.Collections.Generic.List<Product>
+{
+        new Product { ProductId = 1, DisplayName = "Curly-wurly straw", LineTwo = "Amaze your friends with this cheap plastic tube", LineThree = "Line three", IsInStock = true },
+        new Product { ProductId = 2, DisplayName = "Pepsi Connoisseur (12mo subscription)", LineTwo = "Covers all developments in the world of Pepsi™", LineThree = "Line three", IsInStock = false },
+        new Product { ProductId = 3, DisplayName = "Recarbonator Pro", LineTwo = "Revitalize your old beverages in just hours", LineThree = "Line three", IsInStock = true },
+    };
+
+
+    private IEnumerable<Product> ThreeLineProducts = new System.Collections.Generic.List<Product>
+{
+        new Product { ProductId = 1, DisplayName = "Curly-wurly straw", LineTwo = "Amaze your friends with this cheap plastic tube", LineThree = "Line three", IsInStock = true },
+        new Product { ProductId = 2, DisplayName = "Pepsi Connoisseur (12mo subscription)", LineTwo = "Covers all developments in the world of Pepsi™", LineThree = "Line three", IsInStock = false },
+        new Product { ProductId = 3, DisplayName = "Recarbonator Pro", LineTwo = "Revitalize your old beverages in just hours", LineThree = "Line three", IsInStock = true },
+    };
+
+
+    public class Product
+    {
+        public int ProductId { get; set; }
+        public string DisplayName { get; set; }
+        public string LineTwo { get; set; }
+        public string LineThree { get; set; }
+        public bool IsInStock { get; set; }
+    }
+
+
+    private MBListType ListType { get; set; } = MBListType.Regular;
+    private bool HideLineTwo = false;
+    private bool HideLineThree = false;
+    private bool KeyboardInteractions = true;
+    private bool Ripple = true;
+
+
+    private void OnSingleLineClick(int index)
+    {
+        ToastService.ShowToast(heading: "Single Line Click", message: $"Line {index} clicked", level: MBToastLevel.Success, showIcon: false);
+    }
+
+
+    private void OnSingleLinePrimaryClick(int index)
+    {
+        ToastService.ShowToast(heading: "Single Line with Primary Action Click", message: $"Line {index} clicked", level: MBToastLevel.Success, showIcon: false);
+    }
+
+
+    private void OnTwoLineClick(int index)
+    {
+        ToastService.ShowToast(heading: "Two Line Click", message: $"Line {index} clicked", level: MBToastLevel.Success, showIcon: false);
+    }
+
+
+    private void OnThreeLineClick(int index)
+    {
+        ToastService.ShowToast(heading: "Three Line Click", message: $"Line {index} clicked", level: MBToastLevel.Success, showIcon: false);
+    }
+}
