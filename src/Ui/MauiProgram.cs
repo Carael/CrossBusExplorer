@@ -1,3 +1,4 @@
+using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using Material.Blazor;
 
@@ -22,6 +23,7 @@ public static class MauiProgram
 		
 		builder.Services.AddServiceBusServices();
 		builder.Services.AddMBServices();
+		builder.Services.AddSingleton<IConnectionManagement, ConnectionManagement>();
 
 
 		return builder.Build();

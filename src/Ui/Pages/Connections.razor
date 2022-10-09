@@ -1,0 +1,75 @@
+﻿@page "/connections"
+
+
+<PageTitle>Connections</PageTitle>
+
+<div class="mdc-layout-grid__cell--span-12">
+    <MBCard AutoStyled="true">
+        <Primary>
+            <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
+                Connections
+            </h2>
+            <p>
+                <MBButton Label="Add"
+                          @onclick="@(ShowAddConnectionDialog)"/>
+            </p>
+            <div class="overflow-auto">
+                <p>
+                    <MBList Items="@ConnectionsList"
+                            Context="connection"
+                            GetKeysFunc="@((item) => item.Name)"
+                            ListStyle="MBListStyle.Outlined"
+                            ListType="MBListType.Regular"
+                            Ripple="true"
+                            ShowSeparators="true">
+
+                        <Title>@connection.Name</Title>
+                    </MBList>
+                </p>
+            </div>
+        </Primary>
+    </MBCard>
+</div>
+
+<MBDialog EscapeKeyAction=""
+          @ref="@AddConnectionDialog"
+          ScrimClickAction=""
+          Title="Logon Dialog">
+    <Body>
+    <EditForm Model="@AddConnection"
+              OnInvalidSubmit="@AddConnectionDialogInvalid"
+              OnValidSubmit="@AddConnectionDialogSubmitted">
+        <DataAnnotationsValidator/>
+
+        <div class="mdc-layout-grid__inner">
+
+            <div class="mdc-layout-grid__cell--span-12">
+                <MBTextArea @bind-Value="@AddConnection.ConnectionString"
+                            HelperTextPersistent="true"
+                            Label="Connection string"
+                            style="width: 100%;"
+                            TextInputStyle="@MBTextInputStyle.Outlined"
+                            TrailingIcon="lock_outline"
+                            @onfocusout="@(() => TryParseName())"
+                            ValidationMessageFor="@(() => AddConnection.ConnectionString)"/>
+            </div>
+            <div class="mdc-layout-grid__cell--span-12">
+                <MBTextField @bind-Value="@AddConnection.Name"
+                             Label="name"
+                             style="width: 100%; margin-top: 6px;"
+                             TextInputStyle="@MBTextInputStyle.Outlined"
+                             ValidationMessageFor="@(() => AddConnection.Name)"/>
+            </div>
+            <div class="mdc-layout-grid__cell--span-12" style="text-align: right;">
+                <MBButton Label="Save"
+                          style="margin: 0.75em 0.25em 0.25em 0.25em;"
+                          type="submit"/>
+                <MBButton Label="Cancel"
+                          @onclick="@AddConnectionDialogCanceled"
+                          style="margin: 0.75em 0.25em 0.25em 0.25em;"
+                          type="button"/>
+            </div>
+        </div>
+    </EditForm>
+    </Body>
+</MBDialog>

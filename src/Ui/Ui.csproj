@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-<!-- TODO: install android sdk net6.0-android-->
-        <TargetFrameworks>net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+        <TargetFramework>net6.0-maccatalyst</TargetFramework>
+<!--        <TargetFrameworks>net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>-->
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
@@ -30,6 +30,7 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -50,7 +51,8 @@
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
-    <ItemGroup><!--      <ProjectReference Include="..\Core\ServiceBus\ServiceBus.csproj" />-->
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Management\Management.csproj" />
     
       <ProjectReference Include="..\Core\ServiceBus\ServiceBus.csproj" />
     </ItemGroup>
@@ -63,6 +65,10 @@
 
     <ItemGroup>
       <Folder Include="Data" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <RazorComponent Include="Pages\Connections.razor" />
     </ItemGroup>
 
 </Project>
