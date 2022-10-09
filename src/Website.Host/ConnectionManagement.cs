@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using CrossBusExplorer.Management;
-namespace Web;
+namespace Website.Host;
 
 public class ConnectionManagement : IConnectionManagement
 {
@@ -84,5 +84,6 @@ public class ConnectionManagement : IConnectionManagement
             cancellationToken);
     }
 
-    private string FilePath => Path.Combine(ServiceBusConnectionsFileName);
+    private string FilePath => System.IO.Path.Combine(
+        ServiceBusConnectionsFileName);
 }
