@@ -4,6 +4,7 @@ using CrossBusExplorer.Management;
 using CrossBusExplorer.Website.Models;
 using Material.Blazor;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
@@ -14,7 +15,9 @@ public partial class Connections
     [Inject]
     private IMBToastService ToastService { get; set; }
     private IList<ServiceBusConnection>? ConnectionsList;
-    private AddConnectionModel AddConnection { get; set; }
+    private AddConnectionModel AddConnection = new AddConnectionModel();
+    private EditContext EditContext;
+
 
     public Connections()
     {
@@ -23,21 +26,38 @@ public partial class Connections
 
     protected override async Task OnInitializedAsync()
     {
+        EditContext = new EditContext(AddConnection);
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
         ConnectionsList = await ConnectionManagement.GetAsync(default);
+        
+        base.OnInitialized();
+    }
+    
+    
+    // Note: The OnFieldChanged event is raised for each field in the model
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == nameof(AddConnectionModel.ConnectionString))
+        {
+            if (e.FieldIdentifier.Model is AddConnectionModel model)
+            {
+                AddConnection.Name = TryParseName(model.ConnectionString);
+            }
+            
+        }
     }
 
-    private async Task TryParseName()
+    private string? TryParseName(string connectionString)
     {
-        if (AddConnection is { ConnectionString: { } } &&
-            ServiceBusConnectionStringHelper.IsValid(AddConnection?.ConnectionString))
+        if (connectionString!=null &&
+            ServiceBusConnectionStringHelper.IsValid(connectionString))
         {
-            AddConnection.Name =
+            return 
                 ServiceBusConnectionStringHelper.GetNameFromConnectionString(
-                    AddConnection.ConnectionString);
-            
-            await AddConnection.NameChanged.InvokeAsync(AddConnection.Name);
-
+                    connectionString);
         }
+
+        return null;
     }
 
     private async Task ShowAddConnectionDialog()

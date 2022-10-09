@@ -8,7 +8,7 @@ public static class ServiceBusConnectionStringHelper
         var connectionStringProperties =
             ServiceBusConnectionStringProperties.Parse(connectionString);
 
-        return connectionStringProperties.EntityPath;
+        return connectionStringProperties.FullyQualifiedNamespace;
     }
 
     public static bool IsValid(string? connectionString)

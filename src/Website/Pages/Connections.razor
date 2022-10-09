@@ -36,7 +36,7 @@
           ScrimClickAction=""
           Title="Logon Dialog">
     <Body>
-    <EditForm Model="@AddConnection"
+    <EditForm EditContext="@EditContext"
               OnInvalidSubmit="@AddConnectionDialogInvalid"
               OnValidSubmit="@AddConnectionDialogSubmitted">
         <DataAnnotationsValidator/>
@@ -50,8 +50,7 @@
                             style="width: 100%;"
                             TextInputStyle="@MBTextInputStyle.Outlined"
                             TrailingIcon="lock_outline"
-                            @onfocusout="@(() => TryParseName())"
-                            ValidationMessageFor="@(() => AddConnection.ConnectionString)"/>
+                            ValidationMessageFor="@(() => AddConnection.ConnectionString)"></MBTextArea>
             </div>
             <div class="mdc-layout-grid__cell--span-12">
                 <MBTextField @bind-Value="@AddConnection.Name"
