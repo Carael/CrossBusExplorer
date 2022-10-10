@@ -9,7 +9,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddServiceBusServices();
 builder.Services.AddMBServices();
-builder.Services.AddSingleton<IConnectionManagement, ConnectionManagement>();
+builder.Services.AddManagement();
+builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
 
 var app = builder.Build();
 

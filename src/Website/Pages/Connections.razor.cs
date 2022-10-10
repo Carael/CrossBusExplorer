@@ -12,14 +12,14 @@ public partial class Connections
     [Inject]
     private IConnectionManagement ConnectionManagement { get; set; } = null!;
     [Inject]
-    private IMBToastService ToastService { get; set; }= null!;
-    private MBDialog AddConnectionDialog { get; set; }= null!;
-    private MBDialog ViewConnectionStringDialog { get; set; }= null!;
-    private MBConfirmationDialog DeleteDialog { get; set; }= null!;
+    private IMBToastService ToastService { get; set; } = null!;
+    private MBDialog AddConnectionDialog { get; set; } = null!;
+    private MBDialog ViewConnectionStringDialog { get; set; } = null!;
+    private MBConfirmationDialog DeleteDialog { get; set; } = null!;
 
-    private IList<ServiceBusConnection> _connectionsList;
+    private IList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
     private AddConnectionModel _addEditConnectionModel = new AddConnectionModel();
-    private string _viewConnectionStringValue = null;
+    private string? _viewConnectionStringValue = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,14 +40,14 @@ public partial class Connections
         if (result == WellKnown.DefaultConfirmSuccessResult)
         {
             await ConnectionManagement!.DeleteAsync(connectionName, default);
-            
+
             ToastService!.ShowToast(heading: "Connection deleted",
                 message: $"Connection deleted", level: MBToastLevel.Success, showIcon: false);
 
             await ReloadConnectionsAsync();
         }
     }
-    
+
     private async Task ReloadConnectionsAsync()
     {
         _connectionsList = await ConnectionManagement.GetAsync(default);
@@ -71,13 +71,14 @@ public partial class Connections
         await AddConnectionDialog.HideAsync();
 
         ToastService.ShowToast(heading: "Save connection success",
-            message: $"Connection name '{_addEditConnectionModel.Name}'.", level: MBToastLevel.Success,
+            message: $"Connection name '{_addEditConnectionModel.Name}'.",
+            level: MBToastLevel.Success,
             showIcon: false);
-        
+
         _addEditConnectionModel = new AddConnectionModel();
         await ReloadConnectionsAsync();
     }
-    
+
     private async Task EditConnection(ServiceBusConnection connection)
     {
         _addEditConnectionModel = new AddConnectionModel
@@ -85,10 +86,10 @@ public partial class Connections
             ConnectionString = connection.ConnectionString,
             Name = connection.Name
         };
-        
+
         await AddConnectionDialog!.ShowAsync();
     }
-    
+
     private async Task ViewConnectionString(string connectionString)
     {
         _viewConnectionStringValue = connectionString;

@@ -10,6 +10,7 @@
     
     <ItemGroup>
         <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.10.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     </ItemGroup>
     
 </Project>

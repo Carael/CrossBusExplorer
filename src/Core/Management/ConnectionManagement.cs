@@ -1,22 +1,27 @@
 using System.Text;
 using System.Text.Json;
-using CrossBusExplorer.Management;
-namespace Website.Host;
+namespace CrossBusExplorer.Management;
 
 public class ConnectionManagement : IConnectionManagement
 {
-    private const string ServiceBusConnectionsFileName = "servicebusconnections.json";
+    private readonly IManagementStorage _managementStorage;
+
+    public ConnectionManagement(IManagementStorage managementStorage)
+    {
+        _managementStorage = managementStorage;
+
+    }
 
     public async Task<IList<ServiceBusConnection>> GetAsync(
         CancellationToken cancellationToken)
     {
-        return (await GetFileAsync(cancellationToken)).Select(p => p.Value).ToList();
+        return (await GetData(cancellationToken)).Select(p => p.Value).ToList();
     }
 
     public async Task<ServiceBusConnection> GetAsync(string name,
         CancellationToken cancellationToken)
     {
-        var connections = await GetFileAsync(cancellationToken);
+        var connections = await GetData(cancellationToken);
 
         if (connections.ContainsKey(name))
         {
@@ -32,7 +37,7 @@ public class ConnectionManagement : IConnectionManagement
         CancellationToken cancellationToken)
     {
         IDictionary<string, ServiceBusConnection> connections =
-            await GetFileAsync(cancellationToken);
+            await GetData(cancellationToken);
 
         var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
             name, connectionString);
@@ -59,7 +64,7 @@ public class ConnectionManagement : IConnectionManagement
 
     public async Task DeleteAsync(string name, CancellationToken cancellationToken)
     {
-        var connections = await GetFileAsync(cancellationToken);
+        var connections = await GetData(cancellationToken);
 
         if (connections.ContainsKey(name))
         {
@@ -73,31 +78,26 @@ public class ConnectionManagement : IConnectionManagement
         }
     }
 
-    private async Task<IDictionary<string, ServiceBusConnection>> GetFileAsync(
+    private async Task<IDictionary<string, ServiceBusConnection>> GetData(
         CancellationToken cancellationToken)
     {
-        if (File.Exists(FilePath))
-        {
-            var result = JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
-                File.ReadAllText(FilePath));
+        var data = await _managementStorage.ReadAsync(cancellationToken);
 
-            return result ?? new Dictionary<string, ServiceBusConnection>();
+        if (data == null)
+        {
+            return new Dictionary<string, ServiceBusConnection>();
         }
 
-        return new Dictionary<string, ServiceBusConnection>();
+        return JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
+            data) ?? new Dictionary<string, ServiceBusConnection>();
     }
 
     private async Task SaveAsync(
         IDictionary<string, ServiceBusConnection> connections,
         CancellationToken cancellationToken)
     {
-        await File.WriteAllTextAsync(
-            FilePath,
+        await _managementStorage.StoreAsync(
             JsonSerializer.Serialize(connections),
-            Encoding.UTF8,
             cancellationToken);
     }
-
-    private string FilePath => System.IO.Path.Combine(
-        ServiceBusConnectionsFileName);
 }
