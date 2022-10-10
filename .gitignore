@@ -296,7 +296,6 @@ artifacts/
 Published/
 src/Published
 *.vaultconfig.json
-wwwroot/
 src/Ui/reports/
 *.user.json
 __mismatch__
