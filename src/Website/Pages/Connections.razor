@@ -5,6 +5,49 @@
 
 <PageTitle>Connections</PageTitle>
 
+<MudTable Items="_connectionsList" Hover="true" SortLabel="Sort By" Elevation="0">
+    <HeaderContent>
+        <MudTh>
+            Actions
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<ServiceBusConnection, object>(x => x.Name)">Name</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Fully qualified name
+        </MudTh>
+        <MudTh>
+           View connection string
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Actions">
+            <MudTooltip Text="Add service bus connection">
+                <MudIconButton Icon="@Icons.Material.Outlined.Add"/>
+            </MudTooltip>
+            <MudTooltip Text="Edit service bus connection">
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"/>
+            </MudTooltip>
+            <MudTooltip Text="Delete service bus connection">
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete"/>
+            </MudTooltip>
+        </MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
+        <MudTd DataLabel="View connection string">
+            <MudTooltip Text="View service bus connection string">
+                <MudIconButton Icon="@Icons.Material.Outlined.Preview"/>
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{50, 100}"/>
+    </PagerContent>
+</MudTable>
+
+<!--
+
+
 <div class="mdc-layout-grid__cell--span-12">
     <MBCard AutoStyled="true">
         <Primary>
@@ -116,4 +159,4 @@
                   DialogAction="cancel"
                   Label="Close"/>
     </Buttons>
-</MBDialog>
+</MBDialog> -->

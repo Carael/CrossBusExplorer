@@ -2,20 +2,18 @@
 using System.Threading.Tasks;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Website.Models;
-using Material.Blazor;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
 {
     [Inject]
     private IConnectionManagement ConnectionManagement { get; set; } = null!;
-    [Inject]
-    private IMBToastService ToastService { get; set; } = null!;
-    private MBDialog AddConnectionDialog { get; set; } = null!;
-    private MBDialog ViewConnectionStringDialog { get; set; } = null!;
-    private MBConfirmationDialog DeleteDialog { get; set; } = null!;
+    // [Inject]
+    // private IMBToastService ToastService { get; set; } = null!;
+    // private MBDialog AddConnectionDialog { get; set; } = null!;
+    // private MBDialog ViewConnectionStringDialog { get; set; } = null!;
+    // private MBConfirmationDialog DeleteDialog { get; set; } = null!;
 
     private IList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
     private AddConnectionModel _addEditConnectionModel = new AddConnectionModel();
@@ -26,7 +24,12 @@ public partial class Connections
         await ReloadConnectionsAsync();
         await base.OnInitializedAsync().ConfigureAwait(false);
     }
-
+    
+    private async Task ReloadConnectionsAsync()
+    {
+        _connectionsList = await ConnectionManagement.GetAsync(default);
+    }
+/*
     private async Task ShowAddConnectionDialog()
     {
         _addEditConnectionModel = new AddConnectionModel();
@@ -46,11 +49,6 @@ public partial class Connections
 
             await ReloadConnectionsAsync();
         }
-    }
-
-    private async Task ReloadConnectionsAsync()
-    {
-        _connectionsList = await ConnectionManagement.GetAsync(default);
     }
 
     private async Task AddConnectionDialogCanceled()
@@ -95,4 +93,5 @@ public partial class Connections
         _viewConnectionStringValue = connectionString;
         await ViewConnectionStringDialog!.ShowAsync();
     }
+    */
 }

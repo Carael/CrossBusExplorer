@@ -40,12 +40,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GoogleAnalytics.Blazor" Version="1.0.2" />
-		<PackageReference Include="Material.Blazor" Version="3.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.9" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.9" />
-		<PackageReference Include="Nager.Date" Version="1.33.1" />
-		<PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+		<PackageReference Include="MudBlazor" Version="6.0.13" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -62,18 +57,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Management\Management.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <RazorComponent Include="Pages\Connections.razor" />
-	  <RazorComponent Include="Pages\FormValidation.razor" />
-	  <RazorComponent Include="Pages\Index.razor" />
-	  <RazorComponent Include="Shared\BladeTypeAContent.razor" />
-	  <RazorComponent Include="Shared\BladeTypeBContent.razor" />
-	  <RazorComponent Include="Shared\BladeTypeCContent.razor" />
-	  <RazorComponent Include="Shared\CascadingDefaultsPanel.razor" />
-	  <RazorComponent Include="Shared\DemonstrationPage.razor" />
-	  <RazorComponent Include="Shared\MainLayout.razor" />
 	</ItemGroup>
 
 	<Target Name="CheckIfNpmExists" Inputs="@(InputStaticAssetsStyles)" Outputs="@(OutputStaticAssetsStyles)" BeforeTargets="PreBuildEvent">
