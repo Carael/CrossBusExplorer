@@ -10,91 +10,88 @@ namespace CrossBusExplorer.Website.Pages;
 public partial class Connections
 {
     [Inject]
-    private IConnectionManagement ConnectionManagement { get; set; }
-    private MBDialog AddConnectionDialog { get; set; }
+    private IConnectionManagement ConnectionManagement { get; set; } = null!;
     [Inject]
-    private IMBToastService ToastService { get; set; }
-    private IList<ServiceBusConnection>? ConnectionsList;
-    private AddConnectionModel AddConnection = new AddConnectionModel();
-    private EditContext EditContext;
+    private IMBToastService ToastService { get; set; }= null!;
+    private MBDialog AddConnectionDialog { get; set; }= null!;
+    private MBDialog ViewConnectionStringDialog { get; set; }= null!;
+    private MBConfirmationDialog DeleteDialog { get; set; }= null!;
 
-
-    public Connections()
-    {
-
-    }
+    private IList<ServiceBusConnection> _connectionsList;
+    private AddConnectionModel _addEditConnectionModel = new AddConnectionModel();
+    private string _viewConnectionStringValue = null;
 
     protected override async Task OnInitializedAsync()
     {
-        EditContext = new EditContext(AddConnection);
-        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-        ConnectionsList = await ConnectionManagement.GetAsync(default);
-        
-        base.OnInitialized();
-    }
-    
-    
-    // Note: The OnFieldChanged event is raised for each field in the model
-    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
-    {
-        if (e.FieldIdentifier.FieldName == nameof(AddConnectionModel.ConnectionString))
-        {
-            if (e.FieldIdentifier.Model is AddConnectionModel model)
-            {
-                AddConnection.Name = TryParseName(model.ConnectionString);
-            }
-            
-        }
-    }
-
-    private string? TryParseName(string connectionString)
-    {
-        if (connectionString!=null &&
-            ServiceBusConnectionStringHelper.IsValid(connectionString))
-        {
-            return 
-                ServiceBusConnectionStringHelper.GetNameFromConnectionString(
-                    connectionString);
-        }
-
-        return null;
+        await ReloadConnectionsAsync();
+        await base.OnInitializedAsync().ConfigureAwait(false);
     }
 
     private async Task ShowAddConnectionDialog()
     {
-        AddConnection = new AddConnectionModel();
-        _ = AddConnectionDialog.ShowAsync();
-
-        await Task.CompletedTask;
+        _addEditConnectionModel = new AddConnectionModel();
+        await AddConnectionDialog.ShowAsync();
     }
 
-    private void AddConnectionDialogInvalid()
+    private async Task ShowDeleteConnectionConfirm(string connectionName)
     {
-        ToastService.ShowToast(heading: "Save connection invalid",
-            message: $"Save form was invalid", level: MBToastLevel.Warning, showIcon: false);
+        var result = await DeleteDialog?.ShowAsync()!;
+
+        if (result == WellKnown.DefaultConfirmSuccessResult)
+        {
+            await ConnectionManagement!.DeleteAsync(connectionName, default);
+            
+            ToastService!.ShowToast(heading: "Connection deleted",
+                message: $"Connection deleted", level: MBToastLevel.Success, showIcon: false);
+
+            await ReloadConnectionsAsync();
+        }
+    }
+    
+    private async Task ReloadConnectionsAsync()
+    {
+        _connectionsList = await ConnectionManagement.GetAsync(default);
     }
 
     private async Task AddConnectionDialogCanceled()
     {
+        _addEditConnectionModel = new AddConnectionModel();
         await AddConnectionDialog.HideAsync();
-        ToastService.ShowToast(heading: "Save connection cancelled",
-            message: "The cancel button was selected", level: MBToastLevel.Success,
-            showIcon: false);
     }
 
     private async Task AddConnectionDialogSubmitted()
     {
-        await ConnectionManagement.AddAsync(
-            new ServiceBusConnection(
-                AddConnection.Name,
-                AddConnection.ConnectionString),
+        await ConnectionManagement.SaveAsync(
+            _addEditConnectionModel.Name ??
+            ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(_addEditConnectionModel
+                .ConnectionString!),
+            _addEditConnectionModel.ConnectionString!,
             default);
+
         await AddConnectionDialog.HideAsync();
 
         ToastService.ShowToast(heading: "Save connection success",
-            message: $"Connection name '{AddConnection.Name}'.", level: MBToastLevel.Success,
+            message: $"Connection name '{_addEditConnectionModel.Name}'.", level: MBToastLevel.Success,
             showIcon: false);
-
-        ConnectionsList = await ConnectionManagement.GetAsync(default);
+        
+        _addEditConnectionModel = new AddConnectionModel();
+        await ReloadConnectionsAsync();
+    }
+    
+    private async Task EditConnection(ServiceBusConnection connection)
+    {
+        _addEditConnectionModel = new AddConnectionModel
+        {
+            ConnectionString = connection.ConnectionString,
+            Name = connection.Name
+        };
+        
+        await AddConnectionDialog!.ShowAsync();
+    }
+    
+    private async Task ViewConnectionString(string connectionString)
+    {
+        _viewConnectionStringValue = connectionString;
+        await ViewConnectionStringDialog!.ShowAsync();
     }
 }

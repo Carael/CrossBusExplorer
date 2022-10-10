@@ -1,12 +1,7 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using CrossBusExplorer.Management;
-namespace CrossBusExplorer.Website;
+namespace Ui;
 
 public class ConnectionManagement : IConnectionManagement
 {
@@ -31,18 +26,21 @@ public class ConnectionManagement : IConnectionManagement
         throw new ServiceBusConnectionDoesntExist(name);
     }
 
-    public async Task AddAsync(ServiceBusConnection connection, CancellationToken cancellationToken)
+    public async Task SaveAsync(string name, string connectionString, CancellationToken cancellationToken)
     {
         IDictionary<string, ServiceBusConnection> connections =
             await GetFileAsync(cancellationToken);
 
-        if (connections.ContainsKey(connection.Name))
+        var connection =
+            ServiceBusConnectionStringHelper.GetServiceBusConnection(name, connectionString);
+        
+        if (connections.ContainsKey(name))
         {
-            connections[connection.Name] = connection;
+            connections[name] = connection;
         }
         else
         {
-            connections.Add(connection.Name, connection);
+            connections.Add(name, connection);
         }
 
         await SaveAsync(connections, cancellationToken);
@@ -89,7 +87,7 @@ public class ConnectionManagement : IConnectionManagement
             cancellationToken);
     }
 
-    private string FilePath => System.IO.Path.Combine(
+    private string FilePath => Path.Combine(
         FileSystem.Current.AppDataDirectory,
         ServiceBusConnectionsFileName);
 }

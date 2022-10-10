@@ -1,4 +1,6 @@
 ﻿@page "/connections"
+@using CrossBusExplorer.Management
+@using System.Runtime.InteropServices
 
 
 <PageTitle>Connections</PageTitle>
@@ -7,57 +9,74 @@
     <MBCard AutoStyled="true">
         <Primary>
             <h2 class="mb-card__title mdc-typography mdc-typography--headline6">
-                Connections
+                My service bus connections
             </h2>
-            <p>
-                <MBButton Label="Add"
-                          @onclick="@(ShowAddConnectionDialog)"/>
-            </p>
+
             <div class="overflow-auto">
                 <p>
-                    <MBList Items="@ConnectionsList"
-                            Context="connection"
-                            GetKeysFunc="@((item) => item.Name)"
-                            ListStyle="MBListStyle.Outlined"
-                            ListType="MBListType.Regular"
-                            Ripple="true"
-                            ShowSeparators="true">
-
-                        <Title>@connection.Name</Title>
-                    </MBList>
+                    <MBIconButton Icon="add"
+                                  Tooltip="Add new service bus connection"
+                                  @onclick="@(ShowAddConnectionDialog)"/>
+                </p>
+                <p>
+                    <MBDataTable class="my-data-table"
+                                 Context="item"
+                                 Items="@_connectionsList"
+                                 StickyHeader="true"
+                                 style="max-height: 400px;">
+                        <TableHeader>
+                            <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Actions</th>
+                            <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Name</th>
+                            <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Fully qualified name</th>
+                            <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">View connection string</th>
+                        </TableHeader>
+                        <TableRow>
+                            <td class="mdc-data-table__cell">
+                                <MBIconButton Icon="link" Tooltip="Connect to Service Bus"></MBIconButton>
+                                <MBIconButton Icon="edit" Tooltip="Edit connection" @onclick="@(() => EditConnection(item))"></MBIconButton>
+                                <MBIconButton Icon="delete" Tooltip="Delete connection" @onclick="@(() => ShowDeleteConnectionConfirm(item.Name))"></MBIconButton>
+                            </td>
+                            <td class="mdc-data-table__cell">@item.Name</td>
+                            <td class="mdc-data-table__cell">@item.FullyQualifiedName</td>
+                            <td class="mdc-data-table__cell">
+                                <MBIconButton Icon="visibility" Tooltip="View connection string" @onclick="@(() => ViewConnectionString(item.ConnectionString))"></MBIconButton>
+                            </td>
+                        </TableRow>
+                    </MBDataTable>
                 </p>
             </div>
         </Primary>
     </MBCard>
 </div>
 
-<MBDialog EscapeKeyAction=""
-          @ref="@AddConnectionDialog"
-          ScrimClickAction=""
-          Title="Logon Dialog">
+<MBDialog @ref="@AddConnectionDialog"
+          class="mdc-dialog--fullscreen">
     <Body>
-    <EditForm EditContext="@EditContext"
-              OnInvalidSubmit="@AddConnectionDialogInvalid"
-              OnValidSubmit="@AddConnectionDialogSubmitted">
+    <EditForm
+        Model="_addEditConnectionModel"
+        OnValidSubmit="@AddConnectionDialogSubmitted">
         <DataAnnotationsValidator/>
 
         <div class="mdc-layout-grid__inner">
-
             <div class="mdc-layout-grid__cell--span-12">
-                <MBTextArea @bind-Value="@AddConnection.ConnectionString"
+                <p>Connection save dialog</p>
+            </div>
+            <div class="mdc-layout-grid__cell--span-12">
+                <MBTextArea @bind-Value=_addEditConnectionModel.ConnectionString
                             HelperTextPersistent="true"
                             Label="Connection string"
                             style="width: 100%;"
                             TextInputStyle="@MBTextInputStyle.Outlined"
                             TrailingIcon="lock_outline"
-                            ValidationMessageFor="@(() => AddConnection.ConnectionString)"></MBTextArea>
+                            ValidationMessageFor="@(() => _addEditConnectionModel.ConnectionString!)">
+                </MBTextArea>
             </div>
             <div class="mdc-layout-grid__cell--span-12">
-                <MBTextField @bind-Value="@AddConnection.Name"
+                <MBTextField @bind-Value=_addEditConnectionModel.Name
                              Label="name"
                              style="width: 100%; margin-top: 6px;"
                              TextInputStyle="@MBTextInputStyle.Outlined"
-                             ValidationMessageFor="@(() => AddConnection.Name)"/>
+                             ValidationMessageFor="@(() => _addEditConnectionModel.Name!)"/>
             </div>
             <div class="mdc-layout-grid__cell--span-12" style="text-align: right;">
                 <MBButton Label="Save"
@@ -71,4 +90,30 @@
         </div>
     </EditForm>
     </Body>
+</MBDialog>
+
+<MBConfirmationDialog @ref="@DeleteDialog"
+                      Title="Are you sure?">
+</MBConfirmationDialog>
+
+<MBDialog @ref="@ViewConnectionStringDialog" class="mdc-dialog--fullscreen">
+    <Body>
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBTextArea @bind-Value="_viewConnectionStringValue"
+                        HelperTextPersistent="true"
+                        Label="Connection string"
+                        style="width: 100%;"
+                        TextInputStyle="@MBTextInputStyle.Outlined"
+                        TrailingIcon="lock_outline"
+                        Disabled="true">
+            </MBTextArea>
+        </div>
+    </div>
+    </Body>
+    <Buttons>
+        <MBButton ButtonStyle="@MBButtonStyle.Text"
+                  DialogAction="cancel"
+                  Label="Close"/>
+    </Buttons>
 </MBDialog>

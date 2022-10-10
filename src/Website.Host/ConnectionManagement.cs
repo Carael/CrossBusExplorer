@@ -26,18 +26,32 @@ public class ConnectionManagement : IConnectionManagement
         throw new ServiceBusConnectionDoesntExist(name);
     }
 
-    public async Task AddAsync(ServiceBusConnection connection, CancellationToken cancellationToken)
+    public async Task SaveAsync(
+        string name,
+        string connectionString,
+        CancellationToken cancellationToken)
     {
         IDictionary<string, ServiceBusConnection> connections =
             await GetFileAsync(cancellationToken);
 
-        if (connections.ContainsKey(connection.Name))
+        var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
+            name, connectionString);
+
+        if (connections.ContainsKey(name))
         {
-            connections[connection.Name] = connection;
+            connections[name] = connection;
+        }
+        else if (connections.Any(p => p.Value.ConnectionString == connectionString))
+        {
+            var keyToRemove = connections.First(p => p.Value.ConnectionString == connectionString)
+                .Key;
+
+            connections.Remove(keyToRemove);
+            connections.Add(name, connection);
         }
         else
         {
-            connections.Add(connection.Name, connection);
+            connections.Add(name, connection);
         }
 
         await SaveAsync(connections, cancellationToken);
