@@ -1,25 +1,62 @@
 ﻿@using CrossBusExplorer.Management
+@using CrossBusExplorer.ServiceBus.Contracts
+@using CrossBusExplorer.Website.Models
 <MudNavMenu>
-    <MudNavGroup Title="Service Bus" Expanded="true">
-        <MudNavLink Href="connections" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
-        @foreach (var connection in _connections)
-        {
-            <MudNavLink Icon="@Icons.Material.Filled.Link" Href=@($"servicebus/{connection.Name}") >
-                @connection.Name
-            </MudNavLink>
-        }
-    </MudNavGroup>
+
+    <MudNavLink Href="connections" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
+
+    @foreach (var menuItem in _menuItems)
+    {
+        <MudNavGroup Title=@menuItem.Connection.Name Icon="@Icons.Material.Filled.Link" Expanded=@menuItem.IsExpanded ExpandedChanged="@(() => OnConnectionExpanded(menuItem))">
+
+            <MudNavGroup Title="Queues">
+                @foreach (var queue in menuItem.Queues)
+                {
+                    <MudNavLink>@queue.Name</MudNavLink>
+                }
+            </MudNavGroup>
+            <MudNavGroup Title="Topics">
+                @foreach (var topic in menuItem.Topics)
+                {
+                    <MudNavLink>@topic.Name</MudNavLink>
+                }
+            </MudNavGroup>
+        </MudNavGroup>
+    }
 </MudNavMenu>
 
 @code {
     [Inject]
+    private IQueueService QueueService { get; set; } = null!;
+    [Inject]
+    private ITopicService TopicService { get; set; } = null!;
+    [Inject]
     private IConnectionManagement ConnectionManagement { get; set; } = null!;
-    private IReadOnlyList<ServiceBusConnection> _connections = new List<ServiceBusConnection>();
+    private IList<ConnectionMenuItem> _menuItems = new List<ConnectionMenuItem>();
 
     protected override async Task OnInitializedAsync()
     {
-        _connections = await ConnectionManagement.GetAsync(default);
+        _menuItems = (await ConnectionManagement.GetAsync(default)).Select(p => new ConnectionMenuItem(p)).ToList();
 
         await base.OnInitializedAsync();
+    }
+    private async Task OnConnectionExpanded(ConnectionMenuItem menuItem)
+    {
+        menuItem.IsExpanded = !menuItem.IsExpanded;
+        
+        if (!menuItem.Loaded)
+        {
+            await foreach (var queue in QueueService.GetAsync(menuItem.Connection.ConnectionString, default))
+            {
+                menuItem.Queues.Add(queue);
+                StateHasChanged();
+            }
+            
+            await foreach (var topic in TopicService.GetAsync(menuItem.Connection.ConnectionString, default))
+            {
+                menuItem.Topics.Add(topic);
+                StateHasChanged();
+            }
+        }
     }
 }
