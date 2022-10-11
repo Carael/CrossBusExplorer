@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data" />
     <Folder Include="Shared" />
   </ItemGroup>
 
@@ -18,5 +19,4 @@
     <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
     <ProjectReference Include="..\..\Website\Website.csproj" />
   </ItemGroup>
-
 </Project>

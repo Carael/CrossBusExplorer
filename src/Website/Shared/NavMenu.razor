@@ -1,6 +1,25 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="connections" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Connections</MudNavLink>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
-    <MudNavLink Href="fetchdata" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+﻿@using CrossBusExplorer.Management
+<MudNavMenu>
+    <MudNavGroup Title="Service Bus" Expanded="true">
+        <MudNavLink Href="connections" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
+        @foreach (var connection in _connections)
+        {
+            <MudNavLink Icon="@Icons.Material.Filled.Link" Href=@($"servicebus/{connection.Name}") >
+                @connection.Name
+            </MudNavLink>
+        }
+    </MudNavGroup>
 </MudNavMenu>
+
+@code {
+    [Inject]
+    private IConnectionManagement ConnectionManagement { get; set; } = null!;
+    private IReadOnlyList<ServiceBusConnection> _connections = new List<ServiceBusConnection>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _connections = await ConnectionManagement.GetAsync(default);
+
+        await base.OnInitializedAsync();
+    }
+}

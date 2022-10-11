@@ -9,18 +9,19 @@ namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
 {
+    private readonly DialogOptions _saveDialogOptions =
+        new DialogOptions { FullWidth = true };
+
+    private bool _saveDialogVisible;
+    private IReadOnlyList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
+    private SaveConnectionForm _saveEditConnectionForm = null!;
+
     [Inject]
-    private IConnectionManagement ConnectionManagement{ get; set; } = null!;
+    private IConnectionManagement ConnectionManagement { get; set; } = null!;
     [Inject]
     private ISnackbar Snackbar { get; set; } = null!;
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
-
-    private bool _saveDialogVisible;
-    private DialogOptions _saveDialogOptions = new() { FullWidth = true };
-
-    private IList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
-    private SaveConnectionForm _saveEditConnectionForm { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,8 +64,8 @@ public partial class Connections
         parameters.Add(nameof(ViewDialog.ContentText), connectionString);
 
         DialogService.Show<ViewDialog>(
-            "Service bus connection string", 
-            parameters, 
+            "Service bus connection string",
+            parameters,
             new DialogOptions
             {
                 FullWidth = true,
@@ -74,18 +75,19 @@ public partial class Connections
     private async Task OpenDeleteDialog(ServiceBusConnection context)
     {
         var parameters = new DialogParameters();
-            parameters.Add(
-                "ContentText", 
-                $"Are you sure you want to remove {context.Name} connection?");
+        parameters.Add(
+            "ContentText",
+            $"Are you sure you want to remove {context.Name} connection?");
 
-            var dialog = DialogService.Show<ConfirmDialog>("Confirm", parameters);
-            var result = await dialog.Result;
+        var dialog = DialogService.Show<ConfirmDialog>("Confirm", parameters);
+        var result = await dialog.Result;
 
-            if (result.Data is true)
-            {
-                await ConnectionManagement.DeleteAsync(context.Name, default);
-                await ReloadConnectionsAsync();
-                Snackbar.Add($"Connection {context.Name} successfully deleted.", Severity.Success);
-            }
+        if (result.Data is true)
+        {
+            await ConnectionManagement.DeleteAsync(context.Name, default);
+            await ReloadConnectionsAsync();
+            
+            Snackbar.Add($"Connection {context.Name} successfully deleted.", Severity.Success);
+        }
     }
 }

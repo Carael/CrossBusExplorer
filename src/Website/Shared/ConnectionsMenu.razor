@@ -1,0 +1,22 @@
+@using CrossBusExplorer.Management
+<MudList Clickable="true">
+    @foreach (var connection in _connections)
+    {
+        <MudListItem Icon="@Icons.Material.Filled.Link">
+            @connection.Name
+        </MudListItem>
+    }
+</MudList>
+
+@code {
+    [Inject]
+    private IConnectionManagement ConnectionManagement { get; set; } = null!;
+    private IReadOnlyList<ServiceBusConnection> _connections = new List<ServiceBusConnection>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _connections = await ConnectionManagement.GetAsync(default);
+
+        await base.OnInitializedAsync();
+    }
+}
