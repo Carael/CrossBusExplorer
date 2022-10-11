@@ -1,21 +1,26 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
+        <MudSpacer/>
+        <MudTooltip Text="Change theme">
+            <MudMenu Icon="@Icons.Filled.MoreVert">
+                <MudMenuItem OnClick="@(() => ChangeDarkMode(false))">Normal</MudMenuItem>
+                <MudMenuItem OnClick="@(() => ChangeDarkMode(true))">Dark</MudMenuItem>
+            </MudMenu>
+        </MudTooltip>
+
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
             <MudText Typo="Typo.h6">Website.Host</MudText>
         </MudDrawerHeader>
-        <NavMenu />
+        <NavMenu/>
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
@@ -26,9 +31,26 @@
 
 @code {
     bool _drawerOpen = true;
+    private MudTheme _theme = new();
+    private MudThemeProvider _mudThemeProvider;
+    private bool _isDarkMode;
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            StateHasChanged();
+        }
+    }
+    private async Task ChangeDarkMode(bool isDarkMode)
+    {
+        _isDarkMode = isDarkMode;
+        StateHasChanged();
     }
 }
