@@ -4,7 +4,7 @@ namespace CrossBusExplorer.ServiceBus.Contracts;
 public interface IMessageService
 {
     Task<IReadOnlyList<Message>> GetMessagesAsync(
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
         int messagesCount,
@@ -12,13 +12,14 @@ public interface IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken);
 
-    Task<Result> PurgeAsync(string connectionString,
+    Task<Result> PurgeAsync(
+        string connectionName,
         string name,
         SubQueue subQueue,
         CancellationToken cancellationToken);
 
     Task<Result> SendMessagesAsync(
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,
         CancellationToken cancellationToken);

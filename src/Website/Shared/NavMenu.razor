@@ -1,32 +1,48 @@
 ﻿@using CrossBusExplorer.Management
+@using CrossBusExplorer.Management.Contracts
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
+@using System.Security.Cryptography
 <MudNavMenu>
-
-    <MudNavLink Href="connections" 
-                Match="NavLinkMatch.All" 
-                Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
+    <MudNavLink Href="connections"
+                Match="NavLinkMatch.All"
+                Icon="@Icons.Material.Filled.EditNote">
+        Manage connections
+    </MudNavLink>
 
     @foreach (var menuItem in _menuItems)
     {
-        <MudNavGroup Title=@menuItem.Connection.Name 
-                     Icon="@Icons.Material.Filled.Link" 
-                     Expanded=@menuItem.IsExpanded 
-                     ExpandedChanged="@(() => OnConnectionExpanded(menuItem))">
-            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Queues">
+        <MudNavGroup Title=@menuItem.Connection.Name
+                     Icon="@Icons.Material.Filled.Link">
+
+            <MudNavGroup Icon="@Icons.Filled.Folder" 
+                         Title="Queues"
+                         @onclick="@(() => OnQueuesExpanded(menuItem))">
+                @if (menuItem.LoadingQueues)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                }
                 @foreach (var queue in menuItem.Queues)
                 {
                     <MudNavLink Href=@($"queue/{menuItem.Connection.Name}/{queue.Name}")
                                 Icon="@Icons.Filled.Queue">
-                        @queue.Name 
+                        @queue.Name
                         (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
                     </MudNavLink>
                 }
             </MudNavGroup>
-            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Topics">
+
+            <MudNavGroup Icon="@Icons.Filled.Folder"
+                         Title="Topics"
+                         @onclick="@(() => OnTopicsExpanded(menuItem))">
+                
+                @if (menuItem.LoadingTopics)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+                }
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@menuItem.Connection />
+                    <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@menuItem.Connection/>
                 }
             </MudNavGroup>
         </MudNavGroup>
@@ -48,25 +64,37 @@
 
         await base.OnInitializedAsync();
     }
-    private async Task OnConnectionExpanded(ConnectionMenuItem menuItem)
+    
+    private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
-        menuItem.IsExpanded = !menuItem.IsExpanded;
-
-        if (!menuItem.Loaded)
+        if (!menuItem.QueuesLoaded && !menuItem.LoadingQueues)
         {
-            await foreach (var queue in QueueService.GetAsync(menuItem.Connection.ConnectionString, default))
+            menuItem.LoadingQueues = true;
+            await foreach (var queue in QueueService.GetAsync(menuItem.Connection.Name, default))
             {
                 menuItem.Queues.Add(queue);
                 StateHasChanged();
             }
+            menuItem.LoadingQueues = false;
+            
+            menuItem.QueuesLoaded = true;
+        }
+    }
+    
+    private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
+    {
+        if (!menuItem.TopicsLoaded && !menuItem.LoadingTopics)
+        {
+            menuItem.LoadingTopics = true;
 
-            await foreach (var topic in TopicService.GetAsync(menuItem.Connection.ConnectionString, default))
+            await foreach (var topic in TopicService.GetAsync(menuItem.Connection.Name, default))
             {
                 menuItem.Topics.Add(topic);
                 StateHasChanged();
             }
 
-            menuItem.Loaded = true;
+            menuItem.LoadingTopics = false;
+            menuItem.TopicsLoaded = true;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CrossBusExplorer.Management;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
 using Microsoft.AspNetCore.Components;
@@ -9,8 +10,7 @@ namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
 {
-    private readonly DialogOptions _saveDialogOptions =
-        new DialogOptions { FullWidth = true };
+    private readonly DialogOptions _saveDialogOptions = new DialogOptions { FullWidth = true };
 
     private bool _saveDialogVisible;
     private IReadOnlyList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();

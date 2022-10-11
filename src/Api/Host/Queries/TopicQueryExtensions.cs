@@ -7,11 +7,11 @@ public class TopicQueryExtensions
 {
     public IAsyncEnumerable<TopicInfo> GetTopicsAsync(
         [Service] ITopicService topicService,
-        string connectionString,
+        string connectionName,
         CancellationToken cancellationToken)
     {
         return topicService.GetAsync(
-            connectionString,
+            connectionName,
             cancellationToken);
     }
 }

@@ -7,7 +7,7 @@ public class MessageQueryExtensions
 {
     public Task<IReadOnlyList<Message>> GetMessagesAsync(
         [Service] IMessageService messageService,
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
         int messagesCount,
@@ -16,7 +16,7 @@ public class MessageQueryExtensions
         CancellationToken cancellationToken)
     {
         return messageService.GetMessagesAsync(
-            connectionString,
+            connectionName,
             queueOrTopicName,
             subscriptionName,
             messagesCount,

@@ -2,6 +2,7 @@
 using Azure;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
@@ -12,12 +13,21 @@ namespace CrossBusExplorer.ServiceBus;
 
 public class QueueService : IQueueService
 {
+    private readonly IConnectionManagement _connectionManagement;
+    public QueueService(IConnectionManagement connectionManagement)
+    {
+        _connectionManagement = connectionManagement;
+
+    }
+    
     public async IAsyncEnumerable<QueueInfo> GetAsync(
-        string connectionString,
+        string connectionName,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connectionString);
+            new ServiceBusAdministrationClient(connection.ConnectionString);
 
         AsyncPageable<QueueProperties> queuesPageable =
             administrationClient.GetQueuesAsync(cancellationToken);
@@ -46,12 +56,14 @@ public class QueueService : IQueueService
         }
     }
     public async Task<QueueDetails> GetAsync(
-        string connectionString,
+        string connectionName,
         string name,
         CancellationToken cancellationToken)
     {
+        var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connectionString);
+            new ServiceBusAdministrationClient(connection.ConnectionString);
 
         var queueResponse = await administrationClient.GetQueueAsync(name, cancellationToken);
 
@@ -65,14 +77,17 @@ public class QueueService : IQueueService
         return queue.ToQueueDetails(runtimePropertiesResponse.Value);
     }
     public async Task<OperationResult> DeleteAsync(
-        string connectionString,
+        string connectionName,
         string name,
         CancellationToken cancellationToken)
     {
         try
         {
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connectionString);
+                new ServiceBusAdministrationClient(connection.ConnectionString);
 
             var response = await administrationClient.DeleteQueueAsync(name, cancellationToken);
 
@@ -86,14 +101,17 @@ public class QueueService : IQueueService
         }
     }
     public async Task<OperationResult<QueueDetails>> CreateAsync(
-        string connectionString,
+        string connectionName,
         CreateQueueOptions options,
         CancellationToken cancellationToken)
     {
         try
         {
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connectionString);
+                new ServiceBusAdministrationClient(connection.ConnectionString);
 
             var createQueueOptions = options.MapToCreateQueueOptions();
 
@@ -120,15 +138,18 @@ public class QueueService : IQueueService
         }
     }
     public async Task<OperationResult<QueueDetails>> CloneAsync(
-        string connectionString,
+        string connectionName,
         string name,
         string sourceName,
         CancellationToken cancellationToken)
     {
         try
         {
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connectionString);
+                new ServiceBusAdministrationClient(connection.ConnectionString);
 
             Response<QueueProperties>? sourceQueueResponse =
                 await administrationClient.GetQueueAsync(sourceName, cancellationToken);
@@ -165,14 +186,17 @@ public class QueueService : IQueueService
     }
 
     public async Task<OperationResult<QueueDetails>> UpdateAsync(
-        string connectionString,
+        string connectionName,
         UpdateQueueOptions options,
         CancellationToken cancellationToken)
     {
         try
         {
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connectionString);
+                new ServiceBusAdministrationClient(connection.ConnectionString);
 
             var getQueueResponse = await administrationClient.GetQueueAsync(
                 options.Name,

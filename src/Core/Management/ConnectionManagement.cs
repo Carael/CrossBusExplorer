@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Management;
 
 public class ConnectionManagement : IConnectionManagement

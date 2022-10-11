@@ -1,4 +1,4 @@
-namespace CrossBusExplorer.Management;
+namespace CrossBusExplorer.Management.Contracts;
 
 public record ServiceBusConnection(
     string Name,

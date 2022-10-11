@@ -1,3 +1,4 @@
+using CrossBusExplorer.Management.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 namespace CrossBusExplorer.Management;
 

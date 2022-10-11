@@ -4,26 +4,27 @@ namespace CrossBusExplorer.ServiceBus.Contracts
     public interface IQueueService
     {
         IAsyncEnumerable<QueueInfo> GetAsync(
-            string connectionString,
+            string connectionName,
             CancellationToken cancellationToken);
         Task<QueueDetails> GetAsync(
-            string connectionString,
+            string connectionName,
             string name,
             CancellationToken cancellationToken);
-        Task<OperationResult> DeleteAsync(string connectionString,
+        Task<OperationResult> DeleteAsync(
+            string connectionName,
             string name,
             CancellationToken cancellationToken);
         Task<OperationResult<QueueDetails>> CreateAsync(
-            string connectionString, 
+            string connectionName, 
             CreateQueueOptions options,
             CancellationToken cancellationToken);
         Task<OperationResult<QueueDetails>> CloneAsync(
-            string connectionString, 
+            string connectionName, 
             string name,
             string sourceName,
             CancellationToken cancellationToken);
         Task<OperationResult<QueueDetails>> UpdateAsync(
-            string connectionString, 
+            string connectionName, 
             UpdateQueueOptions options,
             CancellationToken cancellationToken);
     }

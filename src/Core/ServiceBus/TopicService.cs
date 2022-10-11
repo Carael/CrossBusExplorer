@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Azure;
 using Azure.Messaging.ServiceBus.Administration;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
@@ -9,13 +10,23 @@ namespace CrossBusExplorer.ServiceBus;
 
 public class TopicService : ITopicService
 {
+    private readonly IConnectionManagement _connectionManagement;
+    
+    public TopicService(IConnectionManagement connectionManagement)
+    {
+        _connectionManagement = connectionManagement;
 
+    }
+    
     public async IAsyncEnumerable<TopicInfo> GetAsync(
-        string connectionString,
+        string connectionName,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var connection = 
+            await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connectionString);
+            new ServiceBusAdministrationClient(connection.ConnectionString);
 
         AsyncPageable<TopicProperties> topicsPageable =
             administrationClient.GetTopicsAsync(cancellationToken);
@@ -60,11 +71,6 @@ public class TopicService : ITopicService
         {
             await enumerator.DisposeAsync();
         }
-
-        // foreach (TopicInfo topicInfo in topicsToGroup)
-        // {
-        //     yield return topicInfo;
-        // }
     }
     private IList<TopicInfo> GetNestedTopicsList(List<TopicInfo> topicsToNest)
     {
@@ -112,12 +118,5 @@ public class TopicService : ITopicService
                 }
             }
         }
-
-        // var topic = topics.FirstOrDefault(p => p.Name == name);
-        //     if (topic == null)
-        //     {
-        //         var topic = new TopicInfo(topic,true, new List<TopicInfo>();
-        //     }
-        // }
     }
 }

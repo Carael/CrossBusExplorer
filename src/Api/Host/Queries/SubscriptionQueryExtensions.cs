@@ -7,12 +7,12 @@ public class SubscriptionQueryExtensions
 {
     public IAsyncEnumerable<SubscriptionInfo> GetSubscriptionsAsync(
         [Service] ISubscriptionService subscriptionService,
-        string connectionString,
+        string connectionName,
         string topicName,
         CancellationToken cancellationToken)
     {
         return subscriptionService.GetAsync(
-            connectionString,
+            connectionName,
             topicName,
             cancellationToken);
     }

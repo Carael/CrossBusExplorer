@@ -1,5 +1,6 @@
 @using CrossBusExplorer.ServiceBus.Contracts.Types
 @using CrossBusExplorer.Management
+@using CrossBusExplorer.Management.Contracts
 @using CrossBusExplorer.ServiceBus.Contracts
 
 @if (Topic.IsFolder)
@@ -68,7 +69,7 @@ else
         {
             _loading = true;
             await foreach (var subscription in SubscriptionService.GetAsync(
-                ServiceBusConnection.ConnectionString,
+                ServiceBusConnection.Name,
                 Topic.FullName!,
                 default))
             {

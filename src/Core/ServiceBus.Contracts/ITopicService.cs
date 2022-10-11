@@ -4,6 +4,6 @@ namespace CrossBusExplorer.ServiceBus.Contracts;
 public interface ITopicService
 {
     IAsyncEnumerable<TopicInfo> GetAsync(
-        string connectionString,
+        string connectionName,
         CancellationToken cancellationToken);
 }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
@@ -8,8 +9,14 @@ namespace CrossBusExplorer.ServiceBus;
 
 public class MessageService : IMessageService
 {
+    private readonly IConnectionManagement _connectionManagement;
+    public MessageService(IConnectionManagement connectionManagement)
+    {
+        _connectionManagement = connectionManagement;
+    }
+    
     public async Task<IReadOnlyList<Message>> GetMessagesAsync(
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
         int messagesCount,
@@ -17,7 +24,9 @@ public class MessageService : IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
-        await using ServiceBusClient client = new ServiceBusClient(connectionString);
+        var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        
+        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
 
         await using var receiver =
             GetReceiver(client, queueOrTopicName, subscriptionName, receiveMode);
@@ -31,37 +40,19 @@ public class MessageService : IMessageService
 
         return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
     }
-    private ServiceBusReceiver GetReceiver(
-        ServiceBusClient client,
-        string queueOrTopicName,
-        string? subscriptionName,
-        ReceiveMode receiveMode)
-    {
-        var receiverOptions = new ServiceBusReceiverOptions
-        {
-            ReceiveMode = Enum.Parse<ServiceBusReceiveMode>(receiveMode.ToString())
-        };
-
-        if (subscriptionName != null)
-        {
-            return client.CreateReceiver(
-                queueOrTopicName,
-                subscriptionName,
-                receiverOptions);
-        }
-
-        return client.CreateReceiver(queueOrTopicName, receiverOptions);
-    }
 
     public async Task<Result> PurgeAsync(
-        string connectionString,
+        string connectionName,
         string name,
         SubQueue subQueue,
         CancellationToken cancellationToken)
     {
         try
         {
-            await using ServiceBusClient client = new ServiceBusClient(connectionString);
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
+            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
             await using var receiver = client.CreateReceiver(name, new ServiceBusReceiverOptions
             {
                 SubQueue = (Azure.Messaging.ServiceBus.SubQueue)subQueue,
@@ -70,7 +61,9 @@ public class MessageService : IMessageService
 
             var totalRemoved = 0;
             var removedCount = 0;
-
+            
+            //TODO: async enumerable
+            
             do
             {
                 removedCount = (await receiver.ReceiveMessagesAsync(
@@ -152,6 +145,28 @@ public class MessageService : IMessageService
         {
             messageBatch?.Dispose();
         }
+    }
+    
+    private ServiceBusReceiver GetReceiver(
+        ServiceBusClient client,
+        string queueOrTopicName,
+        string? subscriptionName,
+        ReceiveMode receiveMode)
+    {
+        var receiverOptions = new ServiceBusReceiverOptions
+        {
+            ReceiveMode = Enum.Parse<ServiceBusReceiveMode>(receiveMode.ToString())
+        };
+
+        if (subscriptionName != null)
+        {
+            return client.CreateReceiver(
+                queueOrTopicName,
+                subscriptionName,
+                receiverOptions);
+        }
+
+        return client.CreateReceiver(queueOrTopicName, receiverOptions);
     }
 
     private async Task<IReadOnlyList<ServiceBusReceivedMessage>?> ReceiveMessagesAsync(
