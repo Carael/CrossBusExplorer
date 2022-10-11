@@ -31,7 +31,7 @@
                 <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenSaveDialog(context))"/>
             </MudTooltip>
             <MudTooltip Text="Delete service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(()=>OpenDeleteDialog(context))"/>
             </MudTooltip>
         </MudTd>
         <MudTd DataLabel="Name">@context.Name</MudTd>

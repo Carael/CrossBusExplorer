@@ -65,6 +65,28 @@ public partial class Connections
         parameters.Add(nameof(ViewDialog.ContentText), connectionString);
 
         DialogService.Show<ViewDialog>(
-            "Service bus connection string", parameters, new DialogOptions());
+            "Service bus connection string", 
+            parameters, 
+            new DialogOptions
+            {
+                FullWidth = true,
+                CloseOnEscapeKey = true
+            });
+    }
+    private async Task OpenDeleteDialog(ServiceBusConnection context)
+    {
+        var parameters = new DialogParameters();
+            parameters.Add(
+                "ContentText", 
+                $"Are you sure you want to remove {context.Name} connection?");
+
+            var dialog = DialogService.Show<ConfirmDialog>("Confirm", parameters);
+            var result = await dialog.Result;
+
+            if (result.Data is true)
+            {
+                await ConnectionManagement.DeleteAsync(context.Name, default);
+                await ReloadConnectionsAsync();
+            }
     }
 }

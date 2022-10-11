@@ -1,6 +1,6 @@
 <MudDialog>
     <DialogContent>
-        @ContentText
+        <MudTextField @bind-Value="ContentText" Lines="4" Disabled="true"></MudTextField>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary" OnClick="Submit">Close</MudButton>

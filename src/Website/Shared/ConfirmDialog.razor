@@ -1,0 +1,18 @@
+<MudDialog>
+    <DialogContent>
+        @ContentText
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="@(()=>Submit(true))">Yes</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@(()=>Submit(false))">No</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter]
+    public string ContentText { get; set; }
+
+    void Submit(bool result) => MudDialog.Close(DialogResult.Ok(result));
+}
