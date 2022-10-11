@@ -1,18 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
 {
     [Inject]
-    private IConnectionManagement ConnectionManagement { get; set; } = null!;
+    private IConnectionManagement ConnectionManagement{ get; set; } = null!;
     [Inject]
     private ISnackbar Snackbar { get; set; } = null!;
     [Inject]
@@ -22,7 +20,7 @@ public partial class Connections
     private DialogOptions _saveDialogOptions = new() { FullWidth = true };
 
     private IList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
-    public SaveConnectionForm _saveEditConnectionForm { get; set; }
+    private SaveConnectionForm _saveEditConnectionForm { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
