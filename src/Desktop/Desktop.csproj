@@ -60,9 +60,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Material.Blazor" Version="3.0.1" />
-        <PackageReference Include="Nager.Date" Version="1.33.1" />
-
+        <PackageReference Include="MudBlazor" Version="6.0.17" />
     </ItemGroup>
 
     <ItemGroup>
@@ -72,6 +70,7 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="wwwroot\js\app.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\custom.css" />
     </ItemGroup>
 
 </Project>

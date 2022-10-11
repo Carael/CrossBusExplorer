@@ -1,6 +1,4 @@
 @using CrossBusExplorer.Website.Shared
-<MBAnchor />
-
 <Router AppAssembly="@typeof(Main).Assembly" AdditionalAssemblies="new[]{typeof(MainLayout).Assembly}">
 	<Found Context="routeData">
 		<RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
