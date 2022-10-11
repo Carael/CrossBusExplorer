@@ -1,8 +1,7 @@
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
+using CrossBusExplorer.Website;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using Website.Host.Data;
-using MudBlazor.Services;
 using Website.Host;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,8 +11,7 @@ StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configurat
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddMudServices();
+builder.Services.AddConfiguredMudServices();
 builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
 builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();

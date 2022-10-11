@@ -1,5 +1,6 @@
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
+using CrossBusExplorer.Website;
 using MudBlazor.Services;
 
 namespace Ui;
@@ -21,7 +22,7 @@ public static class MauiProgram
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
 		builder.Services.AddMudServices();
-		builder.Services.AddServiceBusServices();
+		builder.Services.AddConfiguredMudServices();
 		builder.Services.AddManagement();
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
 
