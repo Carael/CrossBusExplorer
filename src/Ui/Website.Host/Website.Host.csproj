@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
     <ProjectReference Include="..\..\Website\Website.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\css\custom.css" />
+  </ItemGroup>
 </Project>

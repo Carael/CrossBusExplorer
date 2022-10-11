@@ -51,14 +51,20 @@
 
 	<ItemGroup>
 		<InputStaticAssetsStyles Include="styles\*.scss;" />
-		<OutputStaticAssetsStyles Include="wwwroot\css\asymmetric-theme.min.css;wwwroot\css\dark-square-theme.min.css;wwwroot\css\light-square-theme.min.css;wwwroot\css\material-default-theme.min.css;wwwroot\css\rounded-theme.min.css;" />
 		<Content Remove="@(OutputStaticAssetsStyles)" />
-		<Content Include="@(OutputStaticAssetsStyles)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Management\Management.csproj" />
 		<ProjectReference Include="..\Core\ServiceBus.Contracts\ServiceBus.Contracts.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="wwwroot\js\app.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot" />
 	</ItemGroup>
 
 	<Target Name="CheckIfNpmExists" Inputs="@(InputStaticAssetsStyles)" Outputs="@(OutputStaticAssetsStyles)" BeforeTargets="PreBuildEvent">

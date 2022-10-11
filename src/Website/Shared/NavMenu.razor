@@ -43,7 +43,7 @@
     private async Task OnConnectionExpanded(ConnectionMenuItem menuItem)
     {
         menuItem.IsExpanded = !menuItem.IsExpanded;
-        
+
         if (!menuItem.Loaded)
         {
             await foreach (var queue in QueueService.GetAsync(menuItem.Connection.ConnectionString, default))
@@ -51,7 +51,7 @@
                 menuItem.Queues.Add(queue);
                 StateHasChanged();
             }
-            
+
             await foreach (var topic in TopicService.GetAsync(menuItem.Connection.ConnectionString, default))
             {
                 menuItem.Topics.Add(topic);

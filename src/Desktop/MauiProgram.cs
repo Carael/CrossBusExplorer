@@ -23,6 +23,7 @@ public static class MauiProgram
 #endif
 		builder.Services.AddMudServices();
 		builder.Services.AddConfiguredMudServices();
+		builder.Services.AddServiceBusServices();
 		builder.Services.AddManagement();
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
 
