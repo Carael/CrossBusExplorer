@@ -52,9 +52,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core\Management\Management.csproj" />
+      <ProjectReference Include="..\..\Core\Management\Management.csproj" />
     
-      <ProjectReference Include="..\Core\ServiceBus\ServiceBus.csproj" />
+      <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
     
       <ProjectReference Include="..\Website\Website.csproj" />
     </ItemGroup>

@@ -55,8 +55,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Core\Management\Management.csproj" />
-		<ProjectReference Include="..\Core\ServiceBus.Contracts\ServiceBus.Contracts.csproj" />
+		<ProjectReference Include="..\..\Core\Management\Management.csproj" />
+		<ProjectReference Include="..\..\Core\ServiceBus.Contracts\ServiceBus.Contracts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
-    <ProjectReference Include="..\..\Website\Website.csproj" />
+    <ProjectReference Include="..\Website\Website.csproj" />
   </ItemGroup>
 
   <ItemGroup>
