@@ -9,16 +9,16 @@
     {
         <MudNavGroup Title=@menuItem.Connection.Name Icon="@Icons.Material.Filled.Link" Expanded=@menuItem.IsExpanded ExpandedChanged="@(() => OnConnectionExpanded(menuItem))">
 
-            <MudNavGroup Title="Queues">
+            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Queues" >
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink>@queue.Name</MudNavLink>
+                    <MudNavLink Icon="@Icons.Filled.Queue">@queue.Name (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)</MudNavLink>
                 }
             </MudNavGroup>
-            <MudNavGroup Title="Topics">
+            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Topics">
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <MudNavLink>@topic.Name</MudNavLink>
+                    <MudNavLink Icon="@Icons.Filled.Topic">@topic.Name</MudNavLink>
                 }
             </MudNavGroup>
         </MudNavGroup>
