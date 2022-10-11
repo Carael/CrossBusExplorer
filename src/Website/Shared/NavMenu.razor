@@ -12,13 +12,13 @@
             <MudNavGroup Icon="@Icons.Filled.Folder" Title="Queues" >
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink Icon="@Icons.Filled.Queue">@queue.Name (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)</MudNavLink>
+                    <MudNavLink Href=@($"queue/{menuItem.Connection.Name}/{queue.Name}") Icon="@Icons.Filled.Queue">@queue.Name (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)</MudNavLink>
                 }
             </MudNavGroup>
             <MudNavGroup Icon="@Icons.Filled.Folder" Title="Topics">
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <MudNavLink Icon="@Icons.Filled.Topic">@topic.Name</MudNavLink>
+                    <MudNavLink Href=@($"topic/{menuItem.Connection.Name}/{topic.Name}") Icon="@Icons.Filled.Topic">@topic.Name</MudNavLink>
                 }
             </MudNavGroup>
         </MudNavGroup>
