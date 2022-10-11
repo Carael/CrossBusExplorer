@@ -26,7 +26,7 @@ else
 
             @if (_loading)
             {
-                <MudProgressCircular Color="Color.Default" Indeterminate="true"/>
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
             }
             @if (!_loading && _subscriptions.Count == 0)
             {
