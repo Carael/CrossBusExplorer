@@ -87,6 +87,7 @@ public partial class Connections
             {
                 await ConnectionManagement.DeleteAsync(context.Name, default);
                 await ReloadConnectionsAsync();
+                Snackbar.Add($"Connection {context.Name} successfully deleted.", Severity.Success);
             }
     }
 }
