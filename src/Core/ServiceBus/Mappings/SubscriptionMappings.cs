@@ -8,7 +8,10 @@ public static class SubscriptionMappings
         this SubscriptionProperties subscription,
         SubscriptionRuntimeProperties properties)
     {
-        //todo: map properties
-        return new SubscriptionInfo(subscription.SubscriptionName);
+        return new SubscriptionInfo(
+            subscription.SubscriptionName,
+            properties.ActiveMessageCount,
+            properties.DeadLetterMessageCount,
+            properties.TransferMessageCount);
     }
 }

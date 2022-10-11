@@ -3,22 +3,30 @@
 @using CrossBusExplorer.Website.Models
 <MudNavMenu>
 
-    <MudNavLink Href="connections" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
+    <MudNavLink Href="connections" 
+                Match="NavLinkMatch.All" 
+                Icon="@Icons.Material.Filled.EditNote">Manage connections</MudNavLink>
 
     @foreach (var menuItem in _menuItems)
     {
-        <MudNavGroup Title=@menuItem.Connection.Name Icon="@Icons.Material.Filled.Link" Expanded=@menuItem.IsExpanded ExpandedChanged="@(() => OnConnectionExpanded(menuItem))">
-
-            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Queues" >
+        <MudNavGroup Title=@menuItem.Connection.Name 
+                     Icon="@Icons.Material.Filled.Link" 
+                     Expanded=@menuItem.IsExpanded 
+                     ExpandedChanged="@(() => OnConnectionExpanded(menuItem))">
+            <MudNavGroup Icon="@Icons.Filled.Folder" Title="Queues">
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink Href=@($"queue/{menuItem.Connection.Name}/{queue.Name}") Icon="@Icons.Filled.Queue">@queue.Name (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)</MudNavLink>
+                    <MudNavLink Href=@($"queue/{menuItem.Connection.Name}/{queue.Name}")
+                                Icon="@Icons.Filled.Queue">
+                        @queue.Name 
+                        (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
+                    </MudNavLink>
                 }
             </MudNavGroup>
             <MudNavGroup Icon="@Icons.Filled.Folder" Title="Topics">
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <MudNavLink Href=@($"topic/{menuItem.Connection.Name}/{topic.Name}") Icon="@Icons.Filled.Topic">@topic.Name</MudNavLink>
+                    <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@menuItem.Connection />
                 }
             </MudNavGroup>
         </MudNavGroup>
@@ -57,6 +65,8 @@
                 menuItem.Topics.Add(topic);
                 StateHasChanged();
             }
+
+            menuItem.Loaded = true;
         }
     }
 }

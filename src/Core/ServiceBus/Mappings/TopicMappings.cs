@@ -9,6 +9,15 @@ public static class TopicMappings
         TopicRuntimeProperties properties)
     {
         //todo: map properties
-        return new TopicInfo(topic.Name);
+        var folders = topic.Name.Split("/");
+
+        if (folders.Length > 1)
+        {
+            return new TopicInfo(topic.Name, true, null, new List<TopicInfo>());
+        }
+        else
+        {
+            return new TopicInfo(topic.Name, false, topic.Name, new List<TopicInfo>());
+        }
     }
 }
