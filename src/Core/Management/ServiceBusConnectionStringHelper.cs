@@ -1,4 +1,5 @@
 using Azure.Messaging.ServiceBus;
+using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Management;
 
 public static class ServiceBusConnectionStringHelper

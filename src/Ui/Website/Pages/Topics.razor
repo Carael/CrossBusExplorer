@@ -1,0 +1,8 @@
+@page "/topics/{ConnectionName}"
+<PageTitle>Topics from @ConnectionName </PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Topics from @ConnectionName </MudText>
+
+@code {
+    [Parameter]
+    public string? ConnectionName { get; set; }
+}

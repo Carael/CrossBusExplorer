@@ -7,22 +7,22 @@ public class QueueQueryExtensions
 {
     public IAsyncEnumerable<QueueInfo> GetQueuesAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         CancellationToken cancellationToken)
     {
         return queueService.GetAsync(
-            connectionString,
+            connectionName,
             cancellationToken);
     }
 
     public Task<QueueDetails> GetQueueAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         string name,
         CancellationToken cancellationToken)
     {
         return queueService.GetAsync(
-            connectionString,
+            connectionName,
             name,
             cancellationToken);
     }

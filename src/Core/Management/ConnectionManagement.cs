@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Management;
 
 public class ConnectionManagement : IConnectionManagement
@@ -12,7 +13,7 @@ public class ConnectionManagement : IConnectionManagement
 
     }
 
-    public async Task<IList<ServiceBusConnection>> GetAsync(
+    public async Task<IReadOnlyList<ServiceBusConnection>> GetAsync(
         CancellationToken cancellationToken)
     {
         return (await GetData(cancellationToken)).Select(p => p.Value).ToList();

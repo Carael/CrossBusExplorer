@@ -1,0 +1,11 @@
+@page "/queue/{ConnectionName}/{QueueName}"
+<PageTitle>Topic @QueueName </PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Topic @QueueName </MudText>
+
+@code {
+    [Parameter]
+    public string? ConnectionName { get; set; }
+    
+    [Parameter]
+    public string? QueueName { get; set; }
+}

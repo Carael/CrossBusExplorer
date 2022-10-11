@@ -1,0 +1,77 @@
+﻿@page "/connections"
+@using CrossBusExplorer.Management
+@using CrossBusExplorer.Management.Contracts
+
+<PageTitle>Connections</PageTitle>
+
+<MudTooltip Text="Add service bus connection">
+    <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => OpenSaveDialog())"/>
+</MudTooltip>
+
+<MudTable Items="_connectionsList" Hover="true" SortLabel="Sort By" Elevation="0">
+    <HeaderContent>
+        <MudTh>
+            Actions
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<ServiceBusConnection, object>(x => x.Name)">Name</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Fully qualified name
+        </MudTh>
+        <MudTh>
+            View connection string
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Actions">
+            <MudTooltip Text="Connect to service bus">
+                <MudIconButton Icon="@Icons.Material.Outlined.Link"/>
+            </MudTooltip>
+            <MudTooltip Text="Edit service bus connection">
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenSaveDialog(context))"/>
+            </MudTooltip>
+            <MudTooltip Text="Delete service bus connection">
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(()=>OpenDeleteDialog(context))"/>
+            </MudTooltip>
+        </MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
+        <MudTd DataLabel="View connection string">
+            <MudTooltip Text="View service bus connection string">
+                <MudIconButton Icon="@Icons.Material.Outlined.Preview" OnClick="@(()=>ViewConnectionString(context.ConnectionString))"/>
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{50, 100}"/>
+    </PagerContent>
+</MudTable>
+
+<MudDialog @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/> Save service bus connection
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="@_saveEditConnectionForm" OnValidSubmit="OnValidSaveConnectionSubmit">
+            <DataAnnotationsValidator/>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField Lines="4" @bind-Value="@_saveEditConnectionForm.ConnectionString" For="@(() => _saveEditConnectionForm.ConnectionString)"/>
+                    <MudTextField @bind-Value="@_saveEditConnectionForm.Name" For="@(() => _saveEditConnectionForm.Name)"/>
+                </MudItem>
+            </MudGrid>
+            <MudGrid Justify="Justify.FlexEnd">
+                <MudItem xs="6">
+                    <MudButton  ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
+                    <MudButton  ButtonType="ButtonType.Reset" Color="Color.Primary" Class="px-10"
+                               OnClick="@(() =>{_saveDialogVisible = false;})">
+                        Close
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>

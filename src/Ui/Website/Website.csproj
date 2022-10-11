@@ -1,0 +1,99 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Configurations>Debug;Release</Configurations>
+		<Nullable>enable</Nullable>
+		<RootNamespace>CrossBusExplorer.Website</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<DefineConstants>Logging</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<DefineConstants>NoLogging</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="Properties\**" />
+		<Content Remove="Properties\**" />
+		<EmbeddedResource Remove="Properties\**" />
+		<None Remove="Properties\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="package-lock.json" />
+		<Content Remove="package.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="11.2.2" />
+		<PackageReference Include="MudBlazor" Version="6.0.17" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Include="@(InputStaticAssetsStyles)" Set="Styles" />
+		<UpToDateCheckOutput Include="@(OutputStaticAssetsStyles)" Set="Styles" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InputStaticAssetsStyles Include="styles\*.scss;" />
+		<Content Remove="@(OutputStaticAssetsStyles)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Management\Management.csproj" />
+		<ProjectReference Include="..\..\Core\ServiceBus.Contracts\ServiceBus.Contracts.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="wwwroot\js\app.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot" />
+	</ItemGroup>
+
+	<Target Name="CheckIfNpmExists" Inputs="@(InputStaticAssetsStyles)" Outputs="@(OutputStaticAssetsStyles)" BeforeTargets="PreBuildEvent">
+		<Message Importance="high" Text="***** npm install" />
+		<Exec Command="npm install" ContinueOnError="true" StandardOutputImportance="low" StandardErrorImportance="low" LogStandardErrorAsError="false" IgnoreExitCode="true">
+			<Output TaskParameter="ExitCode" PropertyName="NpmReturnCode" />
+		</Exec>
+	</Target>
+
+	<Target Name="BuildStyles" Inputs="@(InputStaticAssetsStyles)" Outputs="@(OutputStaticAssetsStyles)" BeforeTargets="PreBuildEvent" AfterTargets="CheckIfNpmExists" Condition=" '$(NpmReturnCode)' == '0' ">
+		<Message Importance="high" Text="***** mkdir wwwroot and wwwroot\css (M.B.W Styles)" />
+		<Exec Command="mkdir wwwroot\css" IgnoreExitCode="true" />
+
+		<!-- Don't build unminified themes -->
+		<Message Importance="high" Text="***** build material default theme" />
+		<Exec Command="npm run build-min-material-default" />
+
+		<Message Importance="high" Text="***** build light square theme" />
+		<Exec Command="npm run build-min-light-square" />
+
+		<Message Importance="high" Text="***** build dark square theme" />
+		<Exec Command="npm run build-min-dark-square" />
+
+		<Message Importance="high" Text="***** build rounded theme" />
+		<Exec Command="npm run build-min-rounded" />
+
+		<Message Importance="high" Text="***** build asymmetric theme" />
+		<Exec Command="npm run build-min-asymmetric" />
+
+	</Target>
+
+</Project>

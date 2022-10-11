@@ -1,0 +1,85 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Management
+@using CrossBusExplorer.Management.Contracts
+@using CrossBusExplorer.ServiceBus.Contracts
+
+@if (Topic.IsFolder)
+{
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.Name>
+        @foreach (var topic in Topic.ChildTopics)
+        {
+            <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@ServiceBusConnection/>
+        }
+    </MudNavGroup>
+}
+else
+{
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.FullName>
+        <MudNavLink Href=@($"topic/{ServiceBusConnection.ConnectionString}/{Topic.FullName}")
+                    Icon="@Icons.Filled.Topic">
+            View topic details
+        </MudNavLink>
+        <MudNavGroup Icon="@Icons.Filled.Add"
+                     Title="Subscriptions"
+                     Expanded=@_subscriptionsExpanded
+                     ExpandedChanged="@(OnSubscriptionsExpanded)">
+
+            @if (_loading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+            }
+            @if (!_loading && _subscriptions.Count == 0)
+            {
+                <MudNavLink Disabled="true">No subscriptions</MudNavLink>
+            }
+            else
+            {
+                @foreach (var subscription in _subscriptions)
+                {
+                    <MudNavLink Href=@($"subscription/{ServiceBusConnection.Name}/{Topic.Name}/{subscription.Name}")
+                                Icon="@Icons.Filled.FormatLineSpacing">
+                        @subscription.Name (@subscription.ActiveMessagesCount, @subscription.DeadLetterMessagesCount,
+                        @subscription.TransferMessagesCount)
+                    </MudNavLink>
+                }
+            }
+
+        </MudNavGroup>
+    </MudNavGroup>
+}
+
+@code {
+    [Inject]
+    private ISubscriptionService SubscriptionService { get; set; } = null!;
+    private IList<SubscriptionInfo> _subscriptions = new List<SubscriptionInfo>();
+    private bool _subscriptionsExpanded = false;
+    private bool _subscriptionsLoaded = false;
+    private bool _loading = false;
+
+    [Parameter]
+    public TopicInfo Topic { get; set; } = null!;
+    [Parameter]
+    public ServiceBusConnection ServiceBusConnection { get; set; } = null!;
+
+    private async Task OnSubscriptionsExpanded()
+    {
+        _subscriptionsExpanded = !_subscriptionsExpanded;
+
+        if (!_subscriptionsLoaded && Topic.FullName != null)
+        {
+            _loading = true;
+            await foreach (var subscription in SubscriptionService.GetAsync(
+                ServiceBusConnection.Name,
+                Topic.FullName!,
+                default))
+            {
+                _subscriptions.Add(subscription);
+            }
+
+            _subscriptionsLoaded = true;
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}
+

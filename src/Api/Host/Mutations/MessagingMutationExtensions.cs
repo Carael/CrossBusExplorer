@@ -11,13 +11,13 @@ public class MessagingMutationExtensions
     [UseMutationConvention(PayloadFieldName = "result")]
     public async Task<Result> PurgeAsync(
         [Service] IMessageService messageService,
-        string connectionString,
+        string connectionName,
         string queueName,
         SubQueue subQueue,
         CancellationToken cancellationToken)
     {
         return await messageService.PurgeAsync(
-            connectionString,
+            connectionName,
             queueName,
             subQueue,
             cancellationToken);
@@ -28,13 +28,13 @@ public class MessagingMutationExtensions
     [UseMutationConvention(PayloadFieldName = "result")]
     public async Task<Result> SendMessagesAsync(
         [Service] IMessageService messageService,
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,
         CancellationToken cancellationToken)
     {
         return await messageService.SendMessagesAsync(
-            connectionString,
+            connectionName,
             queueOrTopicName,
             messages,
             cancellationToken);

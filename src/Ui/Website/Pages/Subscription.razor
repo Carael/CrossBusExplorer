@@ -1,0 +1,14 @@
+@page "/subscription/{ConnectionName}/{TopicName}/{SubscriptionName}"
+<PageTitle>Topic @TopicName </PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Topic @TopicName </MudText>
+
+@code {
+    [Parameter]
+    public string? ConnectionName { get; set; }
+    
+    [Parameter]
+    public string? TopicName { get; set; }
+    
+    [Parameter]
+    public string? SubscriptionName { get; set; }
+}

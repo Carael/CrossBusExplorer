@@ -4,7 +4,7 @@ namespace CrossBusExplorer.ServiceBus.Contracts;
 public interface ISubscriptionService
 {
     IAsyncEnumerable<SubscriptionInfo> GetAsync(
-        string connectionString,
+        string connectionName,
         string topicName,
         CancellationToken cancellationToken);
 }

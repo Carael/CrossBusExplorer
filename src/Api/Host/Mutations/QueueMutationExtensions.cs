@@ -10,22 +10,22 @@ public class QueueMutationExtensions
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult> DeleteQueueAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         string name,
         CancellationToken cancellationToken)
     {
-        return await queueService.DeleteAsync(connectionString, name, cancellationToken);
+        return await queueService.DeleteAsync(connectionName, name, cancellationToken);
     }
 
     [UseMutationConvention(PayloadFieldName = "result")]
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult<QueueDetails>> UpdateQueueAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         UpdateQueueOptions options,
         CancellationToken cancellationToken)
     {
-        return await queueService.UpdateAsync(connectionString, options, cancellationToken);
+        return await queueService.UpdateAsync(connectionName, options, cancellationToken);
     }
     
     [UseMutationConvention(PayloadFieldName = "result")]
@@ -33,22 +33,22 @@ public class QueueMutationExtensions
     [Error<ValidationException>]
     public async Task<OperationResult<QueueDetails>> CreateQueueAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         CreateQueueOptions options,
         CancellationToken cancellationToken)
     {
-        return await queueService.CreateAsync(connectionString, options, cancellationToken);
+        return await queueService.CreateAsync(connectionName, options, cancellationToken);
     }
     
     [UseMutationConvention(PayloadFieldName = "result")]
     [Error<ServiceBusOperationException>]
     public async Task<OperationResult<QueueDetails>> CloneQueueAsync(
         [Service] IQueueService queueService,
-        string connectionString,
+        string connectionName,
         string name,
         string sourceName,
         CancellationToken cancellationToken)
     {
-        return await queueService.CloneAsync(connectionString, name, sourceName, cancellationToken);
+        return await queueService.CloneAsync(connectionName, name, sourceName, cancellationToken);
     }
 }
