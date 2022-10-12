@@ -3,6 +3,8 @@
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
 @using System.Security.Cryptography
+@using CrossBusExplorer.Website.ViewModels
+
 <MudNavMenu>
     <MudNavLink Href="connections"
                 Match="NavLinkMatch.All"
@@ -10,42 +12,9 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (var menuItem in _menuItems)
+    @foreach (var menuItem in ConnectionsViewModel.ServiceBusConnections)
     {
-        <MudNavGroup Title=@menuItem.Connection.Name
-                     Icon="@Icons.Material.Filled.Link">
-
-            <MudNavGroup Icon="@Icons.Filled.Folder" 
-                         Title="Queues"
-                         @onclick="@(() => OnQueuesExpanded(menuItem))">
-                @if (menuItem.LoadingQueues)
-                {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
-                }
-                @foreach (var queue in menuItem.Queues)
-                {
-                    <MudNavLink Href=@($"queue/{menuItem.Connection.Name}/{queue.Name}")
-                                Icon="@Icons.Filled.Queue">
-                        @queue.Name
-                        (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
-                    </MudNavLink>
-                }
-            </MudNavGroup>
-
-            <MudNavGroup Icon="@Icons.Filled.Folder"
-                         Title="Topics"
-                         @onclick="@(() => OnTopicsExpanded(menuItem))">
-                
-                @if (menuItem.LoadingTopics)
-                {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
-                }
-                @foreach (var topic in menuItem.Topics)
-                {
-                    <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@menuItem.Connection/>
-                }
-            </MudNavGroup>
-        </MudNavGroup>
+        <MudNavLink>@menuItem.Name</MudNavLink>
     }
 </MudNavMenu>
 
@@ -55,16 +24,18 @@
     [Inject]
     private ITopicService TopicService { get; set; } = null!;
     [Inject]
-    private IConnectionManagement ConnectionManagement { get; set; } = null!;
+    private IConnectionsViewModel ConnectionsViewModel { get; set; }
     private IList<ConnectionMenuItem> _menuItems = new List<ConnectionMenuItem>();
 
     protected override async Task OnInitializedAsync()
     {
-        _menuItems = (await ConnectionManagement.GetAsync(default)).Select(p => new ConnectionMenuItem(p)).ToList();
-
-        await base.OnInitializedAsync();
+        ConnectionsViewModel.PropertyChanged += (sender, e) =>
+        {
+            StateHasChanged();
+        };
+        _menuItems = (ConnectionsViewModel.ServiceBusConnections).Select(p => new ConnectionMenuItem(p)).ToList();
     }
-    
+
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
         if (!menuItem.QueuesLoaded && !menuItem.LoadingQueues)

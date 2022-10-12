@@ -40,8 +40,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
 		<PackageReference Include="FluentValidation" Version="11.2.2" />
+		<PackageReference Include="Fluxor.Blazor.Web" Version="5.5.0" />
+		<PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="5.5.0" />
 		<PackageReference Include="MudBlazor" Version="6.0.17" />
+		<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>

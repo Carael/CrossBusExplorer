@@ -22,7 +22,7 @@ public static class MauiProgram
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
 		builder.Services.AddMudServices();
-		builder.Services.AddConfiguredMudServices();
+		builder.Services.AddWebsiteServices();
 		builder.Services.AddServiceBusServices();
 		builder.Services.AddManagement();
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();

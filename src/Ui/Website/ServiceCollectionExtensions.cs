@@ -1,3 +1,5 @@
+using CrossBusExplorer.Website.ViewModels;
+using Fluxor.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
@@ -5,8 +7,10 @@ namespace CrossBusExplorer.Website;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddConfiguredMudServices(this IServiceCollection collection)
+    public static IServiceCollection AddWebsiteServices(this IServiceCollection collection)
     {
+        collection.AddScoped<IConnectionsViewModel, ConnectionsViewModel>();
+        
         return collection.AddMudServices(config =>
         {
             config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;

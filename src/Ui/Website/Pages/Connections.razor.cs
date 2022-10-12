@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Models;
@@ -13,25 +12,23 @@ public partial class Connections
     private readonly DialogOptions _saveDialogOptions = new DialogOptions { FullWidth = true };
 
     private bool _saveDialogVisible;
-    private IReadOnlyList<ServiceBusConnection> _connectionsList = new List<ServiceBusConnection>();
     private SaveConnectionForm _saveEditConnectionForm = null!;
-
-    [Inject]
-    private IConnectionManagement ConnectionManagement { get; set; } = null!;
+    
     [Inject]
     private ISnackbar Snackbar { get; set; } = null!;
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private IConnectionsViewModel _connectionsViewModel { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await ReloadConnectionsAsync();
-        await base.OnInitializedAsync().ConfigureAwait(false);
-    }
-
-    private async Task ReloadConnectionsAsync()
-    {
-        _connectionsList = await ConnectionManagement.GetAsync(default);
+        _connectionsViewModel.PropertyChanged += (sender, e) =>
+        {
+            StateHasChanged();
+        };
+        
+        base.OnInitialized();
     }
 
     private void OpenSaveDialog(ServiceBusConnection? model = null)
@@ -45,7 +42,7 @@ public partial class Connections
 
     private async Task OnValidSaveConnectionSubmit()
     {
-        await ConnectionManagement.SaveAsync(
+        await _connectionsViewModel.SaveConnectionAsync(
             _saveEditConnectionForm.Name ??
             ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(
                 _saveEditConnectionForm.ConnectionString!),
@@ -55,8 +52,7 @@ public partial class Connections
         _saveDialogVisible = false;
 
         Snackbar.Add($"Connection {_saveEditConnectionForm.Name} added.", Severity.Success);
-        await ReloadConnectionsAsync();
-        StateHasChanged();
+        
     }
     private void ViewConnectionString(string connectionString)
     {
@@ -72,22 +68,23 @@ public partial class Connections
                 CloseOnEscapeKey = true
             });
     }
-    private async Task OpenDeleteDialog(ServiceBusConnection context)
+    private async Task OpenDeleteDialog(ServiceBusConnection serviceBusConnection)
     {
         var parameters = new DialogParameters();
         parameters.Add(
             "ContentText",
-            $"Are you sure you want to remove {context.Name} connection?");
+            $"Are you sure you want to remove {serviceBusConnection.Name} connection?");
 
         var dialog = DialogService.Show<ConfirmDialog>("Confirm", parameters);
         var result = await dialog.Result;
 
         if (result.Data is true)
         {
-            await ConnectionManagement.DeleteAsync(context.Name, default);
-            await ReloadConnectionsAsync();
-            
-            Snackbar.Add($"Connection {context.Name} successfully deleted.", Severity.Success);
+            _connectionsViewModel.RemoveConnectionAsync(serviceBusConnection, default);
+
+            Snackbar.Add(
+                $"Connection {serviceBusConnection.Name} successfully deleted.", 
+                Severity.Success);
         }
     }
 }
