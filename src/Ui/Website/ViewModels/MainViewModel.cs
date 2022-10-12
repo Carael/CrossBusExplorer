@@ -112,6 +112,7 @@ public class MainViewModel : IMainViewModel
             this.Notify(PropertyChanged);
         }
     }
+    
     public async Task LoadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
     {
         if (!menuItem.QueuesLoaded && !menuItem.LoadingQueues)
