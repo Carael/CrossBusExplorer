@@ -15,7 +15,7 @@
 else
 {
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.FullName>
-        <MudNavLink Href=@($"topic/{ServiceBusConnection.ConnectionString}/{Topic.FullName}")
+        <MudNavLink Href=@($"topic/{ServiceBusConnection.Name}/{Topic.FullName}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
@@ -43,7 +43,6 @@ else
                     </MudNavLink>
                 }
             }
-
         </MudNavGroup>
     </MudNavGroup>
 }
