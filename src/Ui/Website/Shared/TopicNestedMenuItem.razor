@@ -8,14 +8,14 @@
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.Name>
         @foreach (var topic in Topic.ChildTopics)
         {
-            <TopicNestedMenuItem Topic=@topic ServiceBusConnection=@ServiceBusConnection/>
+            <TopicNestedMenuItem Topic=@topic ConnectionName=@ConnectionName/>
         }
     </MudNavGroup>
 }
 else
 {
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.FullName>
-        <MudNavLink Href=@($"topic/{ServiceBusConnection.Name}/{Topic.FullName}")
+        <MudNavLink Href=@($"topic/{ConnectionName}/{Topic.FullName}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
@@ -36,7 +36,7 @@ else
             {
                 @foreach (var subscription in _subscriptions)
                 {
-                    <MudNavLink Href=@($"subscription/{ServiceBusConnection.Name}/{Topic.Name}/{subscription.Name}")
+                    <MudNavLink Href=@($"subscription/{ConnectionName}/{Topic.Name}/{subscription.Name}")
                                 Icon="@Icons.Filled.FormatLineSpacing">
                         @subscription.Name (@subscription.ActiveMessagesCount, @subscription.DeadLetterMessagesCount,
                         @subscription.TransferMessagesCount)
@@ -58,7 +58,7 @@ else
     [Parameter]
     public TopicInfo Topic { get; set; } = null!;
     [Parameter]
-    public ServiceBusConnection ServiceBusConnection { get; set; } = null!;
+    public string ConnectionName { get; set; } = null!;
 
     private async Task OnSubscriptionsExpanded()
     {
@@ -68,7 +68,7 @@ else
         {
             _loading = true;
             await foreach (var subscription in SubscriptionService.GetAsync(
-                ServiceBusConnection.Name,
+                ConnectionName,
                 Topic.FullName!,
                 default))
             {

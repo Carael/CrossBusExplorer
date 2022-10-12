@@ -19,11 +19,11 @@ public partial class Connections
     [Inject]
     private IDialogService DialogService { get; set; } = null!;
     [Inject]
-    private IConnectionsViewModel _connectionsViewModel { get; set; }
+    private IMainViewModel MainViewModel { get; set; }
 
     protected override void OnInitialized()
     {
-        _connectionsViewModel.PropertyChanged += (sender, e) =>
+        MainViewModel.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
@@ -42,7 +42,7 @@ public partial class Connections
 
     private async Task OnValidSaveConnectionSubmit()
     {
-        await _connectionsViewModel.SaveConnectionAsync(
+        await MainViewModel.SaveConnectionAsync(
             _saveEditConnectionForm.Name ??
             ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(
                 _saveEditConnectionForm.ConnectionString!),
@@ -80,7 +80,7 @@ public partial class Connections
 
         if (result.Data is true)
         {
-            _connectionsViewModel.RemoveConnectionAsync(serviceBusConnection, default);
+            MainViewModel.RemoveConnectionAsync(serviceBusConnection, default);
 
             Snackbar.Add(
                 $"Connection {serviceBusConnection.Name} successfully deleted.", 

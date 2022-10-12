@@ -3,7 +3,6 @@
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
 @using System.Security.Cryptography
-@using CrossBusExplorer.Website.ViewModels
 
 <MudNavMenu>
     <MudNavLink Href="connections"
@@ -12,60 +11,66 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (var menuItem in ConnectionsViewModel.ServiceBusConnections)
+    @foreach (var menuItem in MainViewModel.MenuItems)
     {
-        <MudNavLink>@menuItem.Name</MudNavLink>
+        <MudNavGroup Title=@menuItem.ConnectionName
+                     Icon="@Icons.Material.Filled.Link">
+
+            <MudNavGroup Icon="@Icons.Filled.Folder" 
+                         Title="Queues"
+                         @onclick="@(() => OnQueuesExpanded(menuItem))">
+                @if (menuItem.LoadingQueues)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                }
+                @foreach (var queue in menuItem.Queues)
+                {
+                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{queue.Name}")
+                                Icon="@Icons.Filled.Queue">
+                        @queue.Name
+                        (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
+                    </MudNavLink>
+                }
+            </MudNavGroup>
+
+            <MudNavGroup Icon="@Icons.Filled.Folder"
+                         Title="Topics"
+                         @onclick="@(() => OnTopicsExpanded(menuItem))">
+                
+                @if (menuItem.LoadingTopics)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+                }
+                @foreach (var topic in menuItem.Topics)
+                {
+                    <TopicNestedMenuItem Topic=@topic ConnectionName=@menuItem.ConnectionName/>
+                }
+            </MudNavGroup>
+        </MudNavGroup>
     }
 </MudNavMenu>
 
 @code {
     [Inject]
-    private IQueueService QueueService { get; set; } = null!;
-    [Inject]
-    private ITopicService TopicService { get; set; } = null!;
-    [Inject]
-    private IConnectionsViewModel ConnectionsViewModel { get; set; }
-    private IList<ConnectionMenuItem> _menuItems = new List<ConnectionMenuItem>();
+    private IMainViewModel MainViewModel { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        ConnectionsViewModel.PropertyChanged += (sender, e) =>
+        MainViewModel.PropertyChanged += (sender, e) =>
         {
             StateHasChanged();
         };
-        _menuItems = (ConnectionsViewModel.ServiceBusConnections).Select(p => new ConnectionMenuItem(p)).ToList();
-    }
 
+        await base.OnInitializedAsync();
+    }
+    
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
-        if (!menuItem.QueuesLoaded && !menuItem.LoadingQueues)
-        {
-            menuItem.LoadingQueues = true;
-            await foreach (var queue in QueueService.GetAsync(menuItem.Connection.Name, default))
-            {
-                menuItem.Queues.Add(queue);
-                StateHasChanged();
-            }
-            menuItem.LoadingQueues = false;
-            
-            menuItem.QueuesLoaded = true;
-        }
+        await MainViewModel.LoadQueues(menuItem, default);
     }
     
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
-        if (!menuItem.TopicsLoaded && !menuItem.LoadingTopics)
-        {
-            menuItem.LoadingTopics = true;
-
-            await foreach (var topic in TopicService.GetAsync(menuItem.Connection.Name, default))
-            {
-                menuItem.Topics.Add(topic);
-                StateHasChanged();
-            }
-
-            menuItem.LoadingTopics = false;
-            menuItem.TopicsLoaded = true;
-        }
+        MainViewModel.LoadTopics(menuItem, default);
     }
 }

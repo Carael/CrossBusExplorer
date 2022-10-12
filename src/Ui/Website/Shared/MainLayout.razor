@@ -1,6 +1,6 @@
 ﻿@using CrossBusExplorer.Website.ViewModels
 @inherits LayoutComponentBase
-@inject IConnectionsViewModel ConnectionsViewModel
+@inject IMainViewModel MainViewModel
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode"/>
 <MudDialogProvider/>
@@ -43,7 +43,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await ConnectionsViewModel.InitializeAsync(default);
+        await MainViewModel.InitializeAsync(default);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

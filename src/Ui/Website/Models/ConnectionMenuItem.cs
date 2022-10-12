@@ -5,13 +5,13 @@ namespace CrossBusExplorer.Website.Models;
 
 public class ConnectionMenuItem
 {
-    public ConnectionMenuItem(ServiceBusConnection connection)
+    public ConnectionMenuItem(string connectionName)
     {
-        Connection = connection;
+        ConnectionName = connectionName;
     }
-    public ServiceBusConnection Connection { get; }
-    public IList<QueueInfo> Queues { get; set; } = new List<QueueInfo>();
-    public IList<TopicInfo> Topics { get; set; } = new List<TopicInfo>();
+    public string ConnectionName { get; }
+    public IList<QueueInfo> Queues { get; } = new List<QueueInfo>();
+    public IList<TopicInfo> Topics { get; } = new List<TopicInfo>();
     public bool QueuesLoaded { get; set; }
     public bool TopicsLoaded { get; set; }
     public bool LoadingQueues { get; set; }
