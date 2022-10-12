@@ -108,6 +108,8 @@ public class MainViewModel : IMainViewModel
 
             menuItem.LoadingTopics = false;
             menuItem.TopicsLoaded = true;
+            
+            this.Notify(PropertyChanged);
         }
     }
     public async Task LoadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
@@ -125,11 +127,9 @@ public class MainViewModel : IMainViewModel
             }
 
             menuItem.LoadingQueues = false;
-
             menuItem.QueuesLoaded = true;
+            this.Notify(PropertyChanged);
         }
-
-
     }
 
     private void RemoveOrReplace(ServiceBusConnection newConnection)
