@@ -13,7 +13,7 @@ public class ConnectionManagement : IConnectionManagement
 
     }
 
-    public async Task<IReadOnlyList<ServiceBusConnection>> GetAsync(
+    public async Task<IList<ServiceBusConnection>> GetAsync(
         CancellationToken cancellationToken)
     {
         return (await GetData(cancellationToken)).Select(p => p.Value).ToList();
@@ -32,7 +32,7 @@ public class ConnectionManagement : IConnectionManagement
         throw new ServiceBusConnectionDoesntExist(name);
     }
 
-    public async Task SaveAsync(
+    public async Task<ServiceBusConnection> SaveAsync(
         string name,
         string connectionString,
         CancellationToken cancellationToken)
@@ -61,6 +61,8 @@ public class ConnectionManagement : IConnectionManagement
         }
 
         await SaveAsync(connections, cancellationToken);
+
+        return connection;
     }
 
     public async Task DeleteAsync(string name, CancellationToken cancellationToken)

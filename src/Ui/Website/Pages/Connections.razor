@@ -7,8 +7,7 @@
 <MudTooltip Text="Add service bus connection">
     <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => OpenSaveDialog())"/>
 </MudTooltip>
-
-<MudTable Items="_connectionsList" Hover="true" SortLabel="Sort By" Elevation="0">
+<MudTable Items="ConnectionsViewModel.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
     <HeaderContent>
         <MudTh>
             Actions
@@ -32,14 +31,14 @@
                 <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenSaveDialog(context))"/>
             </MudTooltip>
             <MudTooltip Text="Delete service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(()=>OpenDeleteDialog(context))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => OpenDeleteDialog(context))"/>
             </MudTooltip>
         </MudTd>
         <MudTd DataLabel="Name">@context.Name</MudTd>
         <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
         <MudTd DataLabel="View connection string">
             <MudTooltip Text="View service bus connection string">
-                <MudIconButton Icon="@Icons.Material.Outlined.Preview" OnClick="@(()=>ViewConnectionString(context.ConnectionString))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Preview" OnClick="@(() => ViewConnectionString(context.ConnectionString))"/>
             </MudTooltip>
         </MudTd>
     </RowTemplate>
@@ -65,8 +64,8 @@
             </MudGrid>
             <MudGrid Justify="Justify.FlexEnd">
                 <MudItem xs="6">
-                    <MudButton  ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
-                    <MudButton  ButtonType="ButtonType.Reset" Color="Color.Primary" Class="px-10"
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
+                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Primary" Class="px-10"
                                OnClick="@(() =>{_saveDialogVisible = false;})">
                         Close
                     </MudButton>
