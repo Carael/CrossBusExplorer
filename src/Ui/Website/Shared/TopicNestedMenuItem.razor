@@ -21,8 +21,7 @@ else
         </MudNavLink>
         <MudNavGroup Icon="@Icons.Filled.Add"
                      Title="Subscriptions"
-                     Expanded=@_subscriptionsExpanded
-                     ExpandedChanged="@(OnSubscriptionsExpanded)">
+                     @onclick="@(OnSubscriptionsExpanded)">
 
             @if (_loading)
             {
@@ -51,7 +50,6 @@ else
     [Inject]
     private ISubscriptionService SubscriptionService { get; set; } = null!;
     private IList<SubscriptionInfo> _subscriptions = new List<SubscriptionInfo>();
-    private bool _subscriptionsExpanded = false;
     private bool _subscriptionsLoaded = false;
     private bool _loading = false;
 
@@ -62,8 +60,6 @@ else
 
     private async Task OnSubscriptionsExpanded()
     {
-        _subscriptionsExpanded = !_subscriptionsExpanded;
-
         if (!_subscriptionsLoaded && Topic.FullName != null)
         {
             _loading = true;

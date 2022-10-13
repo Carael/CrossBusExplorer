@@ -11,7 +11,7 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (var menuItem in MainViewModel.MenuItems)
+    @foreach (ConnectionMenuItem menuItem in NavigationViewModel.MenuItems)
     {
         <MudNavGroup Title=@menuItem.ConnectionName
                      Icon="@Icons.Material.Filled.Link">
@@ -52,11 +52,11 @@
 
 @code {
     [Inject]
-    private IMainViewModel MainViewModel { get; set; }
+    private INavigationViewModel NavigationViewModel { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        MainViewModel.PropertyChanged += (sender, e) =>
+        NavigationViewModel.PropertyChanged += (sender, e) =>
         {
             StateHasChanged();
         };
@@ -66,11 +66,11 @@
     
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
-        await MainViewModel.LoadQueues(menuItem, default);
+        await NavigationViewModel.LoadQueues(menuItem, default);
     }
     
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
-        MainViewModel.LoadTopics(menuItem, default);
+        NavigationViewModel.LoadTopics(menuItem, default);
     }
 }

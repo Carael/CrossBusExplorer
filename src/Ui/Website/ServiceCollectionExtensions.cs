@@ -9,7 +9,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddWebsiteServices(this IServiceCollection collection)
     {
-        collection.AddScoped<IMainViewModel, MainViewModel>();
+        collection.AddScoped<IConnectionsViewModel, ConnectionsViewModel>();
+        collection.AddScoped<INavigationViewModel, NavigationViewModel>();
         
         return collection.AddMudServices(config =>
         {

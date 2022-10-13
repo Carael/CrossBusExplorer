@@ -6,10 +6,9 @@ using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website;
 
-public interface IMainViewModel : INotifyPropertyChanged
+public interface IConnectionsViewModel : INotifyPropertyChanged
 {
     ObservableCollection<ServiceBusConnection> ServiceBusConnections { get; }
-    ObservableCollection<ConnectionMenuItem> MenuItems { get; } 
     Task InitializeAsync(CancellationToken cancellationToken);
     Task SaveConnectionAsync(
         string name,
@@ -19,7 +18,4 @@ public interface IMainViewModel : INotifyPropertyChanged
         ServiceBusConnection connection,
         CancellationToken cancellationToken);
     public ServiceBusConnection GetConnection(string name);
-
-    public Task LoadTopics(ConnectionMenuItem menuItem,  CancellationToken cancellationToken);
-    public Task LoadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken);
 }

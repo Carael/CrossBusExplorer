@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.Website.Models;
 

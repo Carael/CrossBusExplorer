@@ -5,3 +5,4 @@ public record TopicInfo(
     bool IsFolder,
     string? FullName,
     IList<TopicInfo> ChildTopics);
+    
