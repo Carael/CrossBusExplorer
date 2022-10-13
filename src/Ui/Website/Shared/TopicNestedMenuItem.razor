@@ -9,7 +9,7 @@
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Model.Topic.Name >
         @foreach (var model in Model.ChildrenModels)
         {
-            <TopicNestedMenuItem Model=@model ConnectionName=@ConnectionName/>
+            <TopicNestedMenuItem Model="@model" ConnectionName="@ConnectionName" />
         }
     </MudNavGroup>
 }

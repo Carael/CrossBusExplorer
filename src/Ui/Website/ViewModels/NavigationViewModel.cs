@@ -129,7 +129,7 @@ public class NavigationViewModel : INavigationViewModel
             }
 
             model.IsLoading = false;
-            model.Loaded = false;
+            model.Loaded = true;
             this.Notify(PropertyChanged);
         }
     }
