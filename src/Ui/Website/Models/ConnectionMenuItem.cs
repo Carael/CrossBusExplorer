@@ -10,7 +10,7 @@ public class ConnectionMenuItem
     }
     public string ConnectionName { get; }
     public IList<QueueInfo> Queues { get; } = new List<QueueInfo>();
-    public IList<TopicInfo> Topics { get; } = new List<TopicInfo>();
+    public IList<TopicSubscriptionsModel> Topics { get; } = new List<TopicSubscriptionsModel>();
     public bool QueuesLoaded { get; set; }
     public bool TopicsLoaded { get; set; }
     public bool LoadingQueues { get; set; }

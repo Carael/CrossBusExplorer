@@ -16,12 +16,12 @@
         <MudNavGroup Title=@menuItem.ConnectionName
                      Icon="@Icons.Material.Filled.Link">
 
-            <MudNavGroup Icon="@Icons.Filled.Folder" 
+            <MudNavGroup Icon="@Icons.Filled.Folder"
                          Title="Queues"
                          @onclick="@(() => OnQueuesExpanded(menuItem))">
                 @if (menuItem.LoadingQueues)
                 {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
                 }
                 @foreach (var queue in menuItem.Queues)
                 {
@@ -36,14 +36,14 @@
             <MudNavGroup Icon="@Icons.Filled.Folder"
                          Title="Topics"
                          @onclick="@(() => OnTopicsExpanded(menuItem))">
-                
+
                 @if (menuItem.LoadingTopics)
                 {
                     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
                 }
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <TopicNestedMenuItem Topic=@topic ConnectionName=@menuItem.ConnectionName/>
+                    <TopicNestedMenuItem Model=@topic ConnectionName=@menuItem.ConnectionName/>
                 }
             </MudNavGroup>
         </MudNavGroup>
@@ -56,19 +56,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationViewModel.PropertyChanged += (sender, e) =>
+        NavigationViewModel.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
 
         await base.OnInitializedAsync();
     }
-    
+
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
         await NavigationViewModel.LoadQueues(menuItem, default);
     }
-    
+
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
         NavigationViewModel.LoadTopics(menuItem, default);

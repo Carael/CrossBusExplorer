@@ -13,17 +13,20 @@ public class NavigationViewModel : INavigationViewModel
 {
     private readonly IQueueService _queueService;
     private readonly ITopicService _topicService;
+    private readonly ISubscriptionService _subscriptionService;
 
     private ObservableCollection<ConnectionMenuItem> _connectionMenuItems;
 
     public NavigationViewModel(
         IConnectionsViewModel connectionsViewModel,
         IQueueService queueService,
-        ITopicService topicService)
+        ITopicService topicService,
+        ISubscriptionService subscriptionService)
     {
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         _queueService = queueService;
         _topicService = topicService;
+        _subscriptionService = subscriptionService;
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
 
@@ -75,7 +78,9 @@ public class NavigationViewModel : INavigationViewModel
                 menuItem.ConnectionName,
                 cancellationToken))
             {
-                menuItem.Topics.Add(topic);
+                menuItem.Topics.Add(
+                    new TopicSubscriptionsModel(topic));
+                
                 this.Notify(PropertyChanged);
             }
 
@@ -102,6 +107,29 @@ public class NavigationViewModel : INavigationViewModel
 
             menuItem.LoadingQueues = false;
             menuItem.QueuesLoaded = true;
+            this.Notify(PropertyChanged);
+        }
+    }
+
+    public async Task LoadSubscriptionsAsync(
+        string connectionName,
+        TopicSubscriptionsModel model)
+    {
+        if (!model.Loaded && !model.IsLoading && !model.Topic.IsFolder)
+        {
+            model.IsLoading = true;
+            this.Notify(PropertyChanged);
+
+            await foreach (var subscription in _subscriptionService.GetAsync(connectionName,
+                model.Topic.FullName!, default))
+            {
+                model.AddSubscription(subscription);
+
+                this.Notify(PropertyChanged);
+            }
+
+            model.IsLoading = false;
+            model.Loaded = false;
             this.Notify(PropertyChanged);
         }
     }

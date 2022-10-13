@@ -2,20 +2,21 @@
 @using CrossBusExplorer.Management
 @using CrossBusExplorer.Management.Contracts
 @using CrossBusExplorer.ServiceBus.Contracts
+@using CrossBusExplorer.Website.Models
 
-@if (Topic.IsFolder)
+@if (Model.Topic.IsFolder)
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.Name>
-        @foreach (var topic in Topic.ChildTopics)
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Model.Topic.Name >
+        @foreach (var model in Model.ChildrenModels)
         {
-            <TopicNestedMenuItem Topic=@topic ConnectionName=@ConnectionName/>
+            <TopicNestedMenuItem Model=@model ConnectionName=@ConnectionName/>
         }
     </MudNavGroup>
 }
 else
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Topic.FullName>
-        <MudNavLink Href=@($"topic/{ConnectionName}/{Topic.FullName}")
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Model.Topic.FullName>
+        <MudNavLink Href=@($"topic/{ConnectionName}/{Model.Topic.FullName}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
@@ -23,23 +24,28 @@ else
                      Title="Subscriptions"
                      @onclick="@(OnSubscriptionsExpanded)">
 
-            @if (_loading)
+            @if (Model.IsLoading)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
             }
-            @if (!_loading && _subscriptions.Count == 0)
+            @if (Model.Subscriptions.Count == 0 && Model.Loaded)
             {
                 <MudNavLink Disabled="true">No subscriptions</MudNavLink>
             }
             else
             {
-                @foreach (var subscription in _subscriptions)
+                @foreach (var subscription in Model.Subscriptions)
                 {
-                    <MudNavLink Href=@($"subscription/{ConnectionName}/{Topic.Name}/{subscription.Name}")
-                                Icon="@Icons.Filled.FormatLineSpacing">
-                        @subscription.Name (@subscription.ActiveMessagesCount, @subscription.DeadLetterMessagesCount,
-                        @subscription.TransferMessagesCount)
-                    </MudNavLink>
+                    <MudTooltip Text="@($"{subscription.Name} ({subscription.ActiveMessagesCount}, " +
+                                        $"{subscription.DeadLetterMessagesCount}, " +
+                                        $"{subscription.TransferMessagesCount}")">
+                        <MudNavLink Href=@($"subscription/{ConnectionName}/{Model.Topic.Name}/{subscription.Name}")
+                                    Icon="@Icons.Filled.FormatLineSpacing">
+                            @subscription.Name (@subscription.ActiveMessagesCount, 
+                            @subscription.DeadLetterMessagesCount,
+                            @subscription.TransferMessagesCount)
+                        </MudNavLink>
+                    </MudTooltip>
                 }
             }
         </MudNavGroup>
@@ -47,34 +53,24 @@ else
 }
 
 @code {
-    [Inject]
-    private ISubscriptionService SubscriptionService { get; set; } = null!;
-    private IList<SubscriptionInfo> _subscriptions = new List<SubscriptionInfo>();
-    private bool _subscriptionsLoaded = false;
-    private bool _loading = false;
-
+    [Inject] 
+    public INavigationViewModel NavigationViewModel { get; set; }
     [Parameter]
-    public TopicInfo Topic { get; set; } = null!;
+    public TopicSubscriptionsModel Model { get; set; } = null!;
+
     [Parameter]
     public string ConnectionName { get; set; } = null!;
 
+    protected override void OnInitialized()
+    {
+        NavigationViewModel.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
+    }
+
     private async Task OnSubscriptionsExpanded()
     {
-        if (!_subscriptionsLoaded && Topic.FullName != null)
-        {
-            _loading = true;
-            await foreach (var subscription in SubscriptionService.GetAsync(
-                ConnectionName,
-                Topic.FullName!,
-                default))
-            {
-                _subscriptions.Add(subscription);
-            }
-
-            _subscriptionsLoaded = true;
-            _loading = false;
-            StateHasChanged();
-        }
+        await NavigationViewModel.LoadSubscriptionsAsync(ConnectionName, Model);
     }
 }
-
