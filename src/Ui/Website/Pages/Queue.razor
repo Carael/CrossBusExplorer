@@ -3,8 +3,6 @@
 @using CrossBusExplorer.Website.Models
 
 
-
-
 <MudTabs Elevation="1" Rounded="true">
     <MudTabPanel Text="Details" ToolTip="Details">
         @if (Model.Form != null)
@@ -25,28 +23,46 @@
                             </MudItem>
                             <MudItem xs="4">
 
-                                <MudTextField @bind-Value="@Model.Form.AutoDeleteOnIdle" For="@(() => Model.Form.AutoDeleteOnIdle)" Variant="Variant.Outlined"/>
-                                <MudTextField @bind-Value="@Model.Form.DefaultMessageTimeToLive" For="@(() => Model.Form.DefaultMessageTimeToLive)" Variant="Variant.Outlined"/>
-                                <MudTextField @bind-Value="@Model.Form.LockDuration" For="@(() => Model.Form.LockDuration)" Variant="Variant.Outlined"/>
-                                <MudTextField @bind-Value="@Model.Form.DuplicateDetectionHistoryTimeWindow" For="@(() => Model.Form.DuplicateDetectionHistoryTimeWindow)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.AutoDeleteOnIdle" 
+                                              For="@(() => Model.Form.AutoDeleteOnIdle)" 
+                                              Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.DefaultMessageTimeToLive" 
+                                              For="@(() => Model.Form.DefaultMessageTimeToLive)" 
+                                              Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.LockDuration" 
+                                              For="@(() => Model.Form.LockDuration)" 
+                                              Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.DuplicateDetectionHistoryTimeWindow" F
+                                              or="@(() => Model.Form.DuplicateDetectionHistoryTimeWindow)" 
+                                              Variant="Variant.Outlined"/>
 
-                                <MudCheckBox @bind-Checked="@Model.Form.RequiresDuplicateDetection" For="@(() => Model.Form.RequiresDuplicateDetection)"></MudCheckBox>
-                                <MudCheckBox @bind-Checked="@Model.Form.DeadLetteringOnMessageExpiration" For="@(() => Model.Form.DeadLetteringOnMessageExpiration)"></MudCheckBox>
-                                <MudCheckBox @bind-Checked="@Model.Form.RequiresSession" For="@(() => Model.Form.RequiresSession)"></MudCheckBox>
-                                <MudCheckBox @bind-Checked="@Model.Form.EnableBatchedOperations" For="@(() => Model.Form.EnableBatchedOperations)"></MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.DeadLetteringOnMessageExpiration" 
+                                             For="@(() => Model.Form.DeadLetteringOnMessageExpiration)"></MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.EnableBatchedOperations" 
+                                             For="@(() => Model.Form.EnableBatchedOperations)"></MudCheckBox>
+
+                                <MudCheckBox @bind-Checked="@Model.Form.RequiresDuplicateDetection"
+                                             Label="Requires duplicate detection"
+                                             Disabled="@(Model.Form.OperationType == OperationType.Update)">
+                                </MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.RequiresSession"
+                                             Label="Requires session"
+                                             Disabled="@(Model.Form.OperationType == OperationType.Update)">
+                                </MudCheckBox>
 
                             </MudItem>
                             <MudItem xs="4">
                                 @if (Model.QueueDetails != null)
                                 {
-                                    <MudField Label="Status" Variant="Variant.Outlined">@Model.QueueDetails.Info.Status</MudField>
-                                    <MudField Label="Created at" Variant="Variant.Outlined">@Model.QueueDetails.Info.CreatedAt</MudField>
-                                    <MudField Label="Accessed at" Variant="Variant.Outlined">@Model.QueueDetails.Info.AccessedAt</MudField>
-                                    <MudField Label="Active messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ActiveMessagesCount</MudField>
-                                    <MudField Label="Dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
-                                    <MudField Label="Scheduled messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
-                                    <MudField Label="In transfer messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.InTransferMessagesCount</MudField>
-                                    <MudField Label="Transfer dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="Status" Variant="Variant.Outlined">@Model.QueueDetails.Info.Status</MudField>
+                                    <MudField Disabled="true" Label="Size" Variant="Variant.Outlined">@($"{Model.QueueDetails.Info.SizeInBytes}Bytes") (@($"{Model.QueueDetails.Info.SizeInMB}MB"))</MudField>
+                                    <MudField Disabled="true" Label="Created at" Variant="Variant.Outlined">@Model.QueueDetails.Info.CreatedAt</MudField>
+                                    <MudField Disabled="true" Label="Accessed at" Variant="Variant.Outlined">@Model.QueueDetails.Info.AccessedAt</MudField>
+                                    <MudField Disabled="true" Label="Active messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ActiveMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="Dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="Scheduled messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="In transfer messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.InTransferMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="Transfer dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
                                 }
                             </MudItem>
                         </MudGrid>
@@ -54,9 +70,8 @@
                     </MudCardContent>
                     <MudCardActions>
                         <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Update</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Success" Class="px-10">Disable</MudButton>
+                        <MudButton ButtonType="ButtonType.Button" Color="Color.Default" Class="px-10">Disable</MudButton>
                         <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Class="px-10">Delete</MudButton>
-
                     </MudCardActions>
                 </MudCard>
             </EditForm>

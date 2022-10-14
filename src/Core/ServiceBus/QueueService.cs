@@ -44,7 +44,7 @@ public class QueueService : IQueueService
                     await administrationClient.GetQueueRuntimePropertiesAsync(
                         queue.Name,
                         cancellationToken);
-
+                
                 QueueRuntimeProperties queueRuntimeProperties = runtimePropertiesResponse.Value;
 
                 yield return queue.ToQueueInfo(queueRuntimeProperties);

@@ -8,6 +8,6 @@ public static class StringExtensions
 
     public static TimeSpan? ToTimeSpan(this string? value)
     {
-        return null;
+        return value != null ? TimeSpan.Parse(value) : null;
     }
 }

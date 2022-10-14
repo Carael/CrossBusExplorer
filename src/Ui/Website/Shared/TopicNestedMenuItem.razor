@@ -6,10 +6,13 @@
 
 @if (Subscription.Topic.IsFolder)
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Subscription.Topic.Name >
-        @foreach (var model in Subscription.ChildrenModels)
+    <MudNavGroup Icon="@Icons.Filled.Folder" ExpandedChanged="OnTopicExpandChange" Expanded="_topicExpanded" Title=@Subscription.Topic.Name>
+        @if (_topicExpanded)
         {
-            <TopicNestedMenuItem Subscription="@model" ConnectionName="@ConnectionName" />
+            @foreach (var model in Subscription.ChildrenModels)
+            {
+                <TopicNestedMenuItem Subscription="@model" ConnectionName="@ConnectionName"/>
+            }
         }
     </MudNavGroup>
 }
@@ -61,6 +64,8 @@ else
     [Parameter]
     public string ConnectionName { get; set; } = null!;
 
+    private bool _topicExpanded;
+
     protected override void OnInitialized()
     {
         Model.PropertyChanged += (_, _) =>
@@ -72,5 +77,9 @@ else
     private async Task OnSubscriptionsExpanded()
     {
         await Model.LoadSubscriptionsAsync(ConnectionName, Subscription);
+    }
+    private void OnTopicExpandChange()
+    {
+        _topicExpanded = !_topicExpanded;
     }
 }
