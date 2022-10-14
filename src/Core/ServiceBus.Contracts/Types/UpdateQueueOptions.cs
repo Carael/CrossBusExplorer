@@ -1,19 +1,19 @@
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record UpdateQueueOptions(
+    string Name,
     IReadOnlyList<SharedAccessAuthorizationRule>? AuthorizationRules,
+    long? MaxSizeInMegabytes,
+    TimeSpan? LockDuration,
+    bool? RequiresSession,
+    TimeSpan? DefaultMessageTimeToLive,
     TimeSpan? AutoDeleteOnIdle,
     bool? DeadLetteringOnMessageExpiration,
-    TimeSpan? DefaultMessageTimeToLive,
     TimeSpan? DuplicateDetectionHistoryTimeWindow,
-    bool? EnableBatchedOperations,
-    string? ForwardDeadLetteredMessagesTo,
-    string? ForwardTo,
-    TimeSpan? LockDuration,
     int? MaxDeliveryCount,
-    long? MaxMessageSizeInKilobytes,
-    long? MaxSizeInMegabytes,
-    string Name,
-    bool? RequiresSession,
+    bool? EnableBatchedOperations,
     QueueStatus? Status,
+    string? ForwardTo,
+    string? ForwardDeadLetteredMessagesTo,
+    long? MaxMessageSizeInKilobytes,
     string? UserMetadata);

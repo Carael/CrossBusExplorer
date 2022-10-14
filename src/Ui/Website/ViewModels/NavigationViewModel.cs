@@ -38,6 +38,7 @@ public class NavigationViewModel : INavigationViewModel
             RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
         }
     }
+    
     private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
     {
         MenuItems.RemoveNonExisting(menuItem =>

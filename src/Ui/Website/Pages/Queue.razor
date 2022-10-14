@@ -1,11 +1,102 @@
 @page "/queue/{ConnectionName}/{QueueName}"
-<PageTitle>Topic @QueueName </PageTitle>
-<MudText Typo="Typo.h3" GutterBottom="true">Topic @QueueName </MudText>
+@using CrossBusExplorer.Website.ViewModels
+@using CrossBusExplorer.Website.Models
+
+
+
+
+<MudTabs Elevation="1" Rounded="true">
+    <MudTabPanel Text="Details" ToolTip="Details">
+        @if (Model.Form != null)
+        {
+            <EditForm Model="@Model.Form" OnValidSubmit="@(() => OnValidSaveForm(Model.Form))">
+                <MudCard>
+                    <MudCardContent>
+                        <MudGrid>
+                            <MudItem xs="4">
+                                <MudTextField @bind-Value="@Model.Form.Name" For="@(() => Model.Form.Name)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.UserMetadata" For="@(() => Model.Form.UserMetadata)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.ForwardTo" For="@(() => Model.Form.ForwardTo)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.ForwardDeadLetteredMessagesTo" For="@(() => Model.Form.ForwardDeadLetteredMessagesTo)" Variant="Variant.Outlined"/>
+                                <MudNumericField @bind-Value="@Model.Form.MaxMessageSizeInKilobytes" For="@(() => Model.Form.MaxMessageSizeInKilobytes)" Min="256" Max="256" Variant="Variant.Outlined"/>
+                                <MudSlider Step="1" @bind-Value="Model.Form.MaxDeliveryCount" Max="100" Variant="Variant.Outlined">Max delivery count: @Model.Form.MaxDeliveryCount</MudSlider>
+                                <MudSlider Step="1024" @bind-Value="Model.Form.MaxSizeInMegabytes" Min="1024" Max="5120" Variant="Variant.Outlined">Max size in MB: @Model.Form.MaxSizeInMegabytes</MudSlider>
+
+                            </MudItem>
+                            <MudItem xs="4">
+
+                                <MudTextField @bind-Value="@Model.Form.AutoDeleteOnIdle" For="@(() => Model.Form.AutoDeleteOnIdle)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.DefaultMessageTimeToLive" For="@(() => Model.Form.DefaultMessageTimeToLive)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.LockDuration" For="@(() => Model.Form.LockDuration)" Variant="Variant.Outlined"/>
+                                <MudTextField @bind-Value="@Model.Form.DuplicateDetectionHistoryTimeWindow" For="@(() => Model.Form.DuplicateDetectionHistoryTimeWindow)" Variant="Variant.Outlined"/>
+
+                                <MudCheckBox @bind-Checked="@Model.Form.RequiresDuplicateDetection" For="@(() => Model.Form.RequiresDuplicateDetection)"></MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.DeadLetteringOnMessageExpiration" For="@(() => Model.Form.DeadLetteringOnMessageExpiration)"></MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.RequiresSession" For="@(() => Model.Form.RequiresSession)"></MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.EnableBatchedOperations" For="@(() => Model.Form.EnableBatchedOperations)"></MudCheckBox>
+
+                            </MudItem>
+                            <MudItem xs="4">
+                                @if (Model.QueueDetails != null)
+                                {
+                                    <MudField Label="Status" Variant="Variant.Outlined">@Model.QueueDetails.Info.Status</MudField>
+                                    <MudField Label="Created at" Variant="Variant.Outlined">@Model.QueueDetails.Info.CreatedAt</MudField>
+                                    <MudField Label="Accessed at" Variant="Variant.Outlined">@Model.QueueDetails.Info.AccessedAt</MudField>
+                                    <MudField Label="Active messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ActiveMessagesCount</MudField>
+                                    <MudField Label="Dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
+                                    <MudField Label="Scheduled messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
+                                    <MudField Label="In transfer messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.InTransferMessagesCount</MudField>
+                                    <MudField Label="Transfer dead letter messages count" Variant="Variant.Outlined">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
+                                }
+                            </MudItem>
+                        </MudGrid>
+
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Update</MudButton>
+                        <MudButton ButtonType="ButtonType.Button" Color="Color.Success" Class="px-10">Disable</MudButton>
+                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Class="px-10">Delete</MudButton>
+
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+        }
+    </MudTabPanel>
+    <MudTabPanel Text="Messages" ToolTip="Messages">
+        <MudText>Item Two</MudText>
+    </MudTabPanel>
+    <MudTabPanel Text="Authorization rules" ToolTip="Authorization rules">
+        <MudText>Item Three</MudText>
+    </MudTabPanel>
+</MudTabs>
+
 
 @code {
+    [Inject]
+    public IQueueViewModel Model { get; set; }
+
     [Parameter]
     public string? ConnectionName { get; set; }
-    
+
     [Parameter]
     public string? QueueName { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (QueueName != null && ConnectionName != null)
+        {
+            await Model.LoadQueueAsync(ConnectionName, QueueName, default);
+        }
+    }
+
+    private async Task OnValidSaveForm(QueueFormModel model)
+    {
+        Model.UpdateQueueFromAsync(ConnectionName!);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.PropertyChanged += (_, _) => StateHasChanged();
+
+    }
 }

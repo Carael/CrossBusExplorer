@@ -11,7 +11,7 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (ConnectionMenuItem menuItem in NavigationViewModel.MenuItems)
+    @foreach (ConnectionMenuItem menuItem in Model.MenuItems)
     {
         <MudNavGroup Title=@menuItem.ConnectionName
                      Icon="@Icons.Material.Filled.Link">
@@ -43,7 +43,7 @@
                 }
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <TopicNestedMenuItem Model=@topic ConnectionName=@menuItem.ConnectionName/>
+                    <TopicNestedMenuItem Subscription=@topic ConnectionName=@menuItem.ConnectionName/>
                 }
             </MudNavGroup>
         </MudNavGroup>
@@ -52,11 +52,11 @@
 
 @code {
     [Inject]
-    private INavigationViewModel NavigationViewModel { get; set; }
+    private INavigationViewModel Model { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationViewModel.PropertyChanged += (_, _) =>
+        Model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
@@ -66,11 +66,11 @@
 
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
-        await NavigationViewModel.LoadQueues(menuItem, default);
+        await Model.LoadQueues(menuItem, default);
     }
 
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
-        NavigationViewModel.LoadTopics(menuItem, default);
+        Model.LoadTopics(menuItem, default);
     }
 }

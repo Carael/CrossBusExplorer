@@ -3,9 +3,8 @@ namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 public record CreateQueueOptions(
     string Name,
     IReadOnlyList<SharedAccessAuthorizationRule>? AuthorizationRules,
-    long MaxSizeInMegabytes,
+    long? MaxSizeInMegabytes,
     TimeSpan? LockDuration,
-    bool? RequiresDuplicateDetection,
     bool? RequiresSession,
     TimeSpan? DefaultMessageTimeToLive,
     TimeSpan? AutoDeleteOnIdle,
@@ -16,6 +15,7 @@ public record CreateQueueOptions(
     QueueStatus? Status,
     string? ForwardTo,
     string? ForwardDeadLetteredMessagesTo,
-    bool? EnablePartitioning,
     long? MaxMessageSizeInKilobytes,
-    string? UserMetadata);
+    string? UserMetadata,
+    bool? RequiresDuplicateDetection,
+    bool? EnablePartitioning);

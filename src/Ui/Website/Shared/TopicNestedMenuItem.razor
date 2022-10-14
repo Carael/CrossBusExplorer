@@ -4,19 +4,19 @@
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
 
-@if (Model.Topic.IsFolder)
+@if (Subscription.Topic.IsFolder)
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Model.Topic.Name >
-        @foreach (var model in Model.ChildrenModels)
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Subscription.Topic.Name >
+        @foreach (var model in Subscription.ChildrenModels)
         {
-            <TopicNestedMenuItem Model="@model" ConnectionName="@ConnectionName" />
+            <TopicNestedMenuItem Subscription="@model" ConnectionName="@ConnectionName" />
         }
     </MudNavGroup>
 }
 else
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Model.Topic.FullName>
-        <MudNavLink Href=@($"topic/{ConnectionName}/{Model.Topic.FullName}")
+    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@Subscription.Topic.FullName>
+        <MudNavLink Href=@($"topic/{ConnectionName}/{Subscription.Topic.FullName}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
@@ -24,22 +24,22 @@ else
                      Title="Subscriptions"
                      @onclick="@(OnSubscriptionsExpanded)">
 
-            @if (Model.IsLoading)
+            @if (Subscription.IsLoading)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
             }
-            @if (Model.Subscriptions.Count == 0 && Model.Loaded)
+            @if (Subscription.Subscriptions.Count == 0 && Subscription.Loaded)
             {
                 <MudNavLink Disabled="true">No subscriptions</MudNavLink>
             }
             else
             {
-                @foreach (var subscription in Model.Subscriptions)
+                @foreach (var subscription in Subscription.Subscriptions)
                 {
                     <MudTooltip Text="@($"{subscription.Name} ({subscription.ActiveMessagesCount}, " +
                                         $"{subscription.DeadLetterMessagesCount}, " +
                                         $"{subscription.TransferMessagesCount}")">
-                        <MudNavLink Href=@($"subscription/{ConnectionName}/{Model.Topic.Name}/{subscription.Name}")
+                        <MudNavLink Href=@($"subscription/{ConnectionName}/{Subscription.Topic.Name}/{subscription.Name}")
                                     Icon="@Icons.Filled.FormatLineSpacing">
                             @subscription.Name (@subscription.ActiveMessagesCount, 
                             @subscription.DeadLetterMessagesCount,
@@ -54,16 +54,16 @@ else
 
 @code {
     [Inject] 
-    public INavigationViewModel NavigationViewModel { get; set; }
+    public INavigationViewModel Model { get; set; }
     [Parameter]
-    public TopicSubscriptionsModel Model { get; set; } = null!;
+    public TopicSubscriptionsModel Subscription { get; set; } = null!;
 
     [Parameter]
     public string ConnectionName { get; set; } = null!;
 
     protected override void OnInitialized()
     {
-        NavigationViewModel.PropertyChanged += (_, _) =>
+        Model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
@@ -71,6 +71,6 @@ else
 
     private async Task OnSubscriptionsExpanded()
     {
-        await NavigationViewModel.LoadSubscriptionsAsync(ConnectionName, Model);
+        await Model.LoadSubscriptionsAsync(ConnectionName, Subscription);
     }
 }
