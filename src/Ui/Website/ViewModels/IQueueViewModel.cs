@@ -7,13 +7,16 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public interface IQueueViewModel : INotifyPropertyChanged
 {
+    event QueueAddedEventHandler? QueueAdded;
     QueueFormModel? Form { get; set; }
-    Task LoadQueueAsync(
+    Task InitializeForm(
         string connectionName, 
-        string queueName,
+        string? queueName,
         CancellationToken cancellationToken);
 
     Task UpdateQueueFromAsync(string connectionName);
     
-    QueueDetails? QueueDetails { get; set; }
+    QueueDetails? QueueDetails { get; }
+    void NavigateToNewQueueForm(string connectionName);
+    void CloneQueue(string connectionName, string queueName);
 }

@@ -8,9 +8,8 @@ namespace CrossBusExplorer.Website.Models;
 
 public class QueueFormModel : INotifyPropertyChanged
 {
-
     public event PropertyChangedEventHandler? PropertyChanged;
-
+    
     public QueueFormModel(OperationType operationType)
     {
         OperationType = operationType;
@@ -35,7 +34,7 @@ public class QueueFormModel : INotifyPropertyChanged
     private long? _maxSizeInMegabytes;
     
     [Label("Max size in MB")]
-    [Required]
+    [Required(ErrorMessage = "Field is required")]
     public long? MaxSizeInMegabytes
     {
         get => _maxSizeInMegabytes;
@@ -99,11 +98,11 @@ public class QueueFormModel : INotifyPropertyChanged
         }
     }
     
-    private string? _duplicateDetectionHistoryTimeWindow;
+    private TimeSpan? _duplicateDetectionHistoryTimeWindow;
     
     [Label("Duplicate detection history time window")]
-    [Required(ErrorMessage = "Name is required")]
-    public string? DuplicateDetectionHistoryTimeWindow
+    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
+    public TimeSpan? DuplicateDetectionHistoryTimeWindow
     {
         get => _duplicateDetectionHistoryTimeWindow;
         set
@@ -113,11 +112,11 @@ public class QueueFormModel : INotifyPropertyChanged
         }
     }
     
-    private string? _autoDeleteOnIdle;
+    private TimeSpan? _autoDeleteOnIdle;
     
     [Label("Auto delete queue on idle")]
-    [Required(ErrorMessage = "Name is required")]
-    public string? AutoDeleteOnIdle
+    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
+    public TimeSpan? AutoDeleteOnIdle
     {
         get => _autoDeleteOnIdle;
         set
@@ -127,11 +126,11 @@ public class QueueFormModel : INotifyPropertyChanged
         }
     }
     
-    private string? _defaultMessageTimeToLive;
+    private TimeSpan? _defaultMessageTimeToLive;
     
     [Label("Default message time to live")]
-    [Required(ErrorMessage = "Name is required")]
-    public string? DefaultMessageTimeToLive
+    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
+    public TimeSpan? DefaultMessageTimeToLive
     {
         get => _defaultMessageTimeToLive;
         set
@@ -141,11 +140,11 @@ public class QueueFormModel : INotifyPropertyChanged
         }
     }
 
-    private string? _lockDuration;
+    private TimeSpan? _lockDuration;
     
-    [Label("Duplicate detection history time window")]
-    [Required(ErrorMessage = "Name is required")]
-    public string? LockDuration
+    [Label("Lock duration")]
+    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
+    public TimeSpan? LockDuration
     {
         get => _lockDuration;
         set

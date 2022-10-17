@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website;
 

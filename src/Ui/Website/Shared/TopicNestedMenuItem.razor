@@ -65,6 +65,7 @@ else
     public string ConnectionName { get; set; } = null!;
 
     private bool _topicExpanded;
+    private bool _shouldRender;
 
     protected override void OnInitialized()
     {
@@ -72,11 +73,17 @@ else
         {
             StateHasChanged();
         };
+
+        _shouldRender = true;
     }
+
+    protected override bool ShouldRender() => _shouldRender;
 
     private async Task OnSubscriptionsExpanded()
     {
+        _shouldRender = false;
         await Model.LoadSubscriptionsAsync(ConnectionName, Subscription);
+        _shouldRender = true;
     }
     private void OnTopicExpandChange()
     {

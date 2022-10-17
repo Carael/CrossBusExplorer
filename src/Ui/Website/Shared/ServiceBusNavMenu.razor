@@ -23,6 +23,14 @@
                 {
                     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
                 }
+                else
+                {
+                    <MudNavLink Href=@($"new-queue/{menuItem.ConnectionName}")
+                                Icon="@Icons.Filled.Add">
+                        Create new queue
+                    </MudNavLink>
+                }
+
                 @foreach (var queue in menuItem.Queues)
                 {
                     <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{queue.Name}")
@@ -54,6 +62,8 @@
     [Inject]
     private INavigationViewModel Model { get; set; }
 
+    private bool _shouldRender;
+
     protected override async Task OnInitializedAsync()
     {
         Model.PropertyChanged += (_, _) =>
@@ -61,16 +71,20 @@
             StateHasChanged();
         };
 
-        await base.OnInitializedAsync();
+        _shouldRender = true;
     }
 
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
+        _shouldRender = false;
         await Model.LoadQueues(menuItem, default);
+        _shouldRender = true;
     }
 
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
+        _shouldRender = false;
         Model.LoadTopics(menuItem, default);
+        _shouldRender = true;
     }
 }
