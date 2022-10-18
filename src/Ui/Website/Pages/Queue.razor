@@ -1,7 +1,7 @@
 @page "/queue/{ConnectionName}/{QueueName}"
 @page "/new-queue/{ConnectionName}"
 @using CrossBusExplorer.Website.ViewModels
-@using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.ServiceBus.Contracts.Types
 
 <PageTitle>Queue @QueueName</PageTitle>
 
@@ -98,7 +98,7 @@
                                     <MudField Disabled="true" Label="Dead letter messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
                                     <MudField Disabled="true" Label="Scheduled messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
                                     <MudField Disabled="true" Label="In transfer messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.InTransferMessagesCount</MudField>
-                                    <MudField Disabled="true" Label="Transfer dead letter messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
+                                    <MudField Disabled="true" Label="Transfer ded letter messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
                                 }
                             </MudItem>
                         </MudGrid>
@@ -111,8 +111,28 @@
 
                         @if (Model.Form?.OperationType != OperationType.Create)
                         {
-                            <MudTooltip Text="View messages">
+                            <MudTooltip Text="Receive messages">
                                 <MudIconButton Icon=@Icons.Filled.Message ButtonType="ButtonType.Button" OnClick="@(() => Model.ViewMessages(ConnectionName, QueueName, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                            </MudTooltip>
+
+                            if (Model.QueueDetails.Info.Status == QueueStatus.Active)
+                            {
+                                <MudTooltip Text="Disable">
+                                    <MudIconButton Icon=@Icons.Filled.Lock ButtonType="ButtonType.Button" OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Disabled, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                                </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="Activate">
+                                    <MudIconButton Icon=@Icons.Filled.LockOpen ButtonType="ButtonType.Button" OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                                </MudTooltip>
+                            }
+
+                            <MudTooltip Text="Purge active messages queue">
+                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue ButtonType="ButtonType.Button" OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" Color="Color.Warning" Class="px-10"></MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Purge dead letter queue">
+                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue ButtonType="ButtonType.Button" OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" Color="Color.Dark" Class="px-10"></MudIconButton>
                             </MudTooltip>
 
                             <MudTooltip Text="Delete">
@@ -126,9 +146,6 @@
     </MudTabPanel>
     <MudTabPanel Text="Messages" ToolTip="Messages">
         <MudText>Item Two</MudText>
-    </MudTabPanel>
-    <MudTabPanel Text="Authorization rules" ToolTip="Authorization rules">
-        <MudText>Item Three</MudText>
     </MudTabPanel>
 </MudTabs>
 
@@ -153,7 +170,7 @@
 
     private async Task OnValidSaveForm()
     {
-        Model.UpdateQueueFromAsync(ConnectionName!);
+        Model.SaveQueueFormAsync(ConnectionName!);
     }
 
     protected override async Task OnInitializedAsync()

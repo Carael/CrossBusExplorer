@@ -9,12 +9,12 @@ public interface IQueueViewModel : INotifyPropertyChanged
 {
     event QueueAddedEventHandler? QueueAdded;
     event QueueRemovedEventHandler? QueueRemoved;
-    QueueFormModel? Form { get; set; }
+    QueueFormModel? Form { get; }
     Task InitializeForm(
-        string connectionName, 
+        string connectionName,
         string? queueName,
         CancellationToken cancellationToken);
-    Task UpdateQueueFromAsync(string connectionName);
+    Task SaveQueueFormAsync(string connectionName);
     QueueDetails? QueueDetails { get; }
     void NavigateToNewQueueForm(string connectionName);
     Task CloneQueue(
@@ -23,4 +23,9 @@ public interface IQueueViewModel : INotifyPropertyChanged
         CancellationToken cancellationToken);
     Task DeleteQueue(string connectionName, string queueName, CancellationToken cancellationToken);
     Task ViewMessages(string connectionName, string queueName, CancellationToken cancellationToken);
+    Task UpdateQueueStatus(
+        string connectionName, 
+        string queueName, 
+        QueueStatus active,
+        CancellationToken cancellationToken);
 }

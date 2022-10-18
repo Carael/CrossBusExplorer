@@ -63,7 +63,7 @@ public class QueueViewModel : IQueueViewModel
         }
     }
 
-    public async Task UpdateQueueFromAsync(string connectionName)
+    public async Task SaveQueueFormAsync(string connectionName)
     {
         if (Form != null)
         {
@@ -202,6 +202,20 @@ public class QueueViewModel : IQueueViewModel
     public Task ViewMessages(string connectionName, string queueName, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
+    }
+    
+    public async Task UpdateQueueStatus(
+        string connectionName, 
+        string queueName, 
+        QueueStatus status,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<QueueDetails> result = await _queueService.UpdateAsync(
+            connectionName,
+            new UpdateQueueOptions(queueName, Status: status),
+            cancellationToken);
+        
+        HandleSaveResult(connectionName, result, OperationType.Update);
     }
 
     private void UpdateFormModel(QueueDetails resultData)
