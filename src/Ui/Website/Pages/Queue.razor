@@ -10,9 +10,12 @@
 <MudTooltip Text="Add new queue">
     <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => Model.NavigateToNewQueueForm(ConnectionName))"/>
 </MudTooltip>
-<MudTooltip Text="Clone queue">
-    <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" OnClick="@(() => Model.CloneQueue(ConnectionName, QueueName))"/>
-</MudTooltip>
+@if (Model.Form?.OperationType != OperationType.Create)
+{
+    <MudTooltip Text="Clone queue">
+        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" OnClick="@(() => Model.CloneQueue(ConnectionName, QueueName, default))"/>
+    </MudTooltip>
+}
 
 <MudTabs Elevation="1" Rounded="true" Border="true">
     <MudTabPanel Text="Details" ToolTip="Details">
@@ -73,14 +76,14 @@
                                              Size="Size.Small"
                                              Margin="@Margin.Dense"
                                              Dense="true"
-                                             Disabled="@(Model.Form.OperationType == OperationType.Update)">
+                                             Disabled="@(Model.Form?.OperationType == OperationType.Update)">
                                 </MudCheckBox>
                                 <MudCheckBox @bind-Checked="@Model.Form.RequiresSession"
                                              Label="Requires session"
                                              Size="Size.Small"
                                              Margin="@Margin.Dense"
                                              Dense="true"
-                                             Disabled="@(Model.Form.OperationType == OperationType.Update)">
+                                             Disabled="@(Model.Form?.OperationType == OperationType.Update)">
                                 </MudCheckBox>
 
                             </MudItem>
@@ -102,9 +105,20 @@
 
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Save</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Default" Class="px-10">Disable</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Class="px-10">Delete</MudButton>
+                        <MudTooltip Text="Save">
+                            <MudIconButton Icon=@Icons.Filled.Save ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10"></MudIconButton>
+                        </MudTooltip>
+
+                        @if (Model.Form?.OperationType != OperationType.Create)
+                        {
+                            <MudTooltip Text="View messages">
+                                <MudIconButton Icon=@Icons.Filled.Message ButtonType="ButtonType.Button" OnClick="@(() => Model.ViewMessages(ConnectionName, QueueName, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                            </MudTooltip>
+
+                            <MudTooltip Text="Delete">
+                                <MudIconButton Icon=@Icons.Filled.Delete ButtonType="ButtonType.Button" OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" Color="Color.Error" Class="px-10"></MudIconButton>
+                            </MudTooltip>
+                        }
                     </MudCardActions>
                 </MudCard>
             </EditForm>
@@ -128,7 +142,7 @@
 
     [Parameter]
     public string? QueueName { get; set; }
-    
+
     protected override async Task OnParametersSetAsync()
     {
         if (ConnectionName != null)

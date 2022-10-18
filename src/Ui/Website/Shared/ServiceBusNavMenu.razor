@@ -3,6 +3,8 @@
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
 @using System.Security.Cryptography
+@using System.Net
+@using System.Web
 
 <MudNavMenu>
     <MudNavLink Href="connections"
@@ -33,7 +35,7 @@
 
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{queue.Name}")
+                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
                                 Icon="@Icons.Filled.Queue">
                         @queue.Name
                         (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)

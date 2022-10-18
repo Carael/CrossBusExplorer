@@ -32,8 +32,9 @@ public class NavigationViewModel : INavigationViewModel
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
         queueViewModel.QueueAdded += this.OnQueueAdded;
+        queueViewModel.QueueRemoved += this.QueueRemoved;
     }
-    
+
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is IConnectionsViewModel connectionsViewModel)
@@ -144,6 +145,18 @@ public class NavigationViewModel : INavigationViewModel
             MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
         
         menuItem.Queues.Add(queueinfo);
+        this.Notify(PropertyChanged);
+    }
+    
+    private void QueueRemoved(string connectionName, string queueName)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        var queue =
+            menuItem.Queues.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(queueName));
+        menuItem.Queues.Remove(queue);
+        
         this.Notify(PropertyChanged);
     }
 }
