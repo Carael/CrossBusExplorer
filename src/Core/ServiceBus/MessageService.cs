@@ -192,7 +192,7 @@ public class MessageService : IMessageService
 
         return await receiver.ReceiveMessagesAsync(
             maxMessages??10,
-            TimeSpan.FromSeconds(5),
-            cancellationToken);
+            default,
+            cancellationToken: cancellationToken);
     }
 }

@@ -17,7 +17,6 @@ public class QueueService : IQueueService
     public QueueService(IConnectionManagement connectionManagement)
     {
         _connectionManagement = connectionManagement;
-
     }
     
     public async IAsyncEnumerable<QueueInfo> GetAsync(

@@ -1,10 +1,13 @@
+using CrossBusExplorer.Host;
 using CrossBusExplorer.Host.Mutations;
 using CrossBusExplorer.Host.Queries;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
+    .AddSingleton<IConnectionManagement, ConnectionManagement>()
     .AddServiceBusServices()
     .AddGraphQLServer()
     .AddQueryType()

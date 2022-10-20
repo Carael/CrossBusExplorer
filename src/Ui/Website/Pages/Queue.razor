@@ -25,7 +25,7 @@
     <MudTabPanel Text="Details" ToolTip="Details">
         @if (Model.Form != null)
         {
-            <EditForm Model="@Model.Form" OnValidSubmit="@(() => OnValidSaveForm())">
+            <EditForm Model="@Model.Form" OnValidSubmit="@(OnValidSaveForm)">
                 <DataAnnotationsValidator/>
                 <MudCard>
                     <MudCardContent>
@@ -114,10 +114,6 @@
                         </MudTooltip>
                         @if (Model.Form?.OperationType != OperationType.Create)
                         {
-                            <MudTooltip Text="Receive messages">
-                                <MudIconButton Icon=@Icons.Filled.Message ButtonType="ButtonType.Button" OnClick="@(() => Model.ViewMessages(ConnectionName, QueueName, default))" Color="Color.Default" Class="px-10"></MudIconButton>
-                            </MudTooltip>
-
                             if (Model.QueueDetails.Info.Status == QueueStatus.Active)
                             {
                                 <MudTooltip Text="Disable">
