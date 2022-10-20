@@ -66,9 +66,7 @@
             </div>
         </PagerContent>
     </MudTable>
-
 </MudPaper>
-
 
 <MudDialog @bind-IsVisible="Model.DialogVisible">
     <TitleContent>
@@ -79,7 +77,6 @@
     <DialogContent>
         <MudPaper Elevation="3">
             <MudForm @ref="@form" Model="@_formModel" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
-
                 <MudField Variant="Variant.Outlined" Label="Queue type">
                     <MudRadioGroup @bind-SelectedOption="_formModel.SubQueue"
                                    For="@(() => _formModel.SubQueue)">
@@ -142,7 +139,8 @@
                     </MudNumericField>
                     <MudNumericField @bind-Value="_formModel.FromSequenceNumber"
                                      For="@(() => _formModel.FromSequenceNumber)"
-                                     Disabled="@(_formModel.Type == ReceiveType.All || _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
+                                     Disabled="@(_formModel.Type == ReceiveType.All || 
+                                                 _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
                                      Class="px-0 ma-0 pa-0 py-0"
                                      Min="0"
                                      Immediate="true"
@@ -174,10 +172,8 @@
     public string QueueOrTopicName { get; set; }
     [Parameter]
     public string? SubscriptionName { get; set; }
-
     [Inject]
     IMessagesViewModel Model { get; set; }
-
     MudForm form;
     ReceiveMessagesForm _formModel;
     ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();

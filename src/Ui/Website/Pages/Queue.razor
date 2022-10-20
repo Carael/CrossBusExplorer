@@ -21,7 +21,7 @@
     </MudTooltip>
 }
 
-<MudTabs Elevation="1" Rounded="true" Border="true">
+<MudTabs Elevation="1" Rounded="true" Border="true" ActivePanelIndex="_activePanel">
     <MudTabPanel Text="Details" ToolTip="Details">
         @if (Model.Form != null)
         {
@@ -157,6 +157,13 @@
 
     [Parameter]
     public string? QueueName { get; set; }
+
+    int _activePanel = 0;
+
+    protected override void OnInitialized()
+    {
+        _activePanel = 0;
+    }
 
     protected override async Task OnParametersSetAsync()
     {

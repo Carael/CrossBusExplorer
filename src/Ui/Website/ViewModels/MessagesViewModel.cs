@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -14,14 +15,18 @@ namespace CrossBusExplorer.Website.ViewModels;
 public class MessagesViewModel : IMessagesViewModel
 {
     private readonly IMessageService _messageService;
+    private readonly ISnackbar _snackbar;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private ObservableCollection<Message> _messages;
     private CurrentMessagesEntity? _entity;
 
-    public MessagesViewModel(IMessageService messageService)
+    public MessagesViewModel(
+        IMessageService messageService,
+        ISnackbar snackbar)
     {
         _messageService = messageService;
+        _snackbar = snackbar;
     }
 
     public ObservableCollection<Message> Messages
@@ -104,15 +109,23 @@ public class MessagesViewModel : IMessagesViewModel
         ReceiveMessagesForm formModel,
         CancellationToken cancellationToken)
     {
-        return (await _messageService.GetMessagesAsync(
-            _entity.ConnectionName,
-            _entity.QueueOrTopicName,
-            _entity.SubscriptionName,
-            formModel.SubQueue,
-            formModel.Mode,
-            formModel.Type,
-            formModel.MessagesCount,
-            formModel.FromSequenceNumber,
-            cancellationToken)).ToList();
+        try
+        {
+            return (await _messageService.GetMessagesAsync(
+                _entity.ConnectionName,
+                _entity.QueueOrTopicName,
+                _entity.SubscriptionName,
+                formModel.SubQueue,
+                formModel.Mode,
+                formModel.Type,
+                formModel.MessagesCount,
+                formModel.FromSequenceNumber,
+                cancellationToken)).ToList();
+        }
+        catch (ServiceBusOperationException ex)
+        {
+            _snackbar.Add(ex.Message, Severity.Error);
+            return new List<Message>();
+        }
     }
 }

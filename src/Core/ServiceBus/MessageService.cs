@@ -27,22 +27,37 @@ public class MessageService : IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
-        var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        try
+        {
+            var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
         
-        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
 
-        await using var receiver =
-            GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
+            await using var receiver =
+                GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
 
-        IReadOnlyList<ServiceBusReceivedMessage>? result =
-            await ReceiveMessagesAsync(
-                receiver,
-                type,
-                messagesCount,
-                fromSequenceNumber,
-                cancellationToken);
+            IReadOnlyList<ServiceBusReceivedMessage>? result =
+                await ReceiveMessagesAsync(
+                    receiver,
+                    type,
+                    messagesCount,
+                    fromSequenceNumber,
+                    cancellationToken);
 
-        return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
+            return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ErrorCodes.InvalidOperation, ex.Message);
+        }
     }
 
     public async Task<Result> PurgeAsync(
