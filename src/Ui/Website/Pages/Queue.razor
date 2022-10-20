@@ -15,6 +15,10 @@
     <MudTooltip Text="Clone queue">
         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" OnClick="@(() => Model.CloneQueue(ConnectionName, QueueName, default))"/>
     </MudTooltip>
+    
+    <MudTooltip Text="Refresh">
+        <MudIconButton Icon="@Icons.Material.Outlined.Refresh" OnClick="@(() => Model.InitializeForm(ConnectionName, QueueName, default))"/>
+    </MudTooltip>
 }
 
 <MudTabs Elevation="1" Rounded="true" Border="true">
@@ -103,13 +107,11 @@
                                 }
                             </MudItem>
                         </MudGrid>
-
                     </MudCardContent>
                     <MudCardActions>
                         <MudTooltip Text="Save">
                             <MudIconButton Icon=@Icons.Filled.Save ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10"></MudIconButton>
                         </MudTooltip>
-
                         @if (Model.Form?.OperationType != OperationType.Create)
                         {
                             <MudTooltip Text="Receive messages">
@@ -128,7 +130,6 @@
                                     <MudIconButton Icon=@Icons.Filled.LockOpen ButtonType="ButtonType.Button" OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10"></MudIconButton>
                                 </MudTooltip>
                             }
-
                             <MudTooltip Text="Purge active messages queue">
                                 <MudIconButton Icon=@Icons.Filled.RemoveFromQueue ButtonType="ButtonType.Button" OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" Color="Color.Warning" Class="px-10"></MudIconButton>
                             </MudTooltip>
@@ -147,7 +148,6 @@
     </MudTabPanel>
     <MudTabPanel Text="Messages" ToolTip="Messages">
         <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@QueueName"/>
-        
     </MudTabPanel>
 </MudTabs>
 
