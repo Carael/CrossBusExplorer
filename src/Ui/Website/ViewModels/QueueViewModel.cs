@@ -25,7 +25,7 @@ public class QueueViewModel : IQueueViewModel
     private readonly INavigationViewModel _navigationViewModel;
     private readonly IQueueService _queueService;
     private QueueFormModel? _form;
-    public QueueDetails? QueueDetails { get; set; }
+    public QueueDetails? QueueDetails { get; private set; }
 
     public QueueViewModel(
         IQueueService queueService,

@@ -14,7 +14,6 @@ public class SubscriptionService : ISubscriptionService
     public SubscriptionService(IConnectionManagement connectionManagement)
     {
         _connectionManagement = connectionManagement;
-
     }
     
     public async IAsyncEnumerable<SubscriptionInfo> GetAsync(

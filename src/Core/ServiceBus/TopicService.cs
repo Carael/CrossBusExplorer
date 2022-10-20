@@ -15,7 +15,6 @@ public class TopicService : ITopicService
     public TopicService(IConnectionManagement connectionManagement)
     {
         _connectionManagement = connectionManagement;
-
     }
     
     public async IAsyncEnumerable<TopicInfo> GetAsync(

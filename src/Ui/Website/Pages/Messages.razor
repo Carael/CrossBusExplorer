@@ -1,0 +1,109 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.Website.Models.Validators
+@inherits LayoutComponentBase
+<MudDialog @bind-IsVisible="_isDialogVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Receive @QueueOrTopicName @SubscriptionName messages
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="3">
+         
+        </MudPaper>
+    </DialogContent>
+</MudDialog>
+
+   <MudForm @ref="@form" Model="@model" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+                <MudField Variant="Variant.Outlined" Label="Receive mode">
+                    <MudRadioGroup @bind-SelectedOption="model.Mode">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMode.ReceiveAndDelete">
+                            Receive and delete
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMode.PeekLock">
+                            Peek lock
+                        </MudRadio>
+                    </MudRadioGroup>
+                </MudField>
+
+                <MudField Variant="Variant.Outlined" Label="Message count">
+                    <MudRadioGroup @bind-SelectedOption="model.Type">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMessagesType.All">
+                            @ReceiveMessagesType.All
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMessagesType.Top">
+                            @ReceiveMessagesType.Top
+                        </MudRadio>
+                    </MudRadioGroup>
+                    <MudNumericField @bind-Value="model.MessagesCount"
+                                     Disabled="@(model.Type == ReceiveMessagesType.All)"
+                                     Class="px-0 ma-0 pa-0 py-0"
+                                     Min="0"
+                                     Immediate="true"
+                                     HelperText="Messages count">
+                    </MudNumericField>
+                    <MudNumericField @bind-Value="model.FromSequenceNumber"
+                                     Disabled="@(model.Type == ReceiveMessagesType.All || model.Mode == ReceiveMode.ReceiveAndDelete)"
+                                     Class="px-0 ma-0 pa-0 py-0"
+                                     Min="0"
+                                     Immediate="true"
+                                     HelperText="From sequence number">
+                    </MudNumericField>
+                </MudField>
+
+                <MudButton ButtonType="ButtonType.Button"
+                           Color="Color.Success"
+                           OnClick="@(() => OnSubmit())"
+                           Class="px-10">
+                    Receive
+                </MudButton>
+                <MudButton ButtonType="ButtonType.Button"
+                           Color="Color.Success"
+                           OnClick="@(() => { _isDialogVisible = false; })"
+                           Class="px-10">
+                    Close
+                </MudButton>
+            </MudForm>
+
+@code {
+    [Parameter]
+    public string ConnectionName { get; set; }
+    [Parameter]
+    public string QueueOrTopicName { get; set; }
+    [Parameter]
+    public string? SubscriptionName { get; set; }
+
+    IList<Message> _messages;
+
+    bool _isDialogVisible;
+    MudForm form;
+    ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();
+    
+    ReceiveMessagesForm model = new ReceiveMessagesForm
+    {
+        MessagesCount = 10
+    };
+    
+    protected override Task OnInitializedAsync()
+    {
+        _isDialogVisible = true;
+        StateHasChanged();
+
+        return base.OnInitializedAsync();
+    }
+
+    async Task OnSubmit()
+    {
+        await form.Validate();
+        var isValid = form.IsValid;
+    }
+}

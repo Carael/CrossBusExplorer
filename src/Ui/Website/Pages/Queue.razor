@@ -22,6 +22,7 @@
         @if (Model.Form != null)
         {
             <EditForm Model="@Model.Form" OnValidSubmit="@(() => OnValidSaveForm())">
+                <DataAnnotationsValidator/>
                 <MudCard>
                     <MudCardContent>
                         <MudGrid>
@@ -145,7 +146,8 @@
         }
     </MudTabPanel>
     <MudTabPanel Text="Messages" ToolTip="Messages">
-        <MudText>Item Two</MudText>
+        <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@QueueName"/>
+        
     </MudTabPanel>
 </MudTabs>
 
