@@ -15,7 +15,7 @@
     <MudTooltip Text="Clone queue">
         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" OnClick="@(() => Model.CloneQueue(ConnectionName, QueueName, default))"/>
     </MudTooltip>
-    
+
     <MudTooltip Text="Refresh">
         <MudIconButton Icon="@Icons.Material.Outlined.Refresh" OnClick="@(() => Model.InitializeForm(ConnectionName, QueueName, default))"/>
     </MudTooltip>
@@ -142,9 +142,11 @@
             </EditForm>
         }
     </MudTabPanel>
-    <MudTabPanel Text="Messages" ToolTip="Messages">
-        <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@QueueName"/>
-    </MudTabPanel>
+    @if(Model.Form?.OperationType == OperationType.Update){
+        <MudTabPanel Text="Messages" ToolTip="Messages">
+            <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@QueueName"/>
+        </MudTabPanel>
+    }
 </MudTabs>
 
 
