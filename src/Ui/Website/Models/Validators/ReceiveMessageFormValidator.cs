@@ -10,21 +10,13 @@ public class ReceiveMessageFormValidator : AbstractValidator<ReceiveMessagesForm
 {
     public ReceiveMessageFormValidator()
     {
-        RuleFor(p => p.Mode)
-            .Empty()
-            .WithMessage("Required");
-
-        RuleFor(p => p.Type)
-            .Empty()
-            .WithMessage("Required");
-
-        When(p => p.Type == ReceiveMessagesType.Top, () =>
-        {
-            RuleFor(p => p.MessagesCount).GreaterThan(0)
-                .WithMessage($"When mode is set to {ReceiveMode.PeekLock} then " +
-                             $"{nameof(ReceiveMessagesForm.MessagesCount)} hast to be" +
-                             $" greater then 0.");
-        });
+        RuleFor(p => p.MessagesCount)
+            .GreaterThan(0)
+            .NotEmpty()
+            .When(p => p.Type == ReceiveType.ByCount)
+            .WithMessage($"When mode is set to {ReceiveMode.PeekLock} then " +
+                         $"{nameof(ReceiveMessagesForm.MessagesCount)} hast to be" +
+                         $" greater then 0.");
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue =>

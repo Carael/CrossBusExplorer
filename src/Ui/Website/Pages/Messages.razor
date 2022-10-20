@@ -1,6 +1,7 @@
 @using CrossBusExplorer.ServiceBus.Contracts.Types
 @using CrossBusExplorer.Website.Models
 @using CrossBusExplorer.Website.Models.Validators
+@using CrossBusExplorer.ServiceBus.Contracts
 @inherits LayoutComponentBase
 <MudDialog @bind-IsVisible="_isDialogVisible">
     <TitleContent>
@@ -10,14 +11,32 @@
     </TitleContent>
     <DialogContent>
         <MudPaper Elevation="3">
-         
-        </MudPaper>
-    </DialogContent>
-</MudDialog>
+            <MudForm @ref="@form" Model="@_model" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
 
-   <MudForm @ref="@form" Model="@model" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+                <MudField Variant="Variant.Outlined" Label="Queue type">
+                    <MudRadioGroup @bind-SelectedOption="_model.SubQueue"
+                                   For="@(() => _model.SubQueue)">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.None">
+                            Active messages
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.DeadLetter">
+                            Dead letter
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.TransferDeadLetter">
+                            Transfer dead letter
+                        </MudRadio>
+                    </MudRadioGroup>
+                </MudField>
+
                 <MudField Variant="Variant.Outlined" Label="Receive mode">
-                    <MudRadioGroup @bind-SelectedOption="model.Mode">
+                    <MudRadioGroup @bind-SelectedOption="_model.Mode"
+                                   For="@(() => _model.Mode)">
                         <MudRadio Dense="true"
                                   Size="Size.Small"
                                   Option="ReceiveMode.ReceiveAndDelete">
@@ -32,27 +51,30 @@
                 </MudField>
 
                 <MudField Variant="Variant.Outlined" Label="Message count">
-                    <MudRadioGroup @bind-SelectedOption="model.Type">
+                    <MudRadioGroup @bind-SelectedOption="_model.Type"
+                                   For="@(() => _model.Type)">
                         <MudRadio Dense="true"
                                   Size="Size.Small"
-                                  Option="ReceiveMessagesType.All">
-                            @ReceiveMessagesType.All
+                                  Option="ReceiveType.All">
+                            @ReceiveType.All
                         </MudRadio>
                         <MudRadio Dense="true"
                                   Size="Size.Small"
-                                  Option="ReceiveMessagesType.Top">
-                            @ReceiveMessagesType.Top
+                                  Option="ReceiveType.ByCount">
+                            @ReceiveType.ByCount
                         </MudRadio>
                     </MudRadioGroup>
-                    <MudNumericField @bind-Value="model.MessagesCount"
-                                     Disabled="@(model.Type == ReceiveMessagesType.All)"
+                    <MudNumericField @bind-Value="_model.MessagesCount"
+                                     Disabled="@(_model.Type == ReceiveType.All)"
+                                     For="@(() => _model.MessagesCount)"
                                      Class="px-0 ma-0 pa-0 py-0"
                                      Min="0"
                                      Immediate="true"
                                      HelperText="Messages count">
                     </MudNumericField>
-                    <MudNumericField @bind-Value="model.FromSequenceNumber"
-                                     Disabled="@(model.Type == ReceiveMessagesType.All || model.Mode == ReceiveMode.ReceiveAndDelete)"
+                    <MudNumericField @bind-Value="_model.FromSequenceNumber"
+                                     For="@(() => _model.FromSequenceNumber)"
+                                     Disabled="@(_model.Type == ReceiveType.All || _model.Mode == ReceiveMode.ReceiveAndDelete)"
                                      Class="px-0 ma-0 pa-0 py-0"
                                      Min="0"
                                      Immediate="true"
@@ -73,6 +95,9 @@
                     Close
                 </MudButton>
             </MudForm>
+        </MudPaper>
+    </DialogContent>
+</MudDialog>
 
 @code {
     [Parameter]
@@ -82,17 +107,20 @@
     [Parameter]
     public string? SubscriptionName { get; set; }
 
+    [Inject]
+    private IMessageService _messageService { get; set; }
+
     IList<Message> _messages;
 
     bool _isDialogVisible;
     MudForm form;
     ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();
-    
-    ReceiveMessagesForm model = new ReceiveMessagesForm
+
+    ReceiveMessagesForm _model = new ReceiveMessagesForm
     {
         MessagesCount = 10
     };
-    
+
     protected override Task OnInitializedAsync()
     {
         _isDialogVisible = true;
@@ -104,6 +132,44 @@
     async Task OnSubmit()
     {
         await form.Validate();
-        var isValid = form.IsValid;
+
+        if (form.IsValid)
+        {
+            _messages = await LoadMessagesAsync();
+        }
+    }
+
+    async Task<IList<Message>> LoadMessagesAsync()
+    {
+        return (await _messageService.GetMessagesAsync(
+            ConnectionName,
+            QueueOrTopicName,
+            SubscriptionName,
+            _model.SubQueue,
+            _model.Mode,
+            _model.Type,
+            _model.MessagesCount,
+            _model.FromSequenceNumber,
+            default)).ToList();
+    }
+
+    private void OnReceiveModeChanged()
+    {
+        if (_model.Mode == ReceiveMode.ReceiveAndDelete)
+        {
+            _model.FromSequenceNumber = null;
+        }
+    }
+
+    private void OnReceiveTypeChange()
+    {
+        if (_model.Type == ReceiveType.All)
+        {
+            _model.MessagesCount = null;
+        }
+        else
+        {
+            _model.MessagesCount = 10;
+        }
     }
 }

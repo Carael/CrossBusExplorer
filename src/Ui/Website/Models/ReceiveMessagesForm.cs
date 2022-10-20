@@ -8,6 +8,19 @@ namespace CrossBusExplorer.Website.Models;
 public class ReceiveMessagesForm : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    
+    private SubQueue _subQueue;
+
+    [Label("Queue type")]
+    public SubQueue SubQueue
+    {
+        get => _subQueue;
+        set
+        {
+            _subQueue = value;
+            this.Notify(PropertyChanged);
+        }
+    }
 
     private ReceiveMode _mode;
 
@@ -22,10 +35,10 @@ public class ReceiveMessagesForm : INotifyPropertyChanged
         }
     }
 
-    private ReceiveMessagesType _type;
+    private ReceiveType _type;
 
     [Label("Receive type")]
-    public ReceiveMessagesType Type
+    public ReceiveType Type
     {
         get => _type;
         set
@@ -36,8 +49,7 @@ public class ReceiveMessagesForm : INotifyPropertyChanged
     }
 
     private int? _messagesCount;
-
-    [Label("Messages count")]
+    
     public int? MessagesCount
     {
         get => _messagesCount;
@@ -49,8 +61,7 @@ public class ReceiveMessagesForm : INotifyPropertyChanged
     }
 
     private int? _fromSequenceNumber;
-
-    [Label("From sequence number")]
+    
     public int? FromSequenceNumber
     {
         get => _fromSequenceNumber;

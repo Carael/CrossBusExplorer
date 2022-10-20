@@ -7,8 +7,10 @@ public interface IMessageService
         string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
-        int messagesCount,
-        ReceiveMode receiveMode,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
         long? fromSequenceNumber,
         CancellationToken cancellationToken);
 
