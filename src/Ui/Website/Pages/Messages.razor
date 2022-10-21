@@ -40,7 +40,7 @@
         <RowTemplate>
             <MudTd DataLabel="Actions">
                 <MudTooltip Text="View details">
-                    <MudIconButton Size="Size.Small" OnClick="@(()=>Model.ViewMessageDetails(context))" Icon="@Icons.Material.Outlined.Preview"/>
+                    <MudIconButton Size="Size.Small" OnClick="@(() => Model.ViewMessageDetails(context))" Icon="@Icons.Material.Outlined.Preview"/>
                 </MudTooltip>
                 <MudTooltip Text="Requeue">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Send"/>
@@ -139,30 +139,30 @@
                     </MudNumericField>
                     <MudNumericField @bind-Value="_formModel.FromSequenceNumber"
                                      For="@(() => _formModel.FromSequenceNumber)"
-                                     Disabled="@(_formModel.Type == ReceiveType.All || 
-                                                 _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
+                                     Disabled="@(_formModel.Type == ReceiveType.All || _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
                                      Class="px-0 ma-0 pa-0 py-0"
                                      Min="0"
                                      Immediate="true"
                                      HelperText="From sequence number">
                     </MudNumericField>
                 </MudField>
-
-                <MudButton ButtonType="ButtonType.Button"
-                           Color="Color.Success"
-                           OnClick="@(() => Model.OnSubmitReceiveForm(form, _formModel, default))"
-                           Class="px-10">
-                    Receive
-                </MudButton>
-                <MudButton ButtonType="ButtonType.Reset"
-                           Color="Color.Default"
-                           OnClick="@(() => { Model.DialogVisible = false; })"
-                           Class="px-10">
-                    Close
-                </MudButton>
             </MudForm>
         </MudPaper>
     </DialogContent>
+    <DialogActions>
+        <MudButton ButtonType="ButtonType.Reset"
+                   Color="Color.Default"
+                   OnClick="@(() => { Model.DialogVisible = false; })"
+                   Class="px-10">
+            Close
+        </MudButton>
+        <MudButton ButtonType="ButtonType.Button"
+                   Color="Color.Success"
+                   OnClick="@(() => Model.OnSubmitReceiveForm(form, _formModel, default))"
+                   Class="px-10">
+            Receive
+        </MudButton>
+    </DialogActions>
 </MudDialog>
 
 @code {

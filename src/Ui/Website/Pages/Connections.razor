@@ -63,11 +63,12 @@
             </MudGrid>
             <MudGrid Justify="Justify.FlexEnd">
                 <MudItem xs="6">
-                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
-                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Primary" Class="px-10"
+                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Default" Class="px-10"
                                OnClick="@(() =>{_saveDialogVisible = false;})">
                         Close
                     </MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
+
                 </MudItem>
             </MudGrid>
         </EditForm>

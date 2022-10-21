@@ -119,7 +119,7 @@ public class MessagesViewModel : IMessagesViewModel
             {
                 FullWidth = true,
                 FullScreen = false,
-                MaxWidth = MaxWidth.ExtraExtraLarge,
+                MaxWidth = MaxWidth.Large,
                 CloseButton = true,
                 Position = DialogPosition.Center
             });

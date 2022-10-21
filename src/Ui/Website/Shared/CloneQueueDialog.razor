@@ -10,33 +10,33 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="@(() => Submit())">Yes</MudButton>
-        <MudButton Color="Color.Primary" OnClick="@(() => CloseDialog())">No</MudButton>
+        <MudButton Color="Color.Default" OnClick="@(CloseDialog)">No</MudButton>
+        <MudButton Color="Color.Success" OnClick="@(Submit)">Yes</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] 
+    [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
-    
+
     [Parameter]
     public string SourceDialogName { get; set; }
-    
+
     [Parameter]
     public string ConnectionName { get; set; }
-    
+
     MudForm form;
     string queueName;
 
     async Task Submit()
     {
         await form.Validate();
-        
+
         if (form.IsValid)
         {
             MudDialog.Close(DialogResult.Ok(queueName));
         }
-        
+
     }
     private void CloseDialog()
     {

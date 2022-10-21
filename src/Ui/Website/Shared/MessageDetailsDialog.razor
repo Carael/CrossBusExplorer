@@ -9,14 +9,14 @@
         <div class="d-flex">
             <MudPaper Width="60%" Style="padding: 10px;">
                 <MudField Variant="Variant.Outlined" Label="Body">
-                    <div style="height: 600px;" Class="overflow-y-auto">
+                    <div style="height: 500px;" Class="overflow-y-auto">
                         @Message.Body
                     </div>
                 </MudField>
             </MudPaper>
             <MudPaper Width="40%" Class="d-flex flex-column">
                 <MudField Label="System properties" Style="padding: 10px;" Variant="Variant.Outlined">
-                    <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 300px;">
+                    <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
                         <thead>
                         <tr>
                             <th>Property</th>
@@ -120,7 +120,7 @@
                     </MudSimpleTable>
                 </MudField>
                 <MudField Label="User properties" Variant="Variant.Outlined" Style="padding: 10px;">
-                    <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 180px;">
+                    <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 185px;">
                         <thead>
                         <tr>
                             <th>Property</th>
@@ -142,12 +142,16 @@
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" 
-                   ButtonType="ButtonType.Button" 
-                   OnClick="@(Submit)">Requeue (current queue or topic)</MudButton>
-        <MudButton Color="Color.Warning" 
-                   ButtonType="ButtonType.Button" 
-                   OnClick="@(CloseDialog)">Close</MudButton>
+        <MudButton Color="Color.Default"
+                   ButtonType="ButtonType.Button"
+                   OnClick="@(CloseDialog)">
+            Close
+        </MudButton>
+        <MudButton Color="Color.Success"
+                   ButtonType="ButtonType.Button"
+                   OnClick="@(Submit)">
+            Requeue (current queue or topic)
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
