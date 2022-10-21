@@ -18,4 +18,5 @@ public interface IMessagesViewModel : INotifyPropertyChanged
         ReceiveMessagesForm formModel,
         CancellationToken cancellationToken);
     void Initialize(CurrentMessagesEntity entity);
+    Task ViewMessageDetails(Message context);
 }

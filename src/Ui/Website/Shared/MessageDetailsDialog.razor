@@ -1,0 +1,175 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Message details
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="d-flex">
+            <MudPaper Width="60%" Style="padding: 10px;">
+                <MudField Variant="Variant.Outlined" Label="Body">
+                    <div style="height: 600px;" Class="overflow-y-auto">
+                        @Message.Body
+                    </div>
+                </MudField>
+            </MudPaper>
+            <MudPaper Width="40%" Class="d-flex flex-column">
+                <MudField Label="System properties" Style="padding: 10px;" Variant="Variant.Outlined">
+                    <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 300px;">
+                        <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>@nameof(Message.Id)</td>
+                            <td>@Message.Id</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
+                            <td>@Message.SystemProperties.SequenceNumber</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.Subject)</td>
+                            <td>@(Message.Subject ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.State)</td>
+                            <td>@Message.SystemProperties.State</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
+                            <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
+                            <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
+                            <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.To)</td>
+                            <td>@(Message.SystemProperties.To ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.ContentType)</td>
+                            <td>@(Message.SystemProperties.ContentType ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.CorrelationId)</td>
+                            <td>@(Message.SystemProperties.CorrelationId ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
+                            <td>@Message.SystemProperties.DeliveryCount</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
+                            <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
+                            <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.LockedUntil)</td>
+                            <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.LockToken)</td>
+                            <td>@Message.SystemProperties.LockToken</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.PartitionKey)</td>
+                            <td>@(Message.SystemProperties.PartitionKey ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.ReplyTo)</td>
+                            <td>@(Message.SystemProperties.ReplyTo ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.SessionId)</td>
+                            <td>@(Message.SystemProperties.SessionId ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
+                            <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
+                            <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.ScheduledEnqueueTime)</td>
+                            <td>@Message.SystemProperties.ScheduledEnqueueTime.ToUniversal()</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.TimeToLive)</td>
+                            <td>@Message.SystemProperties.TimeToLive.ToTimeSpanString()</td>
+                        </tr>
+                        <tr>
+                            <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
+                            <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
+                        </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudField>
+                <MudField Label="User properties" Variant="Variant.Outlined" Style="padding: 10px;">
+                    <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 180px;">
+                        <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var userProperty in Message.ApplicationProperties)
+                        {
+                            <tr>
+                                <td>@userProperty.Key</td>
+                                <td>@userProperty.Value</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </MudSimpleTable>
+                </MudField>
+            </MudPaper>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" 
+                   ButtonType="ButtonType.Button" 
+                   OnClick="@(Submit)">Requeue (current queue or topic)</MudButton>
+        <MudButton Color="Color.Warning" 
+                   ButtonType="ButtonType.Button" 
+                   OnClick="@(CloseDialog)">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Message Message { get; set; }
+
+    async Task Submit()
+    {
+
+    }
+
+    private void CloseDialog()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+    }
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();
+    }
+}

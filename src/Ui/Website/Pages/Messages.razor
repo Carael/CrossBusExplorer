@@ -39,8 +39,8 @@
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Actions">
-                <MudTooltip Text="View body">
-                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Preview"/>
+                <MudTooltip Text="View details">
+                    <MudIconButton Size="Size.Small" OnClick="@(()=>Model.ViewMessageDetails(context))" Icon="@Icons.Material.Outlined.Preview"/>
                 </MudTooltip>
                 <MudTooltip Text="Requeue">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Send"/>
