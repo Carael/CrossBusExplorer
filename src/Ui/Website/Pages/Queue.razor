@@ -154,19 +154,12 @@
                                                    OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10"></MudIconButton>
                                 </MudTooltip>
                             }
-                            <MudTooltip Text="Purge active messages queue">
+                            <MudTooltip Text="Purge messages">
                                 <MudIconButton Icon=@Icons.Filled.RemoveFromQueue 
                                                ButtonType="ButtonType.Button" 
-                                               OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" 
-                                               Color="Color.Warning" Class="px-10"></MudIconButton>
+                                               OnClick="@(() => Model.PurgeMessages(ConnectionName, QueueName, default))" 
+                                               Color="Color.Default" Class="px-10"></MudIconButton>
                             </MudTooltip>
-                            <MudTooltip Text="Purge dead letter queue">
-                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue 
-                                               ButtonType="ButtonType.Button" 
-                                               OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" 
-                                               Color="Color.Dark" Class="px-10"></MudIconButton>
-                            </MudTooltip>
-
                             <MudTooltip Text="Delete">
                                 <MudIconButton Icon=@Icons.Filled.Delete 
                                                ButtonType="ButtonType.Button" 

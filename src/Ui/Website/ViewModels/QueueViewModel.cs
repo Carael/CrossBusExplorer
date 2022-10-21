@@ -101,7 +101,8 @@ public class QueueViewModel : IQueueViewModel
         }
         else
         {
-            _snackbar.Add("Not saved. Please correct parameters and try again.",
+            _snackbar.Add(
+                "Not saved. Please correct parameters and try again.",
                 Severity.Error);
         }
     }
@@ -199,11 +200,7 @@ public class QueueViewModel : IQueueViewModel
 
         }
     }
-    public Task ViewMessages(string connectionName, string queueName, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-    
+
     public async Task UpdateQueueStatus(
         string connectionName, 
         string queueName, 
@@ -216,6 +213,14 @@ public class QueueViewModel : IQueueViewModel
             cancellationToken);
         
         HandleSaveResult(connectionName, result, OperationType.Update);
+    }
+    
+    public Task PurgeMessages(
+        string connectionName,
+        string queueName,
+        CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     private void UpdateFormModel(QueueDetails resultData)
