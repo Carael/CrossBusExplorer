@@ -1,7 +1,8 @@
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record QueueProperties(    
-    long MaxSizeInMegabytes,
+    long MaxQueueSizeInMegabytes,
+    long? MaxMessageSizeInKilobytes,
     int MaxDeliveryCount,
     string? UserMetadata,
     string? ForwardTo,

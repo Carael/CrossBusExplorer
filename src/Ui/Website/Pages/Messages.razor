@@ -1,0 +1,194 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.Website.Models.Validators
+@using CrossBusExplorer.ServiceBus.Contracts
+@using CrossBusExplorer.Website.ViewModels
+@inherits LayoutComponentBase
+
+<MudPaper>
+
+    <div class="d-flex gap-10">
+        <MudTooltip Text="Receive messages">
+            <MudIconButton Icon="@Icons.Filled.Download" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Receive messages</MudIconButton>
+        </MudTooltip>
+    </div>
+
+    <MudTable Items="Model.Messages" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh>
+                Actions
+            </MudTh>
+            <MudTh>
+                Message Id
+            </MudTh>
+            <MudTh>
+                Seq
+            </MudTh>
+            <MudTh>
+                Subject
+            </MudTh>
+            <MudTh>
+                Enqueue time
+            </MudTh>
+            <MudTh>
+                Expiration time
+            </MudTh>
+            <MudTh>
+                Scheduled enqueue time
+            </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Actions">
+                <MudTooltip Text="View body">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Preview"/>
+                </MudTooltip>
+                <MudTooltip Text="Requeue">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Send"/>
+                </MudTooltip>
+                <MudTooltip Text="Edit and requeue">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit"/>
+                </MudTooltip>
+            </MudTd>
+            <MudTd DataLabel="Message Id">@context.Id</MudTd>
+            <MudTd DataLabel="Seq">@context.SystemProperties.SequenceNumber</MudTd>
+            <MudTd DataLabel="Subject">@(context.Subject ?? "-")</MudTd>
+            <MudTd DataLabel="Enqueue time">@context.SystemProperties.EnqueuedTime.ToUniversal())</MudTd>
+            <MudTd DataLabel="Expiration time">@context.SystemProperties.ExpiresAt.ToUniversal()</MudTd>
+            <MudTd DataLabel="Scheduled enqueue time">@(context.SystemProperties.ScheduledEnqueueTime.ToUniversal())</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <div class="d-flex">
+                <MudTablePager PageSizeOptions="new int[]{50, 100}"/>
+                @if (Model.CanPeekMore(_formModel))
+                {
+                    <MudButton OnClick="@(() => Model.PeekMore(_formModel, default))" ButtonType="ButtonType.Button">Load more</MudButton>
+                }
+            </div>
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+
+<MudDialog @bind-IsVisible="Model.DialogVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Receive @QueueOrTopicName @SubscriptionName messages
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="3">
+            <MudForm @ref="@form" Model="@_formModel" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+                <MudField Variant="Variant.Outlined" Label="Queue type">
+                    <MudRadioGroup @bind-SelectedOption="_formModel.SubQueue"
+                                   For="@(() => _formModel.SubQueue)">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.None">
+                            Active messages
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.DeadLetter">
+                            Dead letter
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="SubQueue.TransferDeadLetter">
+                            Transfer dead letter
+                        </MudRadio>
+                    </MudRadioGroup>
+                </MudField>
+
+                <MudField Variant="Variant.Outlined" Label="Receive mode">
+                    <MudRadioGroup @bind-SelectedOption="_formModel.Mode"
+                                   For="@(() => _formModel.Mode)">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMode.ReceiveAndDelete">
+                            Receive and delete
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveMode.PeekLock">
+                            Peek lock
+                        </MudRadio>
+                    </MudRadioGroup>
+                </MudField>
+
+                <MudField Variant="Variant.Outlined" Label="Message count">
+                    <MudRadioGroup @bind-SelectedOption="_formModel.Type"
+                                   For="@(() => _formModel.Type)">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveType.All">
+                            @ReceiveType.All
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="ReceiveType.ByCount">
+                            @ReceiveType.ByCount
+                        </MudRadio>
+                    </MudRadioGroup>
+                    <MudNumericField @bind-Value="_formModel.MessagesCount"
+                                     Disabled="@(_formModel.Type == ReceiveType.All)"
+                                     For="@(() => _formModel.MessagesCount)"
+                                     Class="px-0 ma-0 pa-0 py-0"
+                                     Min="1"
+                                     Max="250"
+                                     Immediate="true"
+                                     HelperText="Messages count">
+                    </MudNumericField>
+                    <MudNumericField @bind-Value="_formModel.FromSequenceNumber"
+                                     For="@(() => _formModel.FromSequenceNumber)"
+                                     Disabled="@(_formModel.Type == ReceiveType.All || 
+                                                 _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
+                                     Class="px-0 ma-0 pa-0 py-0"
+                                     Min="0"
+                                     Immediate="true"
+                                     HelperText="From sequence number">
+                    </MudNumericField>
+                </MudField>
+
+                <MudButton ButtonType="ButtonType.Button"
+                           Color="Color.Success"
+                           OnClick="@(() => Model.OnSubmitReceiveForm(form, _formModel, default))"
+                           Class="px-10">
+                    Receive
+                </MudButton>
+                <MudButton ButtonType="ButtonType.Reset"
+                           Color="Color.Default"
+                           OnClick="@(() => { Model.DialogVisible = false; })"
+                           Class="px-10">
+                    Close
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string ConnectionName { get; set; }
+    [Parameter]
+    public string QueueOrTopicName { get; set; }
+    [Parameter]
+    public string? SubscriptionName { get; set; }
+    [Inject]
+    IMessagesViewModel Model { get; set; }
+    MudForm form;
+    ReceiveMessagesForm _formModel;
+    ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _formModel = new ReceiveMessagesForm
+        {
+            MessagesCount = 10,
+            Type = ReceiveType.ByCount
+        };
+
+        Model.Initialize(
+            new CurrentMessagesEntity(ConnectionName, QueueOrTopicName, SubscriptionName));
+
+        Model.PropertyChanged += (_, _) => StateHasChanged();
+    }
+}

@@ -41,7 +41,7 @@ public static class QueueMappings
             new Azure.Messaging.ServiceBus.Administration.CreateQueueOptions(
                 createQueueOptions.Name);
 
-        options.MaxSizeInMegabytes = createQueueOptions.MaxSizeInMegabytes;
+        options.MaxSizeInMegabytes = createQueueOptions.MaxSizeInMegabytes ?? 1024;
 
         if (createQueueOptions.EnablePartitioning.HasValue)
         {
@@ -236,10 +236,23 @@ public static class QueueMappings
         Azure.Messaging.ServiceBus.Administration.QueueProperties queue) =>
         new QueueProperties(
             queue.MaxSizeInMegabytes,
+            queue.MaxMessageSizeInKilobytes,
             queue.MaxDeliveryCount,
             queue.UserMetadata,
-            queue.ForwardTo,
-            queue.ForwardDeadLetteredMessagesTo);
+            RemoveUrl(queue.ForwardTo),
+            RemoveUrl(queue.ForwardDeadLetteredMessagesTo));
+    
+    private static string? RemoveUrl(string? forwardTo)
+    {
+        if (string.IsNullOrEmpty(forwardTo))
+        {
+            return null;
+        }
+
+        var uri = new Uri(forwardTo);
+
+        return uri.LocalPath.Remove(0,1);
+    }
 
     private static QueueSettings GetQueueSettings(
         Azure.Messaging.ServiceBus.Administration.QueueProperties queue) =>

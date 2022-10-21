@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
+using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website.ViewModels;
@@ -21,7 +22,8 @@ public class NavigationViewModel : INavigationViewModel
         IConnectionsViewModel connectionsViewModel,
         IQueueService queueService,
         ITopicService topicService,
-        ISubscriptionService subscriptionService)
+        ISubscriptionService subscriptionService,
+        IQueueViewModel queueViewModel)
     {
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         _queueService = queueService;
@@ -29,8 +31,10 @@ public class NavigationViewModel : INavigationViewModel
         _subscriptionService = subscriptionService;
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
-
+        queueViewModel.QueueAdded += this.OnQueueAdded;
+        queueViewModel.QueueRemoved += this.QueueRemoved;
     }
+
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is IConnectionsViewModel connectionsViewModel)
@@ -38,6 +42,7 @@ public class NavigationViewModel : INavigationViewModel
             RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
         }
     }
+    
     private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
     {
         MenuItems.RemoveNonExisting(menuItem =>
@@ -132,5 +137,26 @@ public class NavigationViewModel : INavigationViewModel
             model.Loaded = true;
             this.Notify(PropertyChanged);
         }
+    }
+
+    private void OnQueueAdded(string connectionName, QueueInfo queueinfo)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+        
+        menuItem.Queues.Add(queueinfo);
+        this.Notify(PropertyChanged);
+    }
+    
+    private void QueueRemoved(string connectionName, string queueName)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        var queue =
+            menuItem.Queues.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(queueName));
+        menuItem.Queues.Remove(queue);
+        
+        this.Notify(PropertyChanged);
     }
 }

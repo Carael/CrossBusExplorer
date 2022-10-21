@@ -1,0 +1,45 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Clone queue @SourceDialogName
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField T="string" @bind-value="queueName" MaxLength="260" Label="Queue name" Required="true" RequiredError="Queue name is required!"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="@(() => Submit())">Yes</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@(() => CloseDialog())">No</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter]
+    public string SourceDialogName { get; set; }
+    
+    [Parameter]
+    public string ConnectionName { get; set; }
+    
+    MudForm form;
+    string queueName;
+
+    async Task Submit()
+    {
+        await form.Validate();
+        
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(queueName));
+        }
+        
+    }
+    private void CloseDialog()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+    }
+}

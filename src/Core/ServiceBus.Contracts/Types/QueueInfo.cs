@@ -1,7 +1,7 @@
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record QueueInfo(
-    string Name, 
+    string Name,
     QueueStatus Status,
     long SizeInBytes,
     DateTimeOffset CreatedAt,
@@ -12,4 +12,7 @@ public record QueueInfo(
     long ScheduledMessagesCount,
     long InTransferMessagesCount,
     long TransferDeadLetterMessagesCount,
-    long TotalMessagesCount);
+    long TotalMessagesCount)
+{
+    public long SizeInMB => SizeInBytes / 1024 / 1024;
+}

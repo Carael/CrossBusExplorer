@@ -17,7 +17,6 @@ public class QueueService : IQueueService
     public QueueService(IConnectionManagement connectionManagement)
     {
         _connectionManagement = connectionManagement;
-
     }
     
     public async IAsyncEnumerable<QueueInfo> GetAsync(
@@ -44,7 +43,7 @@ public class QueueService : IQueueService
                     await administrationClient.GetQueueRuntimePropertiesAsync(
                         queue.Name,
                         cancellationToken);
-
+                
                 QueueRuntimeProperties queueRuntimeProperties = runtimePropertiesResponse.Value;
 
                 yield return queue.ToQueueInfo(queueRuntimeProperties);

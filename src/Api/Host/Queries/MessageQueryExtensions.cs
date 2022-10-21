@@ -10,8 +10,10 @@ public class MessageQueryExtensions
         string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
-        int messagesCount,
-        ReceiveMode receiveMode,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
@@ -19,8 +21,10 @@ public class MessageQueryExtensions
             connectionName,
             queueOrTopicName,
             subscriptionName,
+            subQueue,
+            mode,
+            type,
             messagesCount,
-            receiveMode,
             fromSequenceNumber,
             cancellationToken);
     }

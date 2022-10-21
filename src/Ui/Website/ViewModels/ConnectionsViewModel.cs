@@ -1,13 +1,10 @@
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CrossBusExplorer.Management.Contracts;
-using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.Website.Extensions;
-using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website.ViewModels;
 
 public class ConnectionsViewModel : IConnectionsViewModel

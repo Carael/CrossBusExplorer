@@ -9,6 +9,7 @@ namespace CrossBusExplorer.ServiceBus;
 
 public class MessageService : IMessageService
 {
+    private const int receiveBatch = 100;
     private readonly IConnectionManagement _connectionManagement;
     public MessageService(IConnectionManagement connectionManagement)
     {
@@ -19,26 +20,44 @@ public class MessageService : IMessageService
         string connectionName,
         string queueOrTopicName,
         string? subscriptionName,
-        int messagesCount,
-        ReceiveMode receiveMode,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
-        var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+        try
+        {
+            var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
         
-        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
 
-        await using var receiver =
-            GetReceiver(client, queueOrTopicName, subscriptionName, receiveMode);
+            await using var receiver =
+                GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
 
-        IReadOnlyList<ServiceBusReceivedMessage>? result =
-            await ReceiveMessagesAsync(
-                receiver,
-                messagesCount,
-                fromSequenceNumber,
-                cancellationToken);
+            IReadOnlyList<ServiceBusReceivedMessage>? result =
+                await ReceiveMessagesAsync(
+                    receiver,
+                    type,
+                    messagesCount,
+                    fromSequenceNumber,
+                    cancellationToken);
 
-        return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
+            return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ErrorCodes.InvalidOperation, ex.Message);
+        }
     }
 
     public async Task<Result> PurgeAsync(
@@ -151,11 +170,13 @@ public class MessageService : IMessageService
         ServiceBusClient client,
         string queueOrTopicName,
         string? subscriptionName,
+        SubQueue subQueue,
         ReceiveMode receiveMode)
     {
         var receiverOptions = new ServiceBusReceiverOptions
         {
-            ReceiveMode = Enum.Parse<ServiceBusReceiveMode>(receiveMode.ToString())
+            ReceiveMode = Enum.Parse<ServiceBusReceiveMode>(receiveMode.ToString()),
+            SubQueue = Enum.Parse<Azure.Messaging.ServiceBus.SubQueue>(subQueue.ToString()),
         };
 
         if (subscriptionName != null)
@@ -171,21 +192,22 @@ public class MessageService : IMessageService
 
     private async Task<IReadOnlyList<ServiceBusReceivedMessage>?> ReceiveMessagesAsync(
         ServiceBusReceiver receiver,
-        int maxMessages,
+        ReceiveType type,
+        int? maxMessages,
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
         if (receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock)
         {
             return await receiver.PeekMessagesAsync(
-                maxMessages,
+                maxMessages??10,
                 fromSequenceNumber,
                 cancellationToken);
         }
 
         return await receiver.ReceiveMessagesAsync(
-            maxMessages,
-            TimeSpan.FromSeconds(5),
-            cancellationToken);
+            maxMessages??10,
+            default,
+            cancellationToken: cancellationToken);
     }
 }

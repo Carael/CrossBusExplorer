@@ -11,6 +11,8 @@ public static class ServiceCollectionExtensions
     {
         collection.AddScoped<IConnectionsViewModel, ConnectionsViewModel>();
         collection.AddScoped<INavigationViewModel, NavigationViewModel>();
+        collection.AddScoped<IQueueViewModel, QueueViewModel>();
+        collection.AddScoped<IMessagesViewModel, MessagesViewModel>();
         
         return collection.AddMudServices(config =>
         {

@@ -3,6 +3,8 @@
 @using CrossBusExplorer.ServiceBus.Contracts
 @using CrossBusExplorer.Website.Models
 @using System.Security.Cryptography
+@using System.Net
+@using System.Web
 
 <MudNavMenu>
     <MudNavLink Href="connections"
@@ -11,7 +13,7 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (ConnectionMenuItem menuItem in NavigationViewModel.MenuItems)
+    @foreach (ConnectionMenuItem menuItem in Model.MenuItems)
     {
         <MudNavGroup Title=@menuItem.ConnectionName
                      Icon="@Icons.Material.Filled.Link">
@@ -23,9 +25,17 @@
                 {
                     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
                 }
+                else
+                {
+                    <MudNavLink Href=@($"new-queue/{menuItem.ConnectionName}")
+                                Icon="@Icons.Filled.Add">
+                        Create new queue
+                    </MudNavLink>
+                }
+
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{queue.Name}")
+                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
                                 Icon="@Icons.Filled.Queue">
                         @queue.Name
                         (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
@@ -43,7 +53,7 @@
                 }
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <TopicNestedMenuItem Model=@topic ConnectionName=@menuItem.ConnectionName/>
+                    <TopicNestedMenuItem Subscription=@topic ConnectionName=@menuItem.ConnectionName/>
                 }
             </MudNavGroup>
         </MudNavGroup>
@@ -52,25 +62,31 @@
 
 @code {
     [Inject]
-    private INavigationViewModel NavigationViewModel { get; set; }
+    private INavigationViewModel Model { get; set; }
+
+    private bool _shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationViewModel.PropertyChanged += (_, _) =>
+        Model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
 
-        await base.OnInitializedAsync();
+        _shouldRender = true;
     }
 
     private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
     {
-        await NavigationViewModel.LoadQueues(menuItem, default);
+        _shouldRender = false;
+        await Model.LoadQueues(menuItem, default);
+        _shouldRender = true;
     }
 
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
-        NavigationViewModel.LoadTopics(menuItem, default);
+        _shouldRender = false;
+        Model.LoadTopics(menuItem, default);
+        _shouldRender = true;
     }
 }
