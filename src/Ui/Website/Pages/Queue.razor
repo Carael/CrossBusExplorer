@@ -97,8 +97,8 @@
                                 {
                                     <MudField Disabled="true" Label="Status" Margin="Margin.Dense">@Model.QueueDetails.Info.Status</MudField>
                                     <MudField Disabled="true" Label="Size" Margin="Margin.Dense">@($"{Model.QueueDetails.Info.SizeInBytes}Bytes") (@($"{Model.QueueDetails.Info.SizeInMB}MB"))</MudField>
-                                    <MudField Disabled="true" Label="Created at" Margin="Margin.Dense">@Model.QueueDetails.Info.CreatedAt</MudField>
-                                    <MudField Disabled="true" Label="Accessed at" Margin="Margin.Dense">@Model.QueueDetails.Info.AccessedAt</MudField>
+                                    <MudField Disabled="true" Label="Created at" Margin="Margin.Dense">@Model.QueueDetails.Info.CreatedAt.ToUniversal()</MudField>
+                                    <MudField Disabled="true" Label="Accessed at" Margin="Margin.Dense">@Model.QueueDetails.Info.AccessedAt.ToUniversal()</MudField>
                                     <MudField Disabled="true" Label="Active messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.ActiveMessagesCount</MudField>
                                     <MudField Disabled="true" Label="Dead letter messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
                                     <MudField Disabled="true" Label="Scheduled messages count" Margin="Margin.Dense">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
