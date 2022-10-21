@@ -53,24 +53,41 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <EditForm Model="@_saveEditConnectionForm" OnValidSubmit="OnValidSaveConnectionSubmit">
+        <EditForm @ref="_editForm" Model="@_saveEditConnectionForm" OnValidSubmit="OnValidSaveConnectionSubmit">
             <DataAnnotationsValidator/>
             <MudGrid>
                 <MudItem xs="12">
-                    <MudTextField Lines="4" @bind-Value="@_saveEditConnectionForm.ConnectionString" For="@(() => _saveEditConnectionForm.ConnectionString)"/>
-                    <MudTextField @bind-Value="@_saveEditConnectionForm.Name" For="@(() => _saveEditConnectionForm.Name)"/>
-                </MudItem>
-            </MudGrid>
-            <MudGrid Justify="Justify.FlexEnd">
-                <MudItem xs="6">
-                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Default" Class="px-10"
-                               OnClick="@(() =>{_saveDialogVisible = false;})">
-                        Close
-                    </MudButton>
-                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Class="px-10">Submit</MudButton>
-
+                    <MudTextField Lines="4"
+                                  @bind-Value="@_saveEditConnectionForm.ConnectionString"
+                                  For="@(() => _saveEditConnectionForm.ConnectionString)"/>
+                    <MudTextField @bind-Value="@_saveEditConnectionForm.Name"
+                                  For="@(() => _saveEditConnectionForm.Name)"/>
                 </MudItem>
             </MudGrid>
         </EditForm>
     </DialogContent>
+    <DialogActions>
+        <MudButton ButtonType="ButtonType.Reset" Color="Color.Default" Class="px-10"
+                   OnClick="@(() =>{_saveDialogVisible = false;})">
+            Close
+        </MudButton>
+        <MudButton ButtonType="ButtonType.Submit"
+                   Color="Color.Success"
+                   Class="px-10"
+                   OnClick="@(Submit)">
+            Submit
+        </MudButton>
+    </DialogActions>
 </MudDialog>
+
+@code{
+    EditForm _editForm;
+    
+    async Task Submit()
+    {
+        if (_editForm.EditContext.Validate())
+        {
+            await OnValidSaveConnectionSubmit();
+        }
+    }
+}
