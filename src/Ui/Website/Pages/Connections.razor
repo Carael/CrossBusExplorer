@@ -37,7 +37,8 @@
         <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
         <MudTd DataLabel="View connection string">
             <MudTooltip Text="View service bus connection string">
-                <MudIconButton Icon="@Icons.Material.Outlined.Preview" OnClick="@(() => ViewConnectionString(context.ConnectionString))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Preview" 
+                               OnClick="@(() => ViewConnectionString(context.ConnectionString))"/>
             </MudTooltip>
         </MudTd>
     </RowTemplate>
@@ -67,7 +68,9 @@
         </EditForm>
     </DialogContent>
     <DialogActions>
-        <MudButton ButtonType="ButtonType.Reset" Color="Color.Default" Class="px-10"
+        <MudButton ButtonType="ButtonType.Reset" 
+                   Color="Color.Default" 
+                   Class="px-10"
                    OnClick="@(() =>{_saveDialogVisible = false;})">
             Close
         </MudButton>
