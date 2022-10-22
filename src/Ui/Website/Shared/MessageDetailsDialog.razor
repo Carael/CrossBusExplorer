@@ -6,16 +6,18 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <div class="d-flex">
-            <MudPaper Width="60%" Style="padding: 10px;">
-                <MudField Variant="Variant.Outlined" Label="Body">
-                    <div style="height: 500px;" Class="overflow-y-auto">
-                        @Message.Body
-                    </div>
-                </MudField>
+        <div class="d-flex gap-4">
+            <MudPaper Width="60%">
+                <MudTextField
+                    Variant="Variant.Outlined"
+                    Label="Body"
+                    Disabled="true"
+                    Lines="26"
+                    Value="@Message.Body.TryFormatJson(Message.SystemProperties.ContentType)">
+                </MudTextField>
             </MudPaper>
-            <MudPaper Width="40%" Class="d-flex flex-column">
-                <MudField Label="System properties" Style="padding: 10px;" Variant="Variant.Outlined">
+            <MudPaper Width="40%" Class="d-flex flex-column gap-4">
+                <MudField Label="System properties" Variant="Variant.Outlined">
                     <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
                         <thead>
                         <tr>
@@ -119,7 +121,7 @@
                         </tbody>
                     </MudSimpleTable>
                 </MudField>
-                <MudField Label="User properties" Variant="Variant.Outlined" Style="padding: 10px;">
+                <MudField Label="User properties" Variant="Variant.Outlined">
                     <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 185px;">
                         <thead>
                         <tr>

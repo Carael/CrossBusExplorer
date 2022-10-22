@@ -215,12 +215,11 @@ public class QueueViewModel : IQueueViewModel
         HandleSaveResult(connectionName, result, OperationType.Update);
     }
     
-    public Task PurgeMessages(
+    public async Task PurgeMessages(
         string connectionName,
         string queueName,
         CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
     }
 
     private void UpdateFormModel(QueueDetails resultData)
