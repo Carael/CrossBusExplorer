@@ -12,14 +12,20 @@ public static class StringExtensions
         return value != null ? TimeSpan.Parse(value) : null;
     }
 
-    public static string TryFormatJson(this string value, string contentType)
+    public static string TryFormatBody(this string value, string contentType)
     {
-        if (contentType != null &&
-            !contentType.Contains("json", StringComparison.InvariantCultureIgnoreCase))
+        if (contentType != null)
         {
-            return contentType;
+            if (contentType.Contains("json", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return TryFormatJson(value);
+            }
         }
 
+        return value;
+    }
+    private static string TryFormatJson(string value)
+    {
         try
         {
             dynamic parsedJson = JsonConvert.DeserializeObject(value);

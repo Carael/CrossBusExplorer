@@ -13,7 +13,7 @@
                     Label="Body"
                     Disabled="true"
                     Lines="26"
-                    Value="@Message.Body.TryFormatJson(Message.SystemProperties.ContentType)">
+                    Value="@Message.Body.TryFormatBody(Message.SystemProperties.ContentType)">
                 </MudTextField>
             </MudPaper>
             <MudPaper Width="40%" Class="d-flex flex-column gap-4">
