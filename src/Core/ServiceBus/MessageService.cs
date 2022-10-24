@@ -29,7 +29,8 @@ public class MessageService : IMessageService
     {
         try
         {
-            var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
         
             await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
 
@@ -104,7 +105,7 @@ public class MessageService : IMessageService
     }
 
     public async Task<Result> SendMessagesAsync(
-        string connectionString,
+        string connectionName,
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,
         CancellationToken cancellationToken)
@@ -113,7 +114,10 @@ public class MessageService : IMessageService
 
         try
         {
-            await using ServiceBusClient client = new ServiceBusClient(connectionString);
+            var connection = 
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+            
+            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
             await using var sender = client.CreateSender(queueOrTopicName);
 
             messageBatch =

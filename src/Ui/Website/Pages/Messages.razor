@@ -10,6 +10,7 @@
     <div class="d-flex gap-10">
         <MudTooltip Text="Receive messages">
             <MudIconButton Icon="@Icons.Filled.Download" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Receive messages</MudIconButton>
+            <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Receive messages</MudIconButton>
         </MudTooltip>
     </div>
 
@@ -39,14 +40,16 @@
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Actions">
-                <MudTooltip Text="View details">
-                    <MudIconButton Size="Size.Small" OnClick="@(() => Model.ViewMessageDetails(context))" Icon="@Icons.Material.Outlined.Preview"/>
-                </MudTooltip>
                 <MudTooltip Text="Requeue">
-                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Send"/>
+                    <MudIconButton Size="Size.Small" 
+                                   OnClick="@(() => Model.Requeue(QueueOrTopicName, context))"
+                                   Icon="@Icons.Material.Outlined.Send"/>
                 </MudTooltip>
-                <MudTooltip Text="Edit and requeue">
-                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit"/>
+                <MudTooltip Text="View message details">
+                    <MudIconButton Size="Size.Small" OnClick="@(() => Model.ViewMessageDetails(context, false))" Icon="@Icons.Material.Outlined.Preview"/>
+                </MudTooltip>
+                <MudTooltip Text="Edit message">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => Model.ViewMessageDetails(context, true))"/>
                 </MudTooltip>
             </MudTd>
             <MudTd DataLabel="Message Id">@context.Id</MudTd>

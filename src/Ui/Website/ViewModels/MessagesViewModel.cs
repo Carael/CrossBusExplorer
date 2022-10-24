@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
+using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
 using MudBlazor;
@@ -103,18 +104,24 @@ public class MessagesViewModel : IMessagesViewModel
             DialogVisible = true;
         }
     }
-    public async Task ViewMessageDetails(Message message)
+    public async Task ViewMessageDetails(Message message, bool editMode)
     {
         var parameters = new DialogParameters
         {
             {
                 nameof(MessageDetailsDialog.Message), message
+            },
+            {
+                nameof(MessageDetailsDialog.QueueOrTopicName), _entity.QueueOrTopicName
+            },
+            {
+                nameof(MessageDetailsDialog.EditMode), editMode
             }
         };
 
         var dialogReference = _dialogService.Show<MessageDetailsDialog>(
             "Message details",
-            parameters, 
+            parameters,
             new DialogOptions
             {
                 FullWidth = true,
@@ -124,8 +131,39 @@ public class MessagesViewModel : IMessagesViewModel
                 Position = DialogPosition.Center
             });
 
-        var result = await dialogReference.Result;
-        //TODO: handle requeue when requested
+        var dialogResult = await dialogReference.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data is RequeueMessage requeueMessage)
+        {
+            Requeue(requeueMessage.QueueOrTopicName, requeueMessage.Message);
+        }
+    }
+    public async Task Requeue(string queueOrTopicName, Message message)
+    {
+        try
+        {
+            var sendMessageResult = await _messageService.SendMessagesAsync(
+                _entity.ConnectionName,
+                queueOrTopicName,
+                new[] { message.ToSendMessage() },
+                default);
+
+            //TODO: rethink the SendMessageAsync method result
+            if (sendMessageResult.Count == 1)
+            {
+                _snackbar.Add(
+                    $"Message successfully resend to queue/topic " +
+                    $"{queueOrTopicName}", Severity.Success);
+            }
+            else
+            {
+                _snackbar.Add("Message was not send. Please try again.", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Add($"Error while sending message. Error: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task<List<Message>> LoadMessagesAsync(
