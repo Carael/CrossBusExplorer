@@ -104,7 +104,7 @@ public class MessagesViewModel : IMessagesViewModel
             DialogVisible = true;
         }
     }
-    public async Task ViewMessageDetails(Message message, bool editMode)
+    public async Task ViewMessageDetails(Message? message, bool editMode)
     {
         var parameters = new DialogParameters
         {

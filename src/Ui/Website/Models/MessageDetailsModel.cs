@@ -10,6 +10,11 @@ public class MessageDetailsModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public MessageDetailsModel()
+    {
+        ApplicationProperties = new ObservableCollection<KeyValuePair>();
+    }
+
     private string _body;
 
     public string Body

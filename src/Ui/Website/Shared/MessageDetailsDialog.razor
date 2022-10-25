@@ -146,60 +146,63 @@
                               @bind-Value="@_formModel.TimeToLive"/>
             </td>
         </tr>
+        @if (Message != null)
+        {
+            <tr>
+                <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
+                <td>@Message?.SystemProperties.SequenceNumber"</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.State)</td>
+                <td>@Message.SystemProperties.State</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
+                <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
+                <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
+                <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
+            </tr>
 
-        <tr>
-            <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
-            <td>@Message.SystemProperties.SequenceNumber</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.State)</td>
-            <td>@Message.SystemProperties.State</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
-            <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
-            <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
-            <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
-        </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
+                <td>@Message.SystemProperties.DeliveryCount</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
+                <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
+                <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.LockedUntil)</td>
+                <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.LockToken)</td>
+                <td>@Message.SystemProperties.LockToken</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
+                <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
+                <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
+                <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
+            </tr>
+        }
 
-        <tr>
-            <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
-            <td>@Message.SystemProperties.DeliveryCount</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
-            <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
-            <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.LockedUntil)</td>
-            <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.LockToken)</td>
-            <td>@Message.SystemProperties.LockToken</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
-            <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
-            <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
-            <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
-        </tr>
         </tbody>
     </MudSimpleTable>
 </MudField>
@@ -242,7 +245,7 @@
                 <td></td>
                 <td>
                     <MudTooltip Text="Add new application property">
-                        <MudIconButton Icon="@Icons.Filled.Add" 
+                        <MudIconButton Icon="@Icons.Filled.Add"
                                        OnClick="@(AddNewApplicationProperty)"/>
                     </MudTooltip>
 

@@ -11,7 +11,11 @@
     <div class="d-flex gap-10">
         <MudTooltip Text="Receive messages">
             <MudIconButton Icon="@Icons.Filled.Download" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Receive messages</MudIconButton>
-            <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Send message</MudIconButton>
+            <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => Model.ViewMessageDetails(null, true))" ButtonType="ButtonType.Button">Send message</MudIconButton>
+        </MudTooltip>
+
+        <MudTooltip Text="Send message">
+            <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => Model.ViewMessageDetails(null, true))" ButtonType="ButtonType.Button">Send message</MudIconButton>
         </MudTooltip>
     </div>
 
@@ -42,7 +46,7 @@
         <RowTemplate>
             <MudTd DataLabel="Actions">
                 <MudTooltip Text="Requeue">
-                    <MudIconButton Size="Size.Small" 
+                    <MudIconButton Size="Size.Small"
                                    OnClick="@(() => Model.Requeue(QueueOrTopicName, context.ToSendMessageModel()))"
                                    Icon="@Icons.Material.Outlined.Send"/>
                 </MudTooltip>
