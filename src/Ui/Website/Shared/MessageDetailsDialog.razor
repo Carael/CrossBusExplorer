@@ -1,161 +1,243 @@
 @using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Website.Mappings
 @using CrossBusExplorer.Website.Models
+
 <MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            Message details
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <div class="d-flex gap-4">
-            <MudPaper Width="60%">
-                <MudTextField
-                    Variant="Variant.Outlined"
-                    Label="Body"
-                    Disabled="@(!EditMode)"
-                    Lines="26"
-                    Value="@Message.Body.TryFormatBody(Message.SystemProperties.ContentType)">
-                </MudTextField>
-            </MudPaper>
-            <MudPaper Width="40%" Class="d-flex flex-column gap-4">
-                <MudField Label="System properties" Variant="Variant.Outlined">
-                    <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
-                        <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Value</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>@nameof(Message.Id)</td>
-                            <td>@Message.Id</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
-                            <td>@Message.SystemProperties.SequenceNumber</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.Subject)</td>
-                            <td>@(Message.Subject ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.State)</td>
-                            <td>@Message.SystemProperties.State</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
-                            <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
-                            <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
-                            <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.To)</td>
-                            <td>@(Message.SystemProperties.To ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.ContentType)</td>
-                            <td>@(Message.SystemProperties.ContentType ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.CorrelationId)</td>
-                            <td>@(Message.SystemProperties.CorrelationId ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
-                            <td>@Message.SystemProperties.DeliveryCount</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
-                            <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
-                            <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.LockedUntil)</td>
-                            <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.LockToken)</td>
-                            <td>@Message.SystemProperties.LockToken</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.PartitionKey)</td>
-                            <td>@(Message.SystemProperties.PartitionKey ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.ReplyTo)</td>
-                            <td>@(Message.SystemProperties.ReplyTo ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.SessionId)</td>
-                            <td>@(Message.SystemProperties.SessionId ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
-                            <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
-                            <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.ScheduledEnqueueTime)</td>
-                            <td>@Message.SystemProperties.ScheduledEnqueueTime.ToUniversal()</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.TimeToLive)</td>
-                            <td>@Message.SystemProperties.TimeToLive.ToTimeSpanString()</td>
-                        </tr>
-                        <tr>
-                            <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
-                            <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
-                        </tr>
-                        </tbody>
-                    </MudSimpleTable>
-                </MudField>
-                <MudField Label="User properties" Variant="Variant.Outlined">
-                    <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 185px;">
-                        <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Value</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var userProperty in Message.ApplicationProperties)
-                        {
-                            <tr>
-                                <td>@userProperty.Key</td>
-                                <td>@userProperty.Value</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </MudSimpleTable>
-                </MudField>
-            </MudPaper>
-        </div>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Color="Color.Default"
-                   ButtonType="ButtonType.Button"
-                   OnClick="@(CloseDialog)">
-            Close
-        </MudButton>
-        <MudButton Color="Color.Success"
-                   ButtonType="ButtonType.Button"
-                   OnClick="@(Requeue)">
-            Requeue (current queue or topic)
-        </MudButton>
-    </DialogActions>
+<TitleContent>
+    <MudText Typo="Typo.h6">
+        Message details
+    </MudText>
+</TitleContent>
+<DialogContent>
+<EditForm Model="@_formModel">
+<div class="d-flex gap-4">
+<MudPaper Width="60%">
+    <MudTextField
+        Variant="Variant.Outlined"
+        Label="Body"
+        Disabled="@(!EditMode)"
+        Lines="26"
+        T="string"
+        @bind-Value="@_formModel.Body">
+    </MudTextField>
+</MudPaper>
+<MudPaper Width="40%" Class="d-flex flex-column gap-4">
+    <MudField Label="System properties" Variant="Variant.Outlined">
+        <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
+            <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>@nameof(Message.Id)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.Id)"
+                                  @bind-Value="@_formModel.Id"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.Subject)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.Subject)"
+                                  @bind-Value="@_formModel.Subject"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(_formModel.To)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.To)"
+                                  bind-Value="@_formModel.To"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(_formModel.ContentType)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.ContentType)"
+                                  @bind-Value="@_formModel.ContentType"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.CorrelationId)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.CorrelationId)"
+                                  @bind-Value="@_formModel.CorrelationId"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.PartitionKey)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.PartitionKey)"
+                                  @bind-Value="@_formModel.PartitionKey"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ReplyTo)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.ReplyTo)"
+                                  bind-Value="@_formModel.ReplyTo"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.SessionId)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  T="string"
+                                  For="@(() => _formModel.SessionId)"
+                                  bind-Value="@_formModel.SessionId"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ScheduledEnqueueTime)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _formModel.ScheduledEnqueueTime)"
+                                  T="DateTimeOffset?"
+                                  Format="@WellKnown.Format.DateFormat"
+                                  Converter="@WellKnown.Converters.DateTimeOffsetConverter"
+                                  @bind-Value="@_formModel.ScheduledEnqueueTime"/>
+                </td>
+            </tr>
+            <tr>
+                <td>@nameof(_formModel.TimeToLive)</td>
+                <td>
+                    <MudTextField DisableUnderLine="@(!EditMode)"
+                                  T="TimeSpan?"
+                                  Variant="Variant.Text"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _formModel.TimeToLive)"
+                                  Pattern="@WellKnown.Regex.TimeSpan"
+                                  Converter="@WellKnown.Converters.TimeSpanConverter"
+                                  @bind-Value="@_formModel.TimeToLive"/>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
+                <td>@Message.SystemProperties.SequenceNumber</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.State)</td>
+                <td>@Message.SystemProperties.State</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
+                <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
+                <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
+                <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
+            </tr>
+
+            <tr>
+                <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
+                <td>@Message.SystemProperties.DeliveryCount</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
+                <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
+                <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.LockedUntil)</td>
+                <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.LockToken)</td>
+                <td>@Message.SystemProperties.LockToken</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
+                <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
+                <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
+            </tr>
+            <tr>
+                <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
+                <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
+            </tr>
+            </tbody>
+        </MudSimpleTable>
+    </MudField>
+    <MudField Label="User properties" Variant="Variant.Outlined">
+        <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 185px;">
+            <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var userProperty in Message.ApplicationProperties)
+            {
+                <tr>
+                    <td>@userProperty.Key</td>
+                    <td>@userProperty.Value</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+    </MudField>
+</MudPaper>
+</div>
+</EditForm>
+</DialogContent>
+<DialogActions>
+    <MudButton Color="Color.Default"
+               ButtonType="ButtonType.Button"
+               OnClick="@(CloseDialog)">
+        Close
+    </MudButton>
+    <MudButton Color="Color.Success"
+               ButtonType="ButtonType.Button"
+               OnClick="@(Requeue)">
+        Requeue (current queue or topic)
+    </MudButton>
+</DialogActions>
 </MudDialog>
 
 @code {
@@ -163,17 +245,25 @@
     MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public Message Message { get; set; }
+    public string QueueOrTopicName { get; set; }
 
     [Parameter]
-    public string QueueOrTopicName { get; set; }
-    
-    [Parameter]
     public bool EditMode { get; set; }
+
+    [Parameter]
+    public Message? Message { get; set; }
+
+    private MessageDetailsModel _formModel;
 
     async Task Requeue()
     {
         MudDialog.Close(new RequeueMessage(QueueOrTopicName, Message));
+    }
+
+    protected override void OnInitialized()
+    {
+        _formModel = Message?.ToSendMessageModel() ?? new MessageDetailsModel();
+        _formModel.PropertyChanged += (_, _) => StateHasChanged();
     }
 
     private void CloseDialog()
