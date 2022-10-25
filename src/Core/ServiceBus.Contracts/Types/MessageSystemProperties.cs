@@ -19,6 +19,6 @@ public record MessageSystemProperties(
     DateTimeOffset? ScheduledEnqueueTime,
     long SequenceNumber,
     string? SessionId,
-    MessageState State,
+    MessageState? State,
     TimeSpan TimeToLive,
     string? To);

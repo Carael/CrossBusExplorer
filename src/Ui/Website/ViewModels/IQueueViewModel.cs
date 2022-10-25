@@ -10,22 +10,25 @@ public interface IQueueViewModel : INotifyPropertyChanged
     event QueueAddedEventHandler? QueueAdded;
     event QueueRemovedEventHandler? QueueRemoved;
     QueueFormModel? Form { get; }
+    QueueDetails? QueueDetails { get; }
     Task InitializeForm(
         string connectionName,
         string? queueName,
         CancellationToken cancellationToken);
     Task SaveQueueFormAsync(string connectionName);
-    QueueDetails? QueueDetails { get; }
     void NavigateToNewQueueForm(string connectionName);
     Task CloneQueue(
         string connectionName,
         string sourceQueueName,
         CancellationToken cancellationToken);
     Task DeleteQueue(string connectionName, string queueName, CancellationToken cancellationToken);
-    Task ViewMessages(string connectionName, string queueName, CancellationToken cancellationToken);
     Task UpdateQueueStatus(
-        string connectionName, 
-        string queueName, 
+        string connectionName,
+        string queueName,
         QueueStatus active,
+        CancellationToken cancellationToken);
+    Task PurgeMessages(
+        string connectionName,
+        string queueName,
         CancellationToken cancellationToken);
 }
