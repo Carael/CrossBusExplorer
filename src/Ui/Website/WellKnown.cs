@@ -12,11 +12,6 @@ internal static class WellKnown
         public static string TimeSpan = @"\d+\.((0?\d)|(1\d)|(2[0-3]))(:[0-5]\d){2}";
     }
 
-    internal static class Mask
-    {
-        public static string TimeSpanHelperText = "Format: DDDD.HH:MM:SS";
-    }
-
     internal static class Format
     {
         public static string DateFormat = "dd.MM.yyyy hh:MM:ss";

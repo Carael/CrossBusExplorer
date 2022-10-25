@@ -2,6 +2,7 @@
 @using CrossBusExplorer.Website.Models
 @using CrossBusExplorer.Website.Models.Validators
 @using CrossBusExplorer.ServiceBus.Contracts
+@using CrossBusExplorer.Website.Mappings
 @using CrossBusExplorer.Website.ViewModels
 @inherits LayoutComponentBase
 
@@ -42,7 +43,7 @@
             <MudTd DataLabel="Actions">
                 <MudTooltip Text="Requeue">
                     <MudIconButton Size="Size.Small" 
-                                   OnClick="@(() => Model.Requeue(QueueOrTopicName, context))"
+                                   OnClick="@(() => Model.Requeue(QueueOrTopicName, context.ToSendMessageModel()))"
                                    Icon="@Icons.Material.Outlined.Send"/>
                 </MudTooltip>
                 <MudTooltip Text="View message details">

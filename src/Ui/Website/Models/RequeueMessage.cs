@@ -3,4 +3,4 @@ namespace CrossBusExplorer.Website.Models;
 
 public record RequeueMessage(
     string QueueOrTopicName,
-    Message Message);
+    MessageDetailsModel Message);

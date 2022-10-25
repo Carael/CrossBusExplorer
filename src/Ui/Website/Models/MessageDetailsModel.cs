@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CrossBusExplorer.Website.Extensions;
@@ -20,7 +21,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _subject;
 
     public string? Subject
@@ -32,7 +33,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _to;
 
     public string? To
@@ -44,7 +45,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _contentType;
 
     public string? ContentType
@@ -68,7 +69,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _id;
 
     public string? Id
@@ -80,7 +81,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _partitionKey;
 
     public string? PartitionKey
@@ -92,7 +93,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _replyTo;
 
     public string? ReplyTo
@@ -104,7 +105,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private string? _sessionId;
 
     public string? SessionId
@@ -116,7 +117,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private DateTimeOffset? _scheduledEnqueueTime;
 
     public DateTimeOffset? ScheduledEnqueueTime
@@ -128,7 +129,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
+
     private TimeSpan? _timeToLive;
 
     public TimeSpan? TimeToLive
@@ -140,15 +141,16 @@ public class MessageDetailsModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
-    private IDictionary<string, string> _applicationProperties;
 
-    public IDictionary<string, string> ApplicationProperties
+    private ObservableCollection<KeyValuePair> _applicationProperties;
+
+    public ObservableCollection<KeyValuePair> ApplicationProperties
     {
         get => _applicationProperties;
         set
         {
             _applicationProperties = value;
+            _applicationProperties.CollectionChanged += (_, _) => this.Notify(PropertyChanged);
             this.Notify(PropertyChanged);
         }
     }

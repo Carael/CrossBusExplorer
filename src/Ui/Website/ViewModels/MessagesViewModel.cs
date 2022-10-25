@@ -139,7 +139,8 @@ public class MessagesViewModel : IMessagesViewModel
             Requeue(requeueMessage.QueueOrTopicName, requeueMessage.Message);
         }
     }
-    public async Task Requeue(string queueOrTopicName, Message message)
+
+    public async Task Requeue(string queueOrTopicName, MessageDetailsModel message)
     {
         try
         {

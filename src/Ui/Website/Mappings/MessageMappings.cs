@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Linq;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
@@ -6,21 +7,21 @@ namespace CrossBusExplorer.Website.Mappings;
 
 public static class MessageMappings
 {
-    public static SendMessage ToSendMessage(this Message message) =>
+    public static SendMessage ToSendMessage(this MessageDetailsModel message) =>
         new SendMessage(
-            message.Body.TryFormatBody(message.SystemProperties.ContentType),
+            message.Body.TryFormatBody(message.ContentType),
             message.Subject,
-            message.SystemProperties.To,
-            message.SystemProperties.ContentType,
-            message.SystemProperties.CorrelationId,
+            message.To,
+            message.ContentType,
+            message.CorrelationId,
             message.Id,
-            message.SystemProperties.PartitionKey,
-            message.SystemProperties.ReplyTo,
-            message.SystemProperties.SessionId,
-            message.SystemProperties.ScheduledEnqueueTime,
-            message.SystemProperties.TimeToLive,
+            message.PartitionKey,
+            message.ReplyTo,
+            message.SessionId,
+            message.ScheduledEnqueueTime,
+            message.TimeToLive,
             message.ApplicationProperties?.ToDictionary(p => p.Key, p => p.Value));
-    
+
     public static MessageDetailsModel ToSendMessageModel(this Message message) =>
         new MessageDetailsModel
         {
@@ -36,6 +37,8 @@ public static class MessageMappings
             ScheduledEnqueueTime = message.SystemProperties.ScheduledEnqueueTime,
             TimeToLive = message.SystemProperties.TimeToLive,
             ApplicationProperties =
-                message.ApplicationProperties?.ToDictionary(p => p.Key, p => p.Value)
+                new ObservableCollection<KeyValuePair>(
+                    message.ApplicationProperties?.Select(p =>
+                        new KeyValuePair { Key = p.Key, Value = p.Value }).ToList())
         };
 }

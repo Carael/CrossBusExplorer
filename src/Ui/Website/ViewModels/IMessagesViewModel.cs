@@ -19,5 +19,5 @@ public interface IMessagesViewModel : INotifyPropertyChanged
         CancellationToken cancellationToken);
     void Initialize(CurrentMessagesEntity entity);
     Task ViewMessageDetails(Message context, bool editMode);
-    Task Requeue(string queueOrTopicName, Message message);
+    Task Requeue(string queueOrTopicName, MessageDetailsModel message);
 }
