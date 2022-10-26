@@ -1,0 +1,26 @@
+@using CrossBusExplorer.Website.ViewModels
+
+@foreach (var job in Model.Jobs)
+{
+    <MudGrid Style="margin: 10px">
+        <MudItem xs="8">
+            <MudField>@($"{job.Name} {job.Progress}%")</MudField>
+            <MudProgressLinear Color="Color.Primary" Value="@job.Progress" />
+        </MudItem>
+        <MudItem xs="2">
+            <MudTooltip Text="Cancel">
+                <MudIconButton Icon="@Icons.Filled.Cancel" OnClick="@(() => Model.CancelJob(job))"></MudIconButton>
+            </MudTooltip>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Inject]
+    public IJobsViewModel Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model.PropertyChanged += (_, _) => StateHasChanged();
+    }
+}

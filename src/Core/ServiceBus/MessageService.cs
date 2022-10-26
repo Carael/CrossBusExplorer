@@ -15,7 +15,7 @@ public class MessageService : IMessageService
     {
         _connectionManagement = connectionManagement;
     }
-    
+
     public async Task<IReadOnlyList<Message>> GetMessagesAsync(
         string connectionName,
         string queueOrTopicName,
@@ -29,9 +29,9 @@ public class MessageService : IMessageService
     {
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-        
+
             await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
 
             await using var receiver =
@@ -61,47 +61,39 @@ public class MessageService : IMessageService
         }
     }
 
-    public async Task<Result> PurgeAsync(
+    public async IAsyncEnumerable<PurgeResult> PurgeAsync(
         string connectionName,
-        string name,
+        string topicOrQueueName,
+        string? subscriptionName,
         SubQueue subQueue,
         CancellationToken cancellationToken)
     {
-        try
+        var connection =
+            await _connectionManagement.GetAsync(connectionName, cancellationToken);
+
+        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+        await using var receiver = GetReceiver(
+            client,
+            topicOrQueueName,
+            subscriptionName,
+            subQueue,
+            ReceiveMode.ReceiveAndDelete);
+
+        var totalRemoved = 0;
+        int removedCount = -1;
+
+        while (removedCount > 0 || removedCount == -1)
         {
-            var connection = 
-                await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
-            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
-            await using var receiver = client.CreateReceiver(name, new ServiceBusReceiverOptions
-            {
-                SubQueue = (Azure.Messaging.ServiceBus.SubQueue)subQueue,
-                ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
-            });
+            removedCount = (await receiver.ReceiveMessagesAsync(
+                128,
+                TimeSpan.FromSeconds(10),
+                cancellationToken)).Count;
+            totalRemoved += removedCount;
 
-            var totalRemoved = 0;
-            var removedCount = 0;
-            
-            //TODO: async enumerable
-            
-            do
-            {
-                removedCount = (await receiver.ReceiveMessagesAsync(
-                    1024,
-                    TimeSpan.FromSeconds(5),
-                    cancellationToken)).Count;
-                totalRemoved += removedCount;
-
-            } while (removedCount > 0);
-
-            return new Result(totalRemoved);
+            yield return new PurgeResult(totalRemoved);
         }
-        catch (ServiceBusException ex)
-        {
-            //TODO: log
 
-            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
-        }
+        yield return new PurgeResult(totalRemoved);
     }
 
     public async Task<Result> SendMessagesAsync(
@@ -114,9 +106,9 @@ public class MessageService : IMessageService
 
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
+
             await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
             await using var sender = client.CreateSender(queueOrTopicName);
 
@@ -169,7 +161,7 @@ public class MessageService : IMessageService
             messageBatch?.Dispose();
         }
     }
-    
+
     private ServiceBusReceiver GetReceiver(
         ServiceBusClient client,
         string queueOrTopicName,
@@ -204,13 +196,13 @@ public class MessageService : IMessageService
         if (receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock)
         {
             return await receiver.PeekMessagesAsync(
-                maxMessages??10,
+                maxMessages ?? 10,
                 fromSequenceNumber,
                 cancellationToken);
         }
 
         return await receiver.ReceiveMessagesAsync(
-            maxMessages??10,
+            maxMessages ?? 10,
             default,
             cancellationToken: cancellationToken);
     }

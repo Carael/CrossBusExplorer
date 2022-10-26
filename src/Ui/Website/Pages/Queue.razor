@@ -8,18 +8,18 @@
 <MudText Typo="Typo.h3" GutterBottom="true">Queue @QueueName</MudText>
 
 <MudTooltip Text="Add new queue">
-    <MudIconButton Icon="@Icons.Material.Outlined.Add" 
+    <MudIconButton Icon="@Icons.Material.Outlined.Add"
                    OnClick="@(() => Model.NavigateToNewQueueForm(ConnectionName))"/>
 </MudTooltip>
 @if (Model.Form?.OperationType != OperationType.Create)
 {
     <MudTooltip Text="Clone queue">
-        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" 
+        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                        OnClick="@(() => Model.CloneQueue(ConnectionName, QueueName, default))"/>
     </MudTooltip>
 
     <MudTooltip Text="Refresh">
-        <MudIconButton Icon="@Icons.Material.Outlined.Refresh" 
+        <MudIconButton Icon="@Icons.Material.Outlined.Refresh"
                        OnClick="@(() => Model.InitializeForm(ConnectionName, QueueName, default))"/>
     </MudTooltip>
 }
@@ -98,73 +98,104 @@
                             <MudItem xs="4">
                                 @if (Model.QueueDetails != null)
                                 {
-                                    <MudField Disabled="true" 
-                                              Label="Status" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.Status</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Size" 
-                                              Margin="Margin.Dense">@($"{Model.QueueDetails.Info.SizeInBytes}Bytes") (@($"{Model.QueueDetails.Info.SizeInMB}MB"))</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Created at" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.CreatedAt.ToUniversal()</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Accessed at" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.AccessedAt.ToUniversal()</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Active messages count" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.ActiveMessagesCount</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Dead letter messages count" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.DeadLetterMessagesCount</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="Scheduled messages count" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.ScheduledMessagesCount</MudField>
-                                    <MudField Disabled="true" 
-                                              Label="In transfer messages count" 
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.InTransferMessagesCount</MudField>
-                                    <MudField Disabled="true" 
+                                    <MudField Disabled="true"
+                                              Label="Status"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.Status
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Size"
+                                              Margin="Margin.Dense">
+                                        @($"{Model.QueueDetails.Info.SizeInBytes}Bytes") (@($"{Model.QueueDetails.Info.SizeInMB}MB"))
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Created at"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.CreatedAt.ToUniversal()
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Accessed at"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.AccessedAt.ToUniversal()
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Active messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.ActiveMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Dead letter messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.DeadLetterMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Scheduled messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.ScheduledMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="In transfer messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.InTransferMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
                                               Label="Transfer ded letter messages count"
-                                              Margin="Margin.Dense">@Model.QueueDetails.Info.TransferDeadLetterMessagesCount</MudField>
+                                              Margin="Margin.Dense">
+                                        @Model.QueueDetails.Info.TransferDeadLetterMessagesCount
+                                    </MudField>
                                 }
                             </MudItem>
                         </MudGrid>
                     </MudCardContent>
                     <MudCardActions>
                         <MudTooltip Text="Save">
-                            <MudIconButton Icon=@Icons.Filled.Save 
-                                           ButtonType="ButtonType.Submit" 
-                                           Color="Color.Success" 
-                                           Class="px-10"></MudIconButton>
+                            <MudIconButton Icon=@Icons.Filled.Save
+                                           ButtonType="ButtonType.Submit"
+                                           Color="Color.Success"
+                                           Class="px-10">
+                            </MudIconButton>
                         </MudTooltip>
                         @if (Model.Form?.OperationType != OperationType.Create)
                         {
                             if (Model.QueueDetails.Info.Status == QueueStatus.Active)
                             {
                                 <MudTooltip Text="Disable">
-                                    <MudIconButton Icon=@Icons.Filled.Lock 
-                                                   ButtonType="ButtonType.Button" 
-                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Disabled, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                                    <MudIconButton Icon=@Icons.Filled.Lock
+                                                   ButtonType="ButtonType.Button"
+                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Disabled, default))" Color="Color.Default" Class="px-10">
+                                    </MudIconButton>
                                 </MudTooltip>
                             }
                             else
                             {
                                 <MudTooltip Text="Activate">
-                                    <MudIconButton Icon=@Icons.Filled.LockOpen 
-                                                   ButtonType="ButtonType.Button" 
-                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10"></MudIconButton>
+                                    <MudIconButton Icon=@Icons.Filled.LockOpen
+                                                   ButtonType="ButtonType.Button"
+                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10">
+                                    </MudIconButton>
                                 </MudTooltip>
                             }
                             <MudTooltip Text="Purge messages">
-                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue 
-                                               ButtonType="ButtonType.Button" 
-                                               OnClick="@(() => Model.PurgeMessages(ConnectionName, QueueName, default))" 
-                                               Color="Color.Default" Class="px-10"></MudIconButton>
+                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue
+                                               ButtonType="ButtonType.Button"
+                                               OnClick="@(() => Model.PurgeMessages(ConnectionName, QueueName, default))"
+                                               Color="Color.Default" Class="px-10">
+                                </MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Resend dead letter messages">
+                                <MudIconButton Icon=@Icons.Filled.Refresh
+                                               ButtonType="ButtonType.Button"
+                                               Disabled=@(Model.QueueDetails.Info.DeadLetterMessagesCount==0)
+                                               OnClick="@(() => Model.ResendDeadLetters(ConnectionName, QueueName, default))"
+                                               Color="Color.Default" Class="px-10">
+                                </MudIconButton>
                             </MudTooltip>
                             <MudTooltip Text="Delete">
-                                <MudIconButton Icon=@Icons.Filled.Delete 
-                                               ButtonType="ButtonType.Button" 
-                                               OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))" 
-                                               Color="Color.Error" Class="px-10"></MudIconButton>
+                                <MudIconButton Icon=@Icons.Filled.Delete
+                                               ButtonType="ButtonType.Button"
+                                               OnClick="@(() => Model.DeleteQueue(ConnectionName, QueueName, default))"
+                                               Color="Color.Error" Class="px-10">
+                                </MudIconButton>
                             </MudTooltip>
                         }
                     </MudCardActions>
@@ -172,7 +203,8 @@
             </EditForm>
         }
     </MudTabPanel>
-    @if(Model.Form?.OperationType == OperationType.Update){
+    @if (Model.Form?.OperationType == OperationType.Update)
+    {
         <MudTabPanel Text="Messages" ToolTip="Messages">
             <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@QueueName"/>
         </MudTabPanel>

@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         collection.AddScoped<INavigationViewModel, NavigationViewModel>();
         collection.AddScoped<IQueueViewModel, QueueViewModel>();
         collection.AddScoped<IMessagesViewModel, MessagesViewModel>();
+        collection.AddScoped<IJobsViewModel, JobsViewModel>();
         
         return collection.AddMudServices(config =>
         {

@@ -1,0 +1,63 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Select which sub queue to purge
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="3">
+            <MudField Variant="Variant.Outlined" Label="Queue type">
+                <MudRadioGroup @bind-SelectedOption="_subQueue"
+                               For="@(() => _subQueue)">
+                    <MudRadio Dense="true"
+                              Size="Size.Small"
+                              Option="SubQueue.None">
+                        Active messages
+                    </MudRadio>
+                    <MudRadio Dense="true"
+                              Size="Size.Small"
+                              Option="SubQueue.DeadLetter">
+                        Dead letter
+                    </MudRadio>
+                    <MudRadio Dense="true"
+                              Size="Size.Small"
+                              Option="SubQueue.TransferDeadLetter">
+                        Transfer dead letter
+                    </MudRadio>
+                </MudRadioGroup>
+            </MudField>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton ButtonType="ButtonType.Reset"
+                   Color="Color.Default"
+                   OnClick="@(CloseDialog)"
+                   Class="px-10">
+            Close
+        </MudButton>
+        <MudButton ButtonType="ButtonType.Button"
+                   Color="Color.Success"
+                   OnClick="@(Submit)"
+                   Class="px-10">
+            Purge
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    private SubQueue _subQueue;
+
+    private void CloseDialog()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+    }
+
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(_subQueue));
+    }
+}

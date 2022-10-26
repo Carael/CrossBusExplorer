@@ -14,9 +14,10 @@ public interface IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken);
 
-    Task<Result> PurgeAsync(
+    IAsyncEnumerable<PurgeResult> PurgeAsync(
         string connectionName,
-        string name,
+        string topicOrQueueName,
+        string? subscriptionName,
         SubQueue subQueue,
         CancellationToken cancellationToken);
 

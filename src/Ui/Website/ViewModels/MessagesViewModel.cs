@@ -11,6 +11,7 @@ using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
+using CrossBusExplorer.Website.Shared.Messages;
 using MudBlazor;
 namespace CrossBusExplorer.Website.ViewModels;
 

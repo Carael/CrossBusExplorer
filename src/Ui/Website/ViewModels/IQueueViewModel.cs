@@ -31,4 +31,8 @@ public interface IQueueViewModel : INotifyPropertyChanged
         string connectionName,
         string queueName,
         CancellationToken cancellationToken);
+    Task ResendDeadLetters(
+        string connectionName,
+        string queueName,
+        CancellationToken cancellationToken);
 }
