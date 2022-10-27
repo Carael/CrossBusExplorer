@@ -99,15 +99,15 @@ public class MessageService : IMessageService
             ReceiveMode.ReceiveAndDelete);
 
         var totalRemoved = 0;
-        int removedCount = -1;
+        int batchRemovedCount = -1;
 
-        while (removedCount > 0 || removedCount == -1)
+        while (batchRemovedCount > 0 || batchRemovedCount == -1)
         {
-            removedCount = (await receiver.ReceiveMessagesAsync(
+            batchRemovedCount = (await receiver.ReceiveMessagesAsync(
                 receiveBatch,
                 TimeSpan.FromSeconds(10),
                 cancellationToken)).Count;
-            totalRemoved += removedCount;
+            totalRemoved += batchRemovedCount;
 
             yield return new PurgeResult(totalRemoved);
         }
@@ -136,9 +136,9 @@ public class MessageService : IMessageService
         await using ServiceBusSender sender = client.CreateSender(destinationTopicOrQueueName);
 
         var totalResend = 0;
-        int resendCount = -1;
+        int batchResendCount = -1;
 
-        while (resendCount > 0 || resendCount == -1)
+        while (batchResendCount > 0 || batchResendCount == -1)
         {
             IReadOnlyList<ServiceBusReceivedMessage> messages = await receiver.ReceiveMessagesAsync(
                 receiveBatch,
@@ -149,8 +149,9 @@ public class MessageService : IMessageService
                 sender, 
                 messages.Select(p => p.MapToServiceBusMessage()).ToList(), 
                 cancellationToken);
-            
-            totalResend += resendCount;
+
+            batchResendCount = messages.Count;
+            totalResend += batchResendCount;
 
             yield return new ResendResult(totalResend);
         }

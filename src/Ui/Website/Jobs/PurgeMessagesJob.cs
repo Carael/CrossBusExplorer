@@ -66,5 +66,5 @@ public class PurgeMessagesJob : IJob
         _cancellationTokenSource.Cancel();
     }
     public string Name =>
-        $"Purge messages of {_queueOrTopicName} {_subscriptionName}".Trim();
+        $"Purge messages from {_queueOrTopicName} {_subscriptionName}".Trim();
 }

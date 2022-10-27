@@ -259,14 +259,22 @@ public class QueueViewModel : IQueueViewModel
         var parameters = new DialogParameters();
         parameters.Add(
             nameof(ConfirmDialog.ContentText),
-            $"Are you sure you want to resend all dead letter messages from queue {queueName}?");
+            $"Are you sure you want to reprocess all dead letter messages from queue {queueName}?");
 
         var dialog = _dialogService.Show<ConfirmDialog>("Confirm", parameters);
         var dialogResult = await dialog.Result;
 
         if (dialogResult.Data is true)
         {
-
+            await _jobsViewModel.ScheduleJob(
+                new ResendMessagesJob(
+                    connectionName,
+                    queueName,
+                    null,
+                    SubQueue.DeadLetter,
+                    queueName,
+                    GetTotalMessagesCount(SubQueue.DeadLetter),
+                    _messageService));
         }
     }
 

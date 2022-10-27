@@ -39,6 +39,8 @@ public class JobsViewModel : IJobsViewModel
     {
         if (job.Progress == WellKnown.ProgressCompleted)
         {
+            job.Cancel();
+            job.PropertyChanged -= (_, _) => HandleJobUpdate(job);
             _snackbar.Add($"Job {job.Name} completed.", Severity.Success);
             _jobs.Remove(job);
         }
