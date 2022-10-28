@@ -3,14 +3,15 @@
         @ContentText
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="@(()=>Submit(true))">Yes</MudButton>
-        <MudButton Color="Color.Primary" OnClick="@(()=>Submit(false))">No</MudButton>
+        <MudButton Color="Color.Default" OnClick="@(() => Submit(false))">No</MudButton>
+        <MudButton Color="Color.Success" OnClick="@(() => Submit(true))">Yes</MudButton>
     </DialogActions>
 </MudDialog>
+
 @code {
-    [CascadingParameter] 
+    [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
-    
+
     [Parameter]
     public string ContentText { get; set; }
 

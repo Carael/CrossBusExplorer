@@ -5,6 +5,7 @@ namespace CrossBusExplorer.Website;
 
 internal static class WellKnown
 {
+    internal static int ProgressCompleted = 100;
     internal static string DefaultConfirmSuccessResult => "confirm";
 
     internal static class Regex
@@ -51,5 +52,6 @@ internal static class WellKnown
                     return null;
                 }
             };
+        
     }
 }

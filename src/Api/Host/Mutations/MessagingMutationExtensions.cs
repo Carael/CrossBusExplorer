@@ -9,16 +9,18 @@ public class MessagingMutationExtensions
 {
     [Error<ServiceBusOperationException>]
     [UseMutationConvention(PayloadFieldName = "result")]
-    public async Task<Result> PurgeAsync(
+    public IAsyncEnumerable<PurgeResult> PurgeAsync(
         [Service] IMessageService messageService,
         string connectionName,
-        string queueName,
+        string queueOrTopicName,
+        string? subscriptionName,
         SubQueue subQueue,
         CancellationToken cancellationToken)
     {
-        return await messageService.PurgeAsync(
+        return messageService.PurgeAsync(
             connectionName,
-            queueName,
+            queueOrTopicName,
+            subscriptionName,
             subQueue,
             cancellationToken);
     }

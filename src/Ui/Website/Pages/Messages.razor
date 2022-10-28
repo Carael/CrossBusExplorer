@@ -8,10 +8,9 @@
 
 <MudPaper>
 
-    <div class="d-flex gap-10">
+    <div class="d-flex gap-2">
         <MudTooltip Text="Receive messages">
             <MudIconButton Icon="@Icons.Filled.Download" OnClick="@(() => { Model.DialogVisible = true; })" ButtonType="ButtonType.Button">Receive messages</MudIconButton>
-            <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => Model.ViewMessageDetails(null, true))" ButtonType="ButtonType.Button">Send message</MudIconButton>
         </MudTooltip>
 
         <MudTooltip Text="Send message">

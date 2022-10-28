@@ -104,4 +104,74 @@ public static class MessageMappings
 
         return sbMessage;
     }
+
+    public static ServiceBusMessage MapToServiceBusMessage(
+        this ServiceBusReceivedMessage receivedMessage)
+    {
+        var sbMessage = new ServiceBusMessage(receivedMessage.Body);
+
+        if (!string.IsNullOrEmpty(receivedMessage.Subject))
+        {
+            sbMessage.Subject = receivedMessage.Subject;
+        }
+
+        if (receivedMessage.ApplicationProperties != null)
+        {
+            foreach (var applicationProperty in receivedMessage.ApplicationProperties)
+            {
+                sbMessage.ApplicationProperties.Add(
+                    applicationProperty.Key,
+                    applicationProperty.Value);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.To))
+        {
+            sbMessage.To = receivedMessage.To;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.ContentType))
+        {
+            sbMessage.ContentType = receivedMessage.ContentType;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.CorrelationId))
+        {
+            sbMessage.CorrelationId = receivedMessage.CorrelationId;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.MessageId))
+        {
+            sbMessage.MessageId = receivedMessage.MessageId;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.PartitionKey))
+        {
+            sbMessage.PartitionKey = receivedMessage.PartitionKey;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.ReplyTo))
+        {
+            sbMessage.ReplyTo = receivedMessage.ReplyTo;
+        }
+
+        if (!string.IsNullOrEmpty(receivedMessage.SessionId))
+        {
+            sbMessage.SessionId = receivedMessage.SessionId;
+        }
+
+        if (receivedMessage.ScheduledEnqueueTime != null &&
+            receivedMessage.ScheduledEnqueueTime != DateTimeOffset.MinValue)
+        {
+            sbMessage.ScheduledEnqueueTime = receivedMessage.ScheduledEnqueueTime;
+        }
+
+        if (receivedMessage.TimeToLive != null &&
+            receivedMessage.ScheduledEnqueueTime != DateTimeOffset.MinValue)
+        {
+            sbMessage.TimeToLive = receivedMessage.TimeToLive;
+        }
+
+        return sbMessage;
+    }
 }

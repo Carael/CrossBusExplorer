@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
+using CrossBusExplorer.Website.Jobs;
 using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Pages;
 using CrossBusExplorer.Website.Shared;
+using CrossBusExplorer.Website.Shared.Messages;
+using CrossBusExplorer.Website.Shared.Queue;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 namespace CrossBusExplorer.Website.ViewModels;
@@ -18,10 +21,12 @@ public class QueueViewModel : IQueueViewModel
     public event PropertyChangedEventHandler? PropertyChanged;
     public event QueueAddedEventHandler? QueueAdded;
     public event QueueRemovedEventHandler? QueueRemoved;
-    
+
     private readonly ISnackbar _snackbar;
     private readonly NavigationManager _navigationManager;
     private readonly IDialogService _dialogService;
+    private readonly IJobsViewModel _jobsViewModel;
+    private readonly IMessageService _messageService;
     private readonly INavigationViewModel _navigationViewModel;
     private readonly IQueueService _queueService;
     private QueueFormModel? _form;
@@ -31,12 +36,16 @@ public class QueueViewModel : IQueueViewModel
         IQueueService queueService,
         ISnackbar snackbar,
         NavigationManager navigationManager,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IJobsViewModel jobsViewModel,
+        IMessageService messageService)
     {
         _queueService = queueService;
         _snackbar = snackbar;
         _navigationManager = navigationManager;
         _dialogService = dialogService;
+        _jobsViewModel = jobsViewModel;
+        _messageService = messageService;
     }
 
     public QueueFormModel? Form
@@ -80,7 +89,7 @@ public class QueueViewModel : IQueueViewModel
         }
     }
     private void HandleSaveResult(
-        string connectionName, 
+        string connectionName,
         OperationResult<QueueDetails> result,
         OperationType operationType)
     {
@@ -130,17 +139,17 @@ public class QueueViewModel : IQueueViewModel
     {
         _navigationManager.NavigateTo($"new-queue/{connectionName}");
     }
-    
+
     public async Task CloneQueue(
-        string connectionName, 
-        string sourceQueueName, 
+        string connectionName,
+        string sourceQueueName,
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
-        
+
         parameters.Add(nameof(CloneQueueDialog.ConnectionName), connectionName);
         parameters.Add(nameof(CloneQueueDialog.SourceDialogName), sourceQueueName);
-        
+
         var dialog = _dialogService.Show<CloneQueueDialog>(
             $"Clone queue {sourceQueueName}",
             parameters,
@@ -164,8 +173,8 @@ public class QueueViewModel : IQueueViewModel
         }
     }
     public async Task DeleteQueue(
-        string connectionName, 
-        string queueName, 
+        string connectionName,
+        string queueName,
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
@@ -202,8 +211,8 @@ public class QueueViewModel : IQueueViewModel
     }
 
     public async Task UpdateQueueStatus(
-        string connectionName, 
-        string queueName, 
+        string connectionName,
+        string queueName,
         QueueStatus status,
         CancellationToken cancellationToken)
     {
@@ -211,15 +220,62 @@ public class QueueViewModel : IQueueViewModel
             connectionName,
             new UpdateQueueOptions(queueName, Status: status),
             cancellationToken);
-        
+
         HandleSaveResult(connectionName, result, OperationType.Update);
     }
-    
+
     public async Task PurgeMessages(
         string connectionName,
         string queueName,
         CancellationToken cancellationToken)
     {
+        var dialog = _dialogService.Show<PurgeMessagesDialog>();
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult.Data is SubQueue subQueue)
+        {
+            await _jobsViewModel.ScheduleJob(
+                new PurgeMessagesJob(
+                    connectionName,
+                    queueName,
+                    null,
+                    subQueue,
+                    GetTotalMessagesCount(subQueue),
+                    _messageService));
+        }
+    }
+    private long GetTotalMessagesCount(SubQueue subQueue) => subQueue switch
+    {
+        SubQueue.None => QueueDetails.Info.ActiveMessagesCount,
+        SubQueue.DeadLetter => QueueDetails.Info.DeadLetterMessagesCount,
+        SubQueue.TransferDeadLetter => QueueDetails.Info.TransferDeadLetterMessagesCount
+    };
+
+    public async Task ResendDeadLetters(
+        string connectionName,
+        string queueName,
+        CancellationToken cancellationToken)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(
+            nameof(ConfirmDialog.ContentText),
+            $"Are you sure you want to reprocess all dead letter messages from queue {queueName}?");
+
+        var dialog = _dialogService.Show<ConfirmDialog>("Confirm", parameters);
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult.Data is true)
+        {
+            await _jobsViewModel.ScheduleJob(
+                new ResendMessagesJob(
+                    connectionName,
+                    queueName,
+                    null,
+                    SubQueue.DeadLetter,
+                    queueName,
+                    GetTotalMessagesCount(SubQueue.DeadLetter),
+                    _messageService));
+        }
     }
 
     private void UpdateFormModel(QueueDetails resultData)
