@@ -51,7 +51,7 @@ public class QueueViewModel : IQueueViewModel
     public QueueFormModel? Form
     {
         get => _form;
-        set
+        private set
         {
             _form = value;
             _form.PropertyChanged += (_, _) => this.Notify(PropertyChanged);

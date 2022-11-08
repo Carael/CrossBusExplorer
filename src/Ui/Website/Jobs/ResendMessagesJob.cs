@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ public class ResendMessagesJob : IJob
         _messageService = messageService;
         _cancellationTokenSource = new CancellationTokenSource();
     }
+    
     private int _progress;
     public int Progress
     {
@@ -47,30 +49,57 @@ public class ResendMessagesJob : IJob
             this.Notify(PropertyChanged);
         }
     }
-    public async Task StartAsync()
+    public async Task ExecuteAsync()
     {
-        await foreach (var result in _messageService.ResendAsync(
-            _connectionName,
-            _queueOrTopicName,
-            _subscriptionName,
-            _subQueue,
-            _destinationTopicOrQueueName,
-            _cancellationTokenSource.Token))
+        Status = JobStatus.Running;
+        
+        try
         {
-            Progress = JobsHelper.GetProgress(_totalCount, result.ResendCount);
+            await foreach (var result in _messageService.ResendAsync(
+                _connectionName,
+                _queueOrTopicName,
+                _subscriptionName,
+                _subQueue,
+                _destinationTopicOrQueueName,
+                _cancellationTokenSource.Token))
+            {
+                Progress = JobsHelper.GetProgress(_totalCount, result.ResendCount);
+            }
+            
+            Status = JobStatus.Succeeded;
         }
-
-        Progress = WellKnown.ProgressCompleted;
+        catch (TaskCanceledException)
+        {
+            Status = JobStatus.Cancelled;
+        }
+        catch (Exception ex)
+        {
+            Cancel();
+            ErrorMessage = $"Job {Name} failed. Error: {ex.Message}.";
+            Status = JobStatus.Failed;
+        }
     }
+
+    private JobStatus _status;
+    public JobStatus Status
+    {
+        get => _status;
+        private set
+        {
+            _status = value;
+            this.Notify(PropertyChanged);
+        }
+    }
+    public string? ErrorMessage { get; private set; }
 
     public void Cancel()
     {
         _cancellationTokenSource.Cancel();
     }
-    
+
     public string Name =>
         $"Resend messages from {_queueOrTopicName} {_subscriptionName} " +
         $"to {_destinationTopicOrQueueName}.".Trim();
-    
+
     public bool ViewDetails { get; set; }
 }
