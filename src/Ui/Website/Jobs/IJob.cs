@@ -8,4 +8,5 @@ public interface IJob : INotifyPropertyChanged
     Task StartAsync();
     void Cancel();
     string Name { get; }
+    bool ViewDetails { get; set; }
 }

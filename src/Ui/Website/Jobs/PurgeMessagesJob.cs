@@ -67,4 +67,6 @@ public class PurgeMessagesJob : IJob
     }
     public string Name =>
         $"Purge messages from {_queueOrTopicName} {_subscriptionName}".Trim();
+    
+    public bool ViewDetails { get; set; }
 }

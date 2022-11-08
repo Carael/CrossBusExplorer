@@ -18,7 +18,7 @@ public class JobsViewModel : IJobsViewModel
         _snackbar = snackbar;
         Jobs = new ObservableCollection<IJob>();
     }
-    
+
     private ObservableCollection<IJob> _jobs;
     public ObservableCollection<IJob> Jobs
     {

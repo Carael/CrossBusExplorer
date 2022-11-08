@@ -71,4 +71,6 @@ public class ResendMessagesJob : IJob
     public string Name =>
         $"Resend messages from {_queueOrTopicName} {_subscriptionName} " +
         $"to {_destinationTopicOrQueueName}.".Trim();
+    
+    public bool ViewDetails { get; set; }
 }
