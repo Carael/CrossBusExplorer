@@ -74,7 +74,6 @@ public class ResendMessagesJob : IJob
         }
         catch (Exception ex)
         {
-            Cancel();
             ErrorMessage = $"Job {Name} failed. Error: {ex.Message}.";
             Status = JobStatus.Failed;
         }

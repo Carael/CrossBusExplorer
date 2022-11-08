@@ -90,8 +90,6 @@ public class PurgeMessagesJob : IJob
         }
         catch (Exception ex)
         {
-            Cancel();
-            
             ErrorMessage = $"Job {Name} failed. Error: {ex.Message}.";
             Status = JobStatus.Failed;
         }
