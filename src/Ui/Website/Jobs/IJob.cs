@@ -5,7 +5,10 @@ namespace CrossBusExplorer.Website.Jobs;
 public interface IJob : INotifyPropertyChanged
 {
     int Progress { get; }
-    Task StartAsync();
+    Task ExecuteAsync();
     void Cancel();
     string Name { get; }
+    bool ViewDetails { get; set; }
+    JobStatus Status { get; }
+    string? ErrorMessage { get; }
 }

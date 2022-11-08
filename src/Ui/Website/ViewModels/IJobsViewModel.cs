@@ -6,7 +6,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public interface IJobsViewModel : INotifyPropertyChanged
 {
-    ObservableCollection<IJob> Jobs { get; set; }
+    ObservableCollection<IJob> Jobs { get; }
     Task ScheduleJob(IJob job);
     void CancelJob(IJob job);
 }

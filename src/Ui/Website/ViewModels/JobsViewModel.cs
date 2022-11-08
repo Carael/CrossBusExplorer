@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Jobs;
@@ -18,7 +16,7 @@ public class JobsViewModel : IJobsViewModel
         _snackbar = snackbar;
         Jobs = new ObservableCollection<IJob>();
     }
-    
+
     private ObservableCollection<IJob> _jobs;
     public ObservableCollection<IJob> Jobs
     {
@@ -33,16 +31,31 @@ public class JobsViewModel : IJobsViewModel
     {
         job.PropertyChanged += (_, _) => HandleJobUpdate(job);
         Jobs.Add(job);
-        await job.StartAsync();
+        await job.ExecuteAsync();
     }
+    
     private void HandleJobUpdate(IJob job)
     {
-        if (job.Progress == WellKnown.ProgressCompleted)
+        if (job.Status != JobStatus.Running)
         {
             job.Cancel();
             job.PropertyChanged -= (_, _) => HandleJobUpdate(job);
-            _snackbar.Add($"Job {job.Name} completed.", Severity.Success);
             _jobs.Remove(job);
+
+            if (job.Status == JobStatus.Succeeded)
+            {
+                _snackbar.Add($"Job {job.Name} completed.", Severity.Success);
+            }
+            else if (job.Status == JobStatus.Failed)
+            {
+                _snackbar.Add(
+                    job.ErrorMessage ?? $"Error while executing job {job.Name}",
+                    Severity.Error);
+            }
+            else if (job.Status == JobStatus.Cancelled)
+            {
+                _snackbar.Add($"Job {job.Name} was cancelled.", Severity.Warning);
+            }
         }
 
         this.Notify(PropertyChanged);
@@ -50,8 +63,5 @@ public class JobsViewModel : IJobsViewModel
     public void CancelJob(IJob job)
     {
         job.Cancel();
-        Jobs.Remove(job);
-
-        _snackbar.Add($"Job {job.Name} was cancelled.", Severity.Warning);
     }
 }

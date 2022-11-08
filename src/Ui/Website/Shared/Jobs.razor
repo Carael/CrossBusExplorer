@@ -2,17 +2,25 @@
 
 @foreach (var job in Model.Jobs)
 {
-    <MudGrid Style="margin: 10px">
-        <MudItem xs="8">
-            <MudField>@($"{job.Name} {job.Progress}%")</MudField>
-            <MudProgressLinear Color="Color.Primary" Value="@job.Progress" />
-        </MudItem>
-        <MudItem xs="2">
-            <MudTooltip Text="Cancel">
-                <MudIconButton Icon="@Icons.Filled.Cancel" OnClick="@(() => Model.CancelJob(job))"></MudIconButton>
-            </MudTooltip>
-        </MudItem>
-    </MudGrid>
+    <MudTooltip Text="@($"{job.Name} {job.Progress}%")">
+        <MudButton OnClick="@(() => job.ViewDetails = !job.ViewDetails)">
+            <MudProgressCircular Size="Size.Medium" Indeterminate="true"/>
+        </MudButton>
+        <MudPopover Open="@job.ViewDetails"
+                    OverflowBehavior="@OverflowBehavior.FlipNever"
+                    AnchorOrigin="@Origin.BottomCenter"
+                    TransformOrigin="@Origin.TopCenter"
+                    Class="pa-4">
+            <div class="d-flex">
+                <MudText>@($"{job.Name} {job.Progress}%")</MudText>
+                <MudTooltip Text="Cancel">
+                    <MudIconButton Icon="@Icons.Filled.Cancel" 
+                                   Size="Size.Small"
+                                   OnClick="@(() => Model.CancelJob(job))"></MudIconButton>
+                </MudTooltip>
+            </div>
+        </MudPopover>
+    </MudTooltip>
 }
 
 @code {
