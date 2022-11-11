@@ -5,10 +5,10 @@ namespace CrossBusExplorer.Website.Models;
 
 public class TopicSubscriptionsModel
 {
-    public TopicInfo Topic { get; }
+    public TopicStructure Topic { get; }
     public IList<SubscriptionInfo> Subscriptions { get; }
     public IList<TopicSubscriptionsModel> ChildrenModels { get; }
-    public TopicSubscriptionsModel(TopicInfo topic)
+    public TopicSubscriptionsModel(TopicStructure topic)
     {
         Topic = topic;
         Subscriptions = new List<SubscriptionInfo>();

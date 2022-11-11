@@ -79,7 +79,7 @@ public class NavigationViewModel : INavigationViewModel
         {
             menuItem.LoadingTopics = true;
 
-            await foreach (var topic in _topicService.GetAsync(
+            await foreach (var topic in _topicService.GetStructureAsync(
                 menuItem.ConnectionName,
                 cancellationToken))
             {

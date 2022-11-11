@@ -25,7 +25,7 @@ public interface IQueueViewModel : INotifyPropertyChanged
     Task UpdateQueueStatus(
         string connectionName,
         string queueName,
-        QueueStatus active,
+        ServiceBusEntityStatus active,
         CancellationToken cancellationToken);
     Task PurgeMessages(
         string connectionName,

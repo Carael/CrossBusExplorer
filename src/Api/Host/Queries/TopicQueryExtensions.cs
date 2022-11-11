@@ -5,12 +5,12 @@ namespace CrossBusExplorer.Host.Queries;
 [ExtendObjectType("Query")]
 public class TopicQueryExtensions
 {
-    public IAsyncEnumerable<TopicInfo> GetTopicsAsync(
+    public IAsyncEnumerable<TopicStructure> GetTopicsAsync(
         [Service] ITopicService topicService,
         string connectionName,
         CancellationToken cancellationToken)
     {
-        return topicService.GetAsync(
+        return topicService.GetStructureAsync(
             connectionName,
             cancellationToken);
     }

@@ -45,20 +45,6 @@ public class TopicFormModel : INotifyPropertyChanged
         }
     }
 
-    private int? _maxDeliveryCount;
-    
-    [Label("Max delivery count")]
-    [Required]
-    public int? MaxDeliveryCount
-    {
-        get => _maxDeliveryCount;
-        set
-        {
-            _maxDeliveryCount = value;
-            this.Notify(PropertyChanged);
-        }
-    }
-
     private string? _userMetadata;
     
     [Label("User metadata")]
@@ -71,33 +57,7 @@ public class TopicFormModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
-    private string? _forwardTo;
-    
-    [Label("Forward to (queue or topic)")]
-    public string? ForwardTo
-    {
-        get => _forwardTo;
-        set
-        {
-            _forwardTo = value;
-            this.Notify(PropertyChanged);
-        }
-    }
-    
-    private string? _forwardDeadLetteredMessagesTo;
-    
-    [Label("Forward deadletter messages to")]
-    public string? ForwardDeadLetteredMessagesTo
-    {
-        get => _forwardDeadLetteredMessagesTo;
-        set
-        {
-            _forwardDeadLetteredMessagesTo = value;
-            this.Notify(PropertyChanged);
-        }
-    }
-    
+
     private TimeSpan? _duplicateDetectionHistoryTimeWindow;
     
     [Label("Duplicate detection history time window")]
@@ -139,42 +99,16 @@ public class TopicFormModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-
-    private TimeSpan? _lockDuration;
     
-    [Label("Lock duration")]
-    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
-    public TimeSpan? LockDuration
+    private bool? _supportOrdering;
+    
+    [Label("Support ordering")]
+    public bool? SupportOrdering
     {
-        get => _lockDuration;
+        get => _supportOrdering;
         set
         {
-            _lockDuration = value;
-            this.Notify(PropertyChanged);
-        }
-    }
-    
-    private bool? _deadLetteringOnMessageExpiration;
-    
-    [Label("Duplicate detection history time window")]
-    public bool? DeadLetteringOnMessageExpiration
-    {
-        get => _deadLetteringOnMessageExpiration;
-        set
-        {
-            _deadLetteringOnMessageExpiration = value;
-            this.Notify(PropertyChanged);
-        }
-    }
-    private bool? _requiresSession;
-    
-    [Label("Require session")]
-    public bool? RequiresSession
-    {
-        get => _requiresSession;
-        set
-        {
-            _requiresSession = value;
+            _supportOrdering = value;
             this.Notify(PropertyChanged);
         }
     }

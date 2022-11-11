@@ -1,10 +1,11 @@
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website.ViewModels;
 
-public interface ITopicViewModel
+public interface ITopicViewModel : INotifyPropertyChanged
 {
     event TopicAddedEventHandler? TopicAdded;
     event TopicRemovedEventHandler? TopicRemoved;
@@ -24,14 +25,6 @@ public interface ITopicViewModel
     Task UpdateTopicStatus(
         string connectionName,
         string topicName,
-        QueueStatus active,
-        CancellationToken cancellationToken);
-    Task PurgeMessages(
-        string connectionName,
-        string topicName,
-        CancellationToken cancellationToken);
-    Task ResendDeadLetters(
-        string connectionName,
-        string topicName,
+        ServiceBusEntityStatus active,
         CancellationToken cancellationToken);
 }
