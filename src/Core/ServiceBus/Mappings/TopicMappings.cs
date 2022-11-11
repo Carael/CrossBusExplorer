@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus.Administration;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using TopicProperties = Azure.Messaging.ServiceBus.Administration.TopicProperties;
 namespace CrossBusExplorer.ServiceBus.Mappings;
 
 public static class TopicMappings

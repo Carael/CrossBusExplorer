@@ -6,6 +6,7 @@ using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
 using Microsoft.Azure.Amqp.Serialization;
+using TopicProperties = Azure.Messaging.ServiceBus.Administration.TopicProperties;
 namespace CrossBusExplorer.ServiceBus;
 
 public class TopicService : ITopicService
