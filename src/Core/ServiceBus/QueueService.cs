@@ -54,6 +54,7 @@ public class QueueService : IQueueService
             await enumerator.DisposeAsync();
         }
     }
+    
     public async Task<QueueDetails> GetAsync(
         string connectionName,
         string name,
