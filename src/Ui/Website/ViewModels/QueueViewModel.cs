@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
@@ -29,7 +30,6 @@ public class QueueViewModel : IQueueViewModel
     private readonly IMessageService _messageService;
     private readonly INavigationViewModel _navigationViewModel;
     private readonly IQueueService _queueService;
-    private QueueFormModel? _form;
     public QueueDetails? QueueDetails { get; private set; }
 
     public QueueViewModel(
@@ -48,6 +48,7 @@ public class QueueViewModel : IQueueViewModel
         _messageService = messageService;
     }
 
+    private QueueFormModel? _form;
     public QueueFormModel? Form
     {
         get => _form;
@@ -58,6 +59,7 @@ public class QueueViewModel : IQueueViewModel
             this.Notify(PropertyChanged);
         }
     }
+
     public async Task InitializeForm(
         string connectionName, string? queueName, CancellationToken cancellationToken)
     {
@@ -97,7 +99,8 @@ public class QueueViewModel : IQueueViewModel
         {
             if (operationType == OperationType.Create)
             {
-                _navigationManager.NavigateTo($"queue/{connectionName}/{result.Data.Info.Name}");
+                _navigationManager.NavigateTo(
+                    $"queue/{connectionName}/{HttpUtility.UrlEncode(result.Data.Info.Name)}");
 
                 QueueAdded(connectionName, result.Data.Info);
             }
@@ -147,10 +150,10 @@ public class QueueViewModel : IQueueViewModel
     {
         var parameters = new DialogParameters();
 
-        parameters.Add(nameof(CloneQueueDialog.ConnectionName), connectionName);
-        parameters.Add(nameof(CloneQueueDialog.SourceDialogName), sourceQueueName);
+        parameters.Add(nameof(CloneDialog.ConnectionName), connectionName);
+        parameters.Add(nameof(CloneDialog.SourceDialogName), sourceQueueName);
 
-        var dialog = _dialogService.Show<CloneQueueDialog>(
+        var dialog = _dialogService.Show<CloneDialog>(
             $"Clone queue {sourceQueueName}",
             parameters,
             new DialogOptions
@@ -206,14 +209,13 @@ public class QueueViewModel : IQueueViewModel
                     $"Please check the queue name and try again later.",
                     Severity.Error);
             }
-
         }
     }
 
     public async Task UpdateQueueStatus(
         string connectionName,
         string queueName,
-        QueueStatus status,
+        ServiceBusEntityStatus status,
         CancellationToken cancellationToken)
     {
         OperationResult<QueueDetails> result = await _queueService.UpdateAsync(

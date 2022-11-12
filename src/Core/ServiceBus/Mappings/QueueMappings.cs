@@ -13,7 +13,7 @@ public static class QueueMappings
         QueueRuntimeProperties runtimeProperties) =>
         new QueueInfo(
             properties.Name,
-            Enum.Parse<QueueStatus>(properties.Status.ToString()),
+            Enum.Parse<ServiceBusEntityStatus>(properties.Status.ToString()),
             runtimeProperties.SizeInBytes,
             runtimeProperties.CreatedAt,
             runtimeProperties.AccessedAt,
@@ -263,7 +263,7 @@ public static class QueueMappings
             queue.RequiresDuplicateDetection,
             queue.RequiresSession);
 
-    private static Azure.Messaging.ServiceBus.Administration.SharedAccessAuthorizationRule
+    internal static Azure.Messaging.ServiceBus.Administration.SharedAccessAuthorizationRule
         MapToSharedAccessAuthorizationRule(
             this SharedAccessAuthorizationRule rule) =>
         new Azure.Messaging.ServiceBus.Administration.SharedAccessAuthorizationRule(

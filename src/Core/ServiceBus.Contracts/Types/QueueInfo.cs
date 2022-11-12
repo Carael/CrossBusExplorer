@@ -2,7 +2,7 @@ namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record QueueInfo(
     string Name,
-    QueueStatus Status,
+    ServiceBusEntityStatus Status,
     long SizeInBytes,
     DateTimeOffset CreatedAt,
     DateTimeOffset AccessedAt,

@@ -157,12 +157,12 @@
                         </MudTooltip>
                         @if (Model.Form?.OperationType != OperationType.Create)
                         {
-                            if (Model.QueueDetails.Info.Status == QueueStatus.Active)
+                            if (Model.QueueDetails.Info.Status == ServiceBusEntityStatus.Active)
                             {
                                 <MudTooltip Text="Disable">
                                     <MudIconButton Icon=@Icons.Filled.Lock
                                                    ButtonType="ButtonType.Button"
-                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Disabled, default))" Color="Color.Default" Class="px-10">
+                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, ServiceBusEntityStatus.Disabled, default))" Color="Color.Default" Class="px-10">
                                     </MudIconButton>
                                 </MudTooltip>
                             }
@@ -171,7 +171,7 @@
                                 <MudTooltip Text="Activate">
                                     <MudIconButton Icon=@Icons.Filled.LockOpen
                                                    ButtonType="ButtonType.Button"
-                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, QueueStatus.Active, default))" Color="Color.Default" Class="px-10">
+                                                   OnClick="@(() => Model.UpdateQueueStatus(ConnectionName, QueueName, ServiceBusEntityStatus.Active, default))" Color="Color.Default" Class="px-10">
                                     </MudIconButton>
                                 </MudTooltip>
                             }

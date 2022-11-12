@@ -1,12 +1,12 @@
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Clone queue @SourceDialogName
+            Clone @SourceDialogName
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudForm @ref="form">
-            <MudTextField T="string" @bind-value="queueName" MaxLength="260" Label="Queue name" Required="true" RequiredError="Queue name is required!"/>
+            <MudTextField T="string" @bind-value="name" MaxLength="260" Label="Name" Required="true" RequiredError="Name is required!"/>
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -26,7 +26,7 @@
     public string ConnectionName { get; set; }
 
     MudForm form;
-    string queueName;
+    string name;
 
     async Task Submit()
     {
@@ -34,7 +34,7 @@
 
         if (form.IsValid)
         {
-            MudDialog.Close(DialogResult.Ok(queueName));
+            MudDialog.Close(DialogResult.Ok(name));
         }
 
     }
