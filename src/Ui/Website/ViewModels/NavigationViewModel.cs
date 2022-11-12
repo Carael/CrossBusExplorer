@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -23,7 +24,8 @@ public class NavigationViewModel : INavigationViewModel
         IQueueService queueService,
         ITopicService topicService,
         ISubscriptionService subscriptionService,
-        IQueueViewModel queueViewModel)
+        IQueueViewModel queueViewModel,
+        ITopicViewModel topicViewModel)
     {
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         _queueService = queueService;
@@ -33,6 +35,8 @@ public class NavigationViewModel : INavigationViewModel
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
         queueViewModel.QueueAdded += this.OnQueueAdded;
         queueViewModel.QueueRemoved += this.QueueRemoved;
+        topicViewModel.TopicAdded += this.OnTopicAdded;
+        topicViewModel.TopicRemoved += this.OnTopicRemoved;
     }
 
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
@@ -42,7 +46,7 @@ public class NavigationViewModel : INavigationViewModel
             RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
         }
     }
-    
+
     private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
     {
         MenuItems.RemoveNonExisting(menuItem =>
@@ -85,7 +89,7 @@ public class NavigationViewModel : INavigationViewModel
             {
                 menuItem.Topics.Add(
                     new TopicSubscriptionsModel(topic));
-                
+
                 this.Notify(PropertyChanged);
             }
 
@@ -139,15 +143,15 @@ public class NavigationViewModel : INavigationViewModel
         }
     }
 
-    private void OnQueueAdded(string connectionName, QueueInfo queueinfo)
+    private void OnQueueAdded(string connectionName, QueueInfo queueInfo)
     {
         var menuItem =
             MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-        
-        menuItem.Queues.Add(queueinfo);
+
+        menuItem.Queues.Add(queueInfo);
         this.Notify(PropertyChanged);
     }
-    
+
     private void QueueRemoved(string connectionName, string queueName)
     {
         var menuItem =
@@ -156,7 +160,73 @@ public class NavigationViewModel : INavigationViewModel
         var queue =
             menuItem.Queues.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(queueName));
         menuItem.Queues.Remove(queue);
-        
+
+        this.Notify(PropertyChanged);
+    }
+
+    private void OnTopicRemoved(string connectionName, string topicName)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        for (int i = 0; i < menuItem.Topics.Count; i++)
+        {
+            var current = menuItem.Topics[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            {
+                menuItem.Topics.Remove(current);
+                break;
+            }
+
+            var isNested = TryGetTopicSubscriptionModel(current, topicName);
+
+            if (isNested)
+            {
+                menuItem.Topics.Remove(current);
+                break;
+            }
+        }
+
+        this.Notify(PropertyChanged);
+    }
+
+    private bool TryGetTopicSubscriptionModel(
+        TopicSubscriptionsModel topicSubscriptionsModel,
+        string topicName)
+    {
+        for (var i = 0; i < topicSubscriptionsModel.ChildrenModels.Count; i++)
+        {
+            var current = topicSubscriptionsModel.ChildrenModels[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            {
+                topicSubscriptionsModel.ChildrenModels.Remove(current);
+
+                return true;
+            }
+
+            return TryGetTopicSubscriptionModel(current, topicName);
+        }
+
+        return false;
+    }
+
+    private void OnTopicAdded(string connectionName, TopicInfo topicInfo)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        menuItem.Topics.Add(
+            new TopicSubscriptionsModel(
+                new TopicStructure(
+                    topicInfo.Name,
+                    false,
+                    topicInfo.Name,
+                    new List<TopicStructure>())));
+
         this.Notify(PropertyChanged);
     }
 }

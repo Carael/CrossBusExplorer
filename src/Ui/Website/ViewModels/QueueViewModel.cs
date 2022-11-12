@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
@@ -58,7 +59,7 @@ public class QueueViewModel : IQueueViewModel
             this.Notify(PropertyChanged);
         }
     }
-    
+
     public async Task InitializeForm(
         string connectionName, string? queueName, CancellationToken cancellationToken)
     {
@@ -98,7 +99,8 @@ public class QueueViewModel : IQueueViewModel
         {
             if (operationType == OperationType.Create)
             {
-                _navigationManager.NavigateTo($"queue/{connectionName}/{result.Data.Info.Name}");
+                _navigationManager.NavigateTo(
+                    $"queue/{connectionName}/{HttpUtility.UrlEncode(result.Data.Info.Name)}");
 
                 QueueAdded(connectionName, result.Data.Info);
             }
@@ -207,7 +209,6 @@ public class QueueViewModel : IQueueViewModel
                     $"Please check the queue name and try again later.",
                     Severity.Error);
             }
-
         }
     }
 

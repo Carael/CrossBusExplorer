@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
@@ -40,7 +41,7 @@ public class TopicViewModel : ITopicViewModel
         _dialogService = dialogService;
         _jobsViewModel = jobsViewModel;
     }
-    
+
     private TopicFormModel? _form;
     public TopicFormModel? Form
     {
@@ -53,10 +54,10 @@ public class TopicViewModel : ITopicViewModel
         }
     }
     public TopicDetails? TopicDetails { get; private set; }
-    
-    
+
+
     public async Task InitializeForm(
-        string connectionName, 
+        string connectionName,
         string? topicName,
         CancellationToken cancellationToken)
     {
@@ -70,7 +71,7 @@ public class TopicViewModel : ITopicViewModel
             CreateFormModel();
         }
     }
-    
+
     public async Task SaveTopicFormAsync(string connectionName)
     {
         if (Form != null)
@@ -87,15 +88,15 @@ public class TopicViewModel : ITopicViewModel
             }
         }
     }
-    
+
     public void NavigateToNewTopicForm(string connectionName)
     {
         _navigationManager.NavigateTo($"new-topic/{connectionName}");
     }
 
     public async Task CloneTopic(
-        string connectionName, 
-        string sourceTopicName, 
+        string connectionName,
+        string sourceTopicName,
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
@@ -125,10 +126,10 @@ public class TopicViewModel : ITopicViewModel
             HandleSaveResult(connectionName, result, OperationType.Create);
         }
     }
-    
+
     public async Task DeleteTopic(
-        string connectionName, 
-        string topicName, 
+        string connectionName,
+        string topicName,
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
@@ -161,10 +162,10 @@ public class TopicViewModel : ITopicViewModel
             }
         }
     }
-    
+
     public async Task UpdateTopicStatus(
-        string connectionName, 
-        string topicName, 
+        string connectionName,
+        string topicName,
         ServiceBusEntityStatus status,
         CancellationToken cancellationToken)
     {
@@ -175,7 +176,7 @@ public class TopicViewModel : ITopicViewModel
 
         HandleSaveResult(connectionName, result, OperationType.Update);
     }
-    
+
     private void UpdateFormModel(TopicDetails resultData)
     {
         TopicDetails = resultData;
@@ -202,7 +203,7 @@ public class TopicViewModel : ITopicViewModel
                 return new OperationResult<TopicDetails>(false, null);
         }
     }
-    
+
     private void HandleSaveResult(
         string connectionName,
         OperationResult<TopicDetails> result,
@@ -212,7 +213,8 @@ public class TopicViewModel : ITopicViewModel
         {
             if (operationType == OperationType.Create)
             {
-                _navigationManager.NavigateTo($"queue/{connectionName}/{result.Data.Info.Name}");
+                _navigationManager.NavigateTo(
+                    $"topic/{connectionName}/{HttpUtility.UrlEncode(result.Data.Info.Name)}");
 
                 TopicAdded(connectionName, result.Data.Info);
             }
@@ -230,7 +232,7 @@ public class TopicViewModel : ITopicViewModel
                 Severity.Error);
         }
     }
-    
+
     private void CreateFormModel()
     {
         Form = new TopicFormModel(OperationType.Create)

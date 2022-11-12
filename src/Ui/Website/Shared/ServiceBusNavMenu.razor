@@ -50,9 +50,16 @@
                 {
                     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
                 }
+                else
+                {
+                    <MudNavLink Href=@($"new-topic/{menuItem.ConnectionName}")
+                                Icon="@Icons.Filled.Add">
+                        Create new topic
+                    </MudNavLink>
+                }
                 @foreach (var topic in menuItem.Topics)
                 {
-                    <TopicNestedMenuItem Subscription=@topic ConnectionName=@menuItem.ConnectionName/>
+                    <TopicNestedMenuItem TopicSubscriptionsModel=@topic ConnectionName=@menuItem.ConnectionName/>
                 }
             </MudNavGroup>
         </MudNavGroup>

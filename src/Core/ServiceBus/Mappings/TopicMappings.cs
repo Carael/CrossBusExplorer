@@ -68,7 +68,7 @@ public static class TopicMappings
             options.EnableBatchedOperations = createTopicOptions.EnableBatchedOperations.Value;
         }
         
-        if (createTopicOptions.EnableBatchedOperations.HasValue)
+        if (createTopicOptions.SupportOrdering.HasValue)
         {
             options.SupportOrdering = createTopicOptions.SupportOrdering.Value;
         }
