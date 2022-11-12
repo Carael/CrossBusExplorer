@@ -27,12 +27,12 @@ public class NavigationViewModel : INavigationViewModel
         IQueueViewModel queueViewModel,
         ITopicViewModel topicViewModel)
     {
-        connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         _queueService = queueService;
         _topicService = topicService;
         _subscriptionService = subscriptionService;
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
+        connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         queueViewModel.QueueAdded += this.OnQueueAdded;
         queueViewModel.QueueRemoved += this.QueueRemoved;
         topicViewModel.TopicAdded += this.OnTopicAdded;
