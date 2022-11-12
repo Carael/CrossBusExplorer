@@ -198,7 +198,7 @@ public class NavigationViewModel : INavigationViewModel
     {
         for (var i = 0; i < topicSubscriptionsModel.ChildrenModels.Count; i++)
         {
-            var current = topicSubscriptionsModel.ChildrenModels[i];
+            TopicSubscriptionsModel current = topicSubscriptionsModel.ChildrenModels[i];
 
             if (current.Topic.FullName != null &&
                 current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
