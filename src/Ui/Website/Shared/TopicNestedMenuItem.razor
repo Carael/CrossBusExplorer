@@ -39,12 +39,12 @@ else
             {
                 @foreach (var subscription in TopicSubscriptionsModel.Subscriptions)
                 {
-                    <MudTooltip Text="@($"{subscription.Name} ({subscription.ActiveMessagesCount}, " +
+                    <MudTooltip Text="@($"{subscription.SubscriptionName} ({subscription.ActiveMessagesCount}, " +
                                         $"{subscription.DeadLetterMessagesCount}, " +
                                         $"{subscription.TransferMessagesCount}")">
-                        <MudNavLink Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.Name)}/{HttpUtility.UrlEncode(subscription.Name)}")
+                        <MudNavLink Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.Name)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
                                     Icon="@Icons.Filled.FormatLineSpacing">
-                            @subscription.Name (@subscription.ActiveMessagesCount, 
+                            @subscription.SubscriptionName (@subscription.ActiveMessagesCount, 
                             @subscription.DeadLetterMessagesCount,
                             @subscription.TransferMessagesCount)
                         </MudNavLink>

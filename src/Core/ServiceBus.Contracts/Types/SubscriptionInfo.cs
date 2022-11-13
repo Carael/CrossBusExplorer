@@ -1,7 +1,8 @@
 namespace CrossBusExplorer.ServiceBus.Contracts.Types;
 
 public record SubscriptionInfo(
-    string Name,
+    string TopicName,
+    string SubscriptionName,
     long ActiveMessagesCount,
     long DeadLetterMessagesCount,
     long TransferMessagesCount);
