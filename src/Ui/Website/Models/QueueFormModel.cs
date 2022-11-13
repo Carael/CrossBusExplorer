@@ -97,7 +97,21 @@ public class QueueFormModel : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-
+    
+    private TimeSpan? _duplicateDetectionHistoryTimeWindow;
+    
+    [Label("Duplicate detection history time window")]
+    [Required(ErrorMessage = "Field is required. Format: DDDD.HH:MM:SS.")]
+    public TimeSpan? DuplicateDetectionHistoryTimeWindow
+    {
+        get => _duplicateDetectionHistoryTimeWindow;
+        set
+        {
+            _duplicateDetectionHistoryTimeWindow = value;
+            this.Notify(PropertyChanged);
+        }
+    }
+    
     private TimeSpan? _autoDeleteOnIdle;
     
     [Label("Auto delete queue on idle")]

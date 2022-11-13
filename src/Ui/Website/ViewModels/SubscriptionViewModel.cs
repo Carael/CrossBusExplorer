@@ -80,7 +80,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         }
     }
 
-    public async Task SaveQueueFormAsync(string connectionName)
+    public async Task SaveSubscriptionFormAsync(string connectionName)
     {
         if (Form != null)
         {
@@ -111,7 +111,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                     $"{HttpUtility.UrlEncode(result.Data.Info.TopicName)}/" +
                     $"{HttpUtility.UrlEncode(result.Data.Info.SubscriptionName)}");
 
-                QueueAdded(connectionName, result.Data.Info);
+                SubscriptionAdded(connectionName, result.Data.Info);
             }
             else
             {
@@ -149,9 +149,11 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         }
     }
 
-    public void NavigateToNewQueueForm(string connectionName)
+    public void NavigateToNewSubscriptionForm(
+        string connectionName,
+        string topicName)
     {
-        _navigationManager.NavigateTo($"new-queue/{connectionName}");
+        _navigationManager.NavigateTo($"new-subscription/{connectionName}/{topicName}");
     }
 
     public async Task CloneSubscriptionAsync(
@@ -217,8 +219,8 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                 _snackbar.Add(
                     $"Subscription {subscriptionName} successfully deleted.",
                     Severity.Success);
-                QueueRemoved(connectionName, topicName, subscriptionName);
-                NavigateToNewQueueForm(connectionName);
+                SubscriptionRemoved(connectionName, topicName, subscriptionName);
+                NavigateToNewSubscriptionForm(connectionName, topicName);
 
             }
             else
@@ -248,7 +250,8 @@ public class SubscriptionViewModel : ISubscriptionViewModel
 
     public async Task PurgeMessages(
         string connectionName,
-        string queueName,
+        string topicName,
+        string subscriptionName,
         CancellationToken cancellationToken)
     {
         var dialog = _dialogService.Show<PurgeMessagesDialog>();
@@ -259,8 +262,8 @@ public class SubscriptionViewModel : ISubscriptionViewModel
             await _jobsViewModel.ScheduleJob(
                 new PurgeMessagesJob(
                     connectionName,
-                    queueName,
-                    null,
+                    topicName,
+                    subscriptionName,
                     subQueue,
                     GetTotalMessagesCount(subQueue),
                     _messageService));
@@ -275,13 +278,15 @@ public class SubscriptionViewModel : ISubscriptionViewModel
 
     public async Task ResendDeadLetters(
         string connectionName,
-        string queueName,
+        string topicName,
+        string subscriptionName,
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
         parameters.Add(
             nameof(ConfirmDialog.ContentText),
-            $"Are you sure you want to reprocess all dead letter messages from queue {queueName}?");
+            $"Are you sure you want to reprocess all dead letter messages from " +
+            $"subscription {subscriptionName}?");
 
         var dialog = _dialogService.Show<ConfirmDialog>("Confirm", parameters);
         var dialogResult = await dialog.Result;
@@ -291,10 +296,10 @@ public class SubscriptionViewModel : ISubscriptionViewModel
             await _jobsViewModel.ScheduleJob(
                 new ResendMessagesJob(
                     connectionName,
-                    queueName,
-                    null,
+                    topicName,
+                    subscriptionName,
                     SubQueue.DeadLetter,
-                    queueName,
+                    topicName,
                     GetTotalMessagesCount(SubQueue.DeadLetter),
                     _messageService));
         }
