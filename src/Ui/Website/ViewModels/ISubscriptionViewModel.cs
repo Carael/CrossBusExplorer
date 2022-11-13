@@ -7,10 +7,10 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public interface ISubscriptionViewModel : INotifyPropertyChanged
 {
-    event SubscriptionAddedEventHandler? QueueAdded;
-    event SubscriptionRemovedEventHandler? QueueRemoved;
+    event SubscriptionAddedEventHandler? SubscriptionAdded;
+    event SubscriptionRemovedEventHandler? SubscriptionRemoved;
     SubscriptionFormModel? Form { get; }
-    SubscriptionDetails? QueueDetails { get; }
+    SubscriptionDetails? SubscriptionDetails { get; }
     Task InitializeFormAsync(
         string connectionName,
         string topicName,
