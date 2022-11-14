@@ -52,6 +52,5 @@ internal static class WellKnown
                     return null;
                 }
             };
-        
     }
 }

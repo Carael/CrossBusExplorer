@@ -28,18 +28,18 @@ public interface ISubscriptionViewModel : INotifyPropertyChanged
         string topicName,
         string subscriptionName,
         CancellationToken cancellationToken);
-    Task UpdateSubscriptionStatus(
+    Task UpdateSubscriptionStatusAsync(
         string connectionName,
         string topicName,
         string subscriptionName,
         ServiceBusEntityStatus status,
         CancellationToken cancellationToken);
-    Task PurgeMessages(
+    Task PurgeMessagesAsync(
         string connectionName,
         string topicName,
         string subscriptionName,
         CancellationToken cancellationToken);
-    Task ResendDeadLetters(
+    Task ResendDeadLettersAsync(
         string connectionName,
         string topicName,
         string subscriptionName,

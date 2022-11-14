@@ -34,7 +34,7 @@
                     <MudCardContent>
                         <MudGrid>
                             <MudItem xs="4">
-                                <MudTextField @bind-Value="@Model.Form.Name" For="@(() => Model.Form.Name)" Margin="Margin.Dense" Variant="Variant.Text"/>
+                                <MudTextField @bind-Value="@Model.Form.Name" For="@(() => Model.Form.Name)" Margin="Margin.Dense" Variant="Variant.Text" Disabled="@(Model.Form?.OperationType == OperationType.Update)"/>
                                 <MudTextField @bind-Value="@Model.Form.UserMetadata" For="@(() => Model.Form.UserMetadata)" Margin="Margin.Dense" Variant="Variant.Text"/>
                                 <MudTextField @bind-Value="@Model.Form.ForwardTo" For="@(() => Model.Form.ForwardTo)" Margin="Margin.Dense" Variant="Variant.Text"/>
                                 <MudTextField @bind-Value="@Model.Form.ForwardDeadLetteredMessagesTo" For="@(() => Model.Form.ForwardDeadLetteredMessagesTo)" Margin="Margin.Dense" Variant="Variant.Text"/>

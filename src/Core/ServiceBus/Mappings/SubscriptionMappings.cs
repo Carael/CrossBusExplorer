@@ -13,6 +13,10 @@ public static class SubscriptionMappings
         return new SubscriptionInfo(
             subscription.TopicName,
             subscription.SubscriptionName,
+            Enum.Parse<ServiceBusEntityStatus>(subscription.Status.ToString()),
+            properties.CreatedAt,
+            properties.AccessedAt,
+            properties.UpdatedAt,
             properties.ActiveMessageCount,
             properties.DeadLetterMessageCount,
             properties.TransferMessageCount);

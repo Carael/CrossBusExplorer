@@ -12,6 +12,7 @@ using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Pages;
 using CrossBusExplorer.Website.Shared;
 using CrossBusExplorer.Website.Shared.Messages;
+using CrossBusExplorer.Website.Shared.Queue;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 namespace CrossBusExplorer.Website.ViewModels;
@@ -92,7 +93,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
             }
             catch (Exception ex)
             {
-                _snackbar.Add($"Error while updating queue: {ex.Message}", Severity.Error);
+                _snackbar.Add($"Error while updating subscription: {ex.Message}", Severity.Error);
             }
         }
     }
@@ -162,33 +163,33 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         string sourceSubscriptionName,
         CancellationToken cancellationToken)
     {
-        //TODO
-        // var parameters = new DialogParameters();
-        //
-        // parameters.Add(nameof(CloneDialog.ConnectionName), connectionName);
-        // parameters.Add(nameof(CloneDialog.SourceDialogName), sourceQueueName);
-        //
-        // var dialog = _dialogService.Show<CloneDialog>(
-        //     $"Clone queue {sourceQueueName}",
-        //     parameters,
-        //     new DialogOptions
-        //     {
-        //         FullWidth = true,
-        //         CloseOnEscapeKey = true
-        //     });
-        //
-        // var dialogResult = await dialog.Result;
-        //
-        // if (!dialogResult.Cancelled && dialogResult.Data is string newQueueName)
-        // {
-        //     var result = await _subscriptionService.CloneAsync(
-        //         connectionName,
-        //         newQueueName,
-        //         sourceQueueName,
-        //         cancellationToken);
-        //
-        //     HandleSaveResult(connectionName, result, OperationType.Create);
-        // }
+        var parameters = new DialogParameters();
+        
+         parameters.Add(nameof(CloneDialog.ConnectionName), connectionName);
+         parameters.Add(nameof(CloneDialog.SourceDialogName), sourceTopicName);
+        
+         var dialog = _dialogService.Show<CloneDialog>(
+             $"Clone subscription {sourceSubscriptionName}",
+             parameters,
+             new DialogOptions
+             {
+                 FullWidth = true,
+                 CloseOnEscapeKey = true
+             });
+        
+         var dialogResult = await dialog.Result;
+        
+         if (!dialogResult.Cancelled && dialogResult.Data is string newSubscriptionName)
+         {
+             var result = await _subscriptionService.CloneAsync(
+                 connectionName,
+                 newSubscriptionName,
+                 sourceTopicName,
+                 sourceSubscriptionName,
+                 cancellationToken);
+        
+             HandleSaveResult(connectionName, result, OperationType.Create);
+         }
     }
     public async Task DeleteSubscriptionAsync(
         string connectionName,
@@ -227,13 +228,13 @@ public class SubscriptionViewModel : ISubscriptionViewModel
             {
                 _snackbar.Add(
                     $"Subscription {subscriptionName} was not deleted. " +
-                    $"Please check the queue name and try again later.",
+                    $"Please check the subscription name and try again later.",
                     Severity.Error);
             }
         }
     }
 
-    public async Task UpdateSubscriptionStatus(
+    public async Task UpdateSubscriptionStatusAsync(
         string connectionName,
         string topicName,
         string subscriptionName,
@@ -248,7 +249,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         HandleSaveResult(connectionName, result, OperationType.Update);
     }
 
-    public async Task PurgeMessages(
+    public async Task PurgeMessagesAsync(
         string connectionName,
         string topicName,
         string subscriptionName,
@@ -276,7 +277,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         SubQueue.TransferDeadLetter => SubscriptionDetails.Info.TransferMessagesCount
     };
 
-    public async Task ResendDeadLetters(
+    public async Task ResendDeadLettersAsync(
         string connectionName,
         string topicName,
         string subscriptionName,
