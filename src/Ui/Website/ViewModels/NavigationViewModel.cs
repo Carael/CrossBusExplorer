@@ -25,7 +25,8 @@ public class NavigationViewModel : INavigationViewModel
         ITopicService topicService,
         ISubscriptionService subscriptionService,
         IQueueViewModel queueViewModel,
-        ITopicViewModel topicViewModel)
+        ITopicViewModel topicViewModel,
+        ISubscriptionViewModel subscriptionViewModel)
     {
         _queueService = queueService;
         _topicService = topicService;
@@ -37,6 +38,8 @@ public class NavigationViewModel : INavigationViewModel
         queueViewModel.QueueRemoved += this.QueueRemoved;
         topicViewModel.TopicAdded += this.OnTopicAdded;
         topicViewModel.TopicRemoved += this.OnTopicRemoved;
+        subscriptionViewModel.SubscriptionAdded += this.OnSubscriptionAdded;
+        subscriptionViewModel.SubscriptionRemoved += this.OnSubscriptionRemoved;
     }
 
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
@@ -150,6 +153,19 @@ public class NavigationViewModel : INavigationViewModel
 
         menuItem.Queues.Add(queueInfo);
         this.Notify(PropertyChanged);
+    }
+    
+    private void OnSubscriptionRemoved(
+        string connectionName, 
+        string topicName, 
+        string subscriptionName)
+    {
+        //TODO
+    }
+    
+    private void OnSubscriptionAdded(string connectionName, SubscriptionInfo subscription)
+    {
+        //TODO
     }
 
     private void QueueRemoved(string connectionName, string queueName)

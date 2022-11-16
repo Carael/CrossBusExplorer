@@ -1,4 +1,4 @@
-@page "/subscription/{ConnectionName}/{TopicName}/{QueueName}"
+@page "/subscription/{ConnectionName}/{TopicName}/{SubscriptionName}"
 @page "/new-subscription/{ConnectionName}/{TopicName}"
 @using CrossBusExplorer.Website.ViewModels
 @using CrossBusExplorer.ServiceBus.Contracts.Types
@@ -7,13 +7,13 @@
 
 <MudText Typo="Typo.h3" GutterBottom="true">Subscription @SubscriptionName</MudText>
 
-<MudTooltip Text="Add new queue">
+<MudTooltip Text="Add new subscription">
     <MudIconButton Icon="@Icons.Material.Outlined.Add"
                    OnClick="@(() => Model.NavigateToNewSubscriptionForm(ConnectionName, TopicName))"/>
 </MudTooltip>
 @if (Model.Form?.OperationType != OperationType.Create)
 {
-    <MudTooltip Text="Clone queue">
+    <MudTooltip Text="Clone subscription">
         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                        OnClick="@(() => Model.CloneSubscriptionAsync(ConnectionName, TopicName, SubscriptionName, default))"/>
     </MudTooltip>
@@ -34,7 +34,7 @@
                     <MudCardContent>
                         <MudGrid>
                             <MudItem xs="4">
-                                <MudTextField @bind-Value="@Model.Form.TopicName" For="@(() => Model.Form.TopicName)" Margin="Margin.Dense" Variant="Variant.Text"Disabled="@(Model.Form?.OperationType == OperationType.Update)"/>
+                                <MudTextField @bind-Value="@Model.Form.TopicName" For="@(() => Model.Form.TopicName)" Margin="Margin.Dense" Variant="Variant.Text"Disabled="true"/>
                                 <MudTextField @bind-Value="@Model.Form.SubscriptionName" For="@(() => Model.Form.SubscriptionName)" Margin="Margin.Dense" Variant="Variant.Text"Disabled="@(Model.Form?.OperationType == OperationType.Update)"/>
                                 <MudTextField @bind-Value="@Model.Form.UserMetadata" For="@(() => Model.Form.UserMetadata)" Margin="Margin.Dense" Variant="Variant.Text"/>
                                 <MudTextField @bind-Value="@Model.Form.ForwardTo" For="@(() => Model.Form.ForwardTo)" Margin="Margin.Dense" Variant="Variant.Text"/>

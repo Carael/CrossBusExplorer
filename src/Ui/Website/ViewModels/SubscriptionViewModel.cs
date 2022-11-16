@@ -77,7 +77,7 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         }
         else
         {
-            CreateFormModel();
+            CreateFormModel(topicName);
         }
     }
 
@@ -222,7 +222,6 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                     Severity.Success);
                 SubscriptionRemoved(connectionName, topicName, subscriptionName);
                 NavigateToNewSubscriptionForm(connectionName, topicName);
-
             }
             else
             {
@@ -312,13 +311,16 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         Form = SubscriptionDetails.ToFormModel(OperationType.Update);
     }
 
-    private void CreateFormModel()
+    private void CreateFormModel(string topicName)
     {
         Form = new SubscriptionFormModel(OperationType.Create)
         {
+            TopicName = topicName,
             EnableBatchedOperations = true,
             AutoDeleteOnIdle = TimeSpan.FromDays(365),
-            DefaultMessageTimeToLive = TimeSpan.FromDays(365)
+            DefaultMessageTimeToLive = TimeSpan.FromDays(365),
+            LockDuration = TimeSpan.FromMinutes(1),
+            MaxDeliveryCount = 10
         };
     }
 }
