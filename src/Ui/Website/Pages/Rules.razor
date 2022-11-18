@@ -1,2 +1,34 @@
+@using CrossBusExplorer.Website.ViewModels
+@using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.Website.Models.Validators
+@using CrossBusExplorer.ServiceBus.Contracts.Types
 <PageTitle>Rules</PageTitle>
 <MudText Typo="Typo.h3" GutterBottom="true">Rules</MudText>
+
+@code {
+    [Parameter]
+    public string ConnectionName { get; set; }
+    [Parameter]
+    public string QueueOrTopicName { get; set; }
+    [Parameter]
+    public string SubscriptionName { get; set; }
+    [Inject]
+    IRulesViewModel Model { get; set; }
+    MudForm form;
+    // ReceiveMessagesForm _formModel;
+    // ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // _formModel = new ReceiveMessagesForm
+        // {
+        //     MessagesCount = 10,
+        //     Type = ReceiveType.ByCount
+        // };
+        //
+        // Model.Initialize(
+        //     new CurrentMessagesEntity(ConnectionName, QueueOrTopicName, SubscriptionName));
+        //
+        // Model.PropertyChanged += (_, _) => StateHasChanged();
+    }
+}
