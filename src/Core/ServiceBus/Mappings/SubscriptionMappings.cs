@@ -61,7 +61,7 @@ public static class SubscriptionMappings
             new Azure.Messaging.ServiceBus.Administration.CreateSubscriptionOptions(
                 createSubscriptionOptions.TopicName, 
                 createSubscriptionOptions.SubscriptionName);
-
+        
         if (createSubscriptionOptions.LockDuration.HasValue)
         {
             options.LockDuration = createSubscriptionOptions.LockDuration.Value;

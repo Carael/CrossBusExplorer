@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IQueueService, QueueService>()
             .AddSingleton<ITopicService, TopicService>()
             .AddSingleton<IMessageService, MessageService>()
+            .AddSingleton<IRuleService, RuleService>()
             .AddSingleton<ISubscriptionService, SubscriptionService>();
     }
 }
