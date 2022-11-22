@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 namespace CrossBusExplorer.Website.Extensions;
 
@@ -24,6 +26,17 @@ public static class StringExtensions
 
         return value;
     }
+
+    public static string SplitAndGetLastSection(this string value, char split)
+    {
+        if (value.Contains(split))
+        {
+            return value.Split(split).Last();
+        }
+
+        return value;
+    }
+    
     private static string TryFormatJson(string value)
     {
         try

@@ -180,11 +180,11 @@
             </EditForm>
         }
     </MudTabPanel>
-    
+
     @if (Model.Form?.OperationType == OperationType.Update)
     {
         <MudTabPanel Text="Rules" ToolTip="Rules">
-            <Rules></Rules>
+            <Rules ConnectionName="@ConnectionName" TopicName="@TopicName" SubscriptionName="@SubscriptionName"></Rules>
         </MudTabPanel>
     }
     @if (Model.Form?.OperationType == OperationType.Update)
