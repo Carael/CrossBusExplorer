@@ -38,7 +38,6 @@ public class JobsViewModel : IJobsViewModel
     {
         if (job.Status != JobStatus.Running)
         {
-            job.Cancel();
             job.PropertyChanged -= (_, _) => HandleJobUpdate(job);
             _jobs.Remove(job);
 
