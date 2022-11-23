@@ -25,6 +25,7 @@ public interface IMessageService
         string topicOrQueueName,
         string? subscriptionName,
         SubQueue subQueue,
+        long totalCount,
         CancellationToken cancellationToken);
     
     IAsyncEnumerable<ResendResult> ResendAsync(string connectionName,
@@ -32,5 +33,6 @@ public interface IMessageService
         string? subscriptionName,
         SubQueue subQueue,
         string destinationTopicOrQueueName,
+        long totalCount,
         CancellationToken cancellationToken);
 }

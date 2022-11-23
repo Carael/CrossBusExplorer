@@ -19,11 +19,12 @@
 else
 {
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@TopicSubscriptionsModel.Topic.Name>
-        <MudNavLink Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
+        <MudNavLink Match="NavLinkMatch.All" 
+                    Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
-        <MudNavGroup Icon="@Icons.Filled.Add"
+        <MudNavGroup Icon="@Icons.Filled.Subscriptions"
                      Title="Subscriptions"
                      @onclick="@(OnSubscriptionsExpanded)">
 
@@ -31,20 +32,21 @@ else
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
             }
-            @if (TopicSubscriptionsModel.Subscriptions.Count == 0 && TopicSubscriptionsModel.Loaded)
+            @if (TopicSubscriptionsModel.Loaded)
             {
-                <MudNavLink Disabled="true">No subscriptions</MudNavLink>
-            }
-            else
-            {
+                <MudNavLink Match="NavLinkMatch.All"
+                            Href=@($"new-subscription/{ConnectionName}/{TopicSubscriptionsModel.Topic.FullName}")
+                            Icon="@Icons.Filled.Add">
+                    Create new subscription
+                </MudNavLink>
+
                 @foreach (var subscription in TopicSubscriptionsModel.Subscriptions)
                 {
-                    <MudTooltip Text="@($"{subscription.Name} ({subscription.ActiveMessagesCount}, " +
-                                        $"{subscription.DeadLetterMessagesCount}, " +
-                                        $"{subscription.TransferMessagesCount}")">
-                        <MudNavLink Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.Name)}/{HttpUtility.UrlEncode(subscription.Name)}")
+                    <MudTooltip Text="@($"{subscription.SubscriptionName} ({subscription.ActiveMessagesCount}, " + $"{subscription.DeadLetterMessagesCount}, " + $"{subscription.TransferMessagesCount}")">
+                        <MudNavLink Match="NavLinkMatch.All"
+                                    Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
                                     Icon="@Icons.Filled.FormatLineSpacing">
-                            @subscription.Name (@subscription.ActiveMessagesCount, 
+                            @subscription.SubscriptionName (@subscription.ActiveMessagesCount,
                             @subscription.DeadLetterMessagesCount,
                             @subscription.TransferMessagesCount)
                         </MudNavLink>
@@ -56,7 +58,7 @@ else
 }
 
 @code {
-    [Inject] 
+    [Inject]
     public INavigationViewModel Model { get; set; }
     [Parameter]
     public TopicSubscriptionsModel TopicSubscriptionsModel { get; set; } = null!;

@@ -61,6 +61,7 @@ public class ResendMessagesJob : IJob
                 _subscriptionName,
                 _subQueue,
                 _destinationTopicOrQueueName,
+                _totalCount,
                 _cancellationTokenSource.Token))
             {
                 Progress = JobsHelper.GetProgress(_totalCount, result.ResendCount);

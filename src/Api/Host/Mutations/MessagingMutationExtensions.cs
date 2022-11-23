@@ -15,6 +15,7 @@ public class MessagingMutationExtensions
         string queueOrTopicName,
         string? subscriptionName,
         SubQueue subQueue,
+        long totalCount,
         CancellationToken cancellationToken)
     {
         return messageService.PurgeAsync(
@@ -22,6 +23,7 @@ public class MessagingMutationExtensions
             queueOrTopicName,
             subscriptionName,
             subQueue,
+            totalCount,
             cancellationToken);
     }
     

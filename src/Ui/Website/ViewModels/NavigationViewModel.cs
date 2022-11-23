@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -25,7 +26,8 @@ public class NavigationViewModel : INavigationViewModel
         ITopicService topicService,
         ISubscriptionService subscriptionService,
         IQueueViewModel queueViewModel,
-        ITopicViewModel topicViewModel)
+        ITopicViewModel topicViewModel,
+        ISubscriptionViewModel subscriptionViewModel)
     {
         _queueService = queueService;
         _topicService = topicService;
@@ -37,6 +39,8 @@ public class NavigationViewModel : INavigationViewModel
         queueViewModel.QueueRemoved += this.QueueRemoved;
         topicViewModel.TopicAdded += this.OnTopicAdded;
         topicViewModel.TopicRemoved += this.OnTopicRemoved;
+        subscriptionViewModel.SubscriptionAdded += this.OnSubscriptionAdded;
+        subscriptionViewModel.SubscriptionRemoved += this.OnSubscriptionRemoved;
     }
 
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
@@ -214,6 +218,33 @@ public class NavigationViewModel : INavigationViewModel
         return false;
     }
 
+    private void TryRemoveSubscription(
+        TopicSubscriptionsModel topicSubscriptionsModel,
+        string topicName,
+        string subscriptionName)
+    {
+        for (var i = 0; i < topicSubscriptionsModel.ChildrenModels.Count; i++)
+        {
+            TopicSubscriptionsModel current = topicSubscriptionsModel.ChildrenModels[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            {
+                var subscription =
+                    current.Subscriptions
+                        .FirstOrDefault(p => p.SubscriptionName
+                            .Equals(subscriptionName, StringComparison.InvariantCultureIgnoreCase));
+                
+                current.Subscriptions.Remove(subscription);
+
+                break;
+            }
+
+            TryRemoveSubscription(current, topicName, subscriptionName);
+        }
+    }
+
+
     private void OnTopicAdded(string connectionName, TopicInfo topicInfo)
     {
         var menuItem =
@@ -228,5 +259,77 @@ public class NavigationViewModel : INavigationViewModel
                     new List<TopicStructure>())));
 
         this.Notify(PropertyChanged);
+    }
+
+    private void OnSubscriptionRemoved(
+        string connectionName,
+        string topicName,
+        string subscriptionName)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        for (int i = 0; i < menuItem.Topics.Count; i++)
+        {
+            var current = menuItem.Topics[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            {
+                var subscription =
+                    current.Subscriptions
+                        .FirstOrDefault(p => p.SubscriptionName
+                            .Equals(subscriptionName, StringComparison.InvariantCultureIgnoreCase));
+
+                current.Subscriptions.Remove(subscription);
+                break;
+            }
+
+            TryRemoveSubscription(current, topicName, subscriptionName);
+        }
+
+        this.Notify(PropertyChanged);
+    }
+
+    private void OnSubscriptionAdded(string connectionName, SubscriptionInfo subscription)
+    {
+        var menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        for (int i = 0; i < menuItem.Topics.Count; i++)
+        {
+            var current = menuItem.Topics[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(subscription.TopicName))
+            {
+                current.Subscriptions.Add(subscription);
+                break;
+            }
+
+            TryAddSubscription(current, subscription);
+        }
+
+        this.Notify(PropertyChanged);
+    }
+    
+    private void TryAddSubscription(
+        TopicSubscriptionsModel topicSubscriptionsModel,
+        SubscriptionInfo subscription)
+    {
+        for (var i = 0; i < topicSubscriptionsModel.ChildrenModels.Count; i++)
+        {
+            TopicSubscriptionsModel current = topicSubscriptionsModel.ChildrenModels[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(subscription.TopicName))
+            {
+                current.Subscriptions.Add(subscription);
+
+                break;
+            }
+
+            TryAddSubscription(current, subscription);
+        }
     }
 }

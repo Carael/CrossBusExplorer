@@ -75,16 +75,17 @@ public class MessageService : IMessageService
         await using ServiceBusSender sender = client.CreateSender(queueOrTopicName);
 
         return await SendMessagesInternalAsync(
-            sender, 
-            messages.Select(p=>p.ToServiceBusMessage()).ToList(), 
+            sender,
+            messages.Select(p => p.ToServiceBusMessage()).ToList(),
             cancellationToken);
     }
-    
+
     public async IAsyncEnumerable<PurgeResult> PurgeAsync(
         string connectionName,
         string topicOrQueueName,
         string? subscriptionName,
         SubQueue subQueue,
+        long totalCount,
         CancellationToken cancellationToken)
     {
         var connection =
@@ -101,25 +102,26 @@ public class MessageService : IMessageService
         var totalRemoved = 0;
         int batchRemovedCount = -1;
 
-        while (batchRemovedCount > 0 || batchRemovedCount == -1)
+        while (totalRemoved <= totalCount && batchRemovedCount > 0 || batchRemovedCount == -1)
         {
             batchRemovedCount = (await receiver.ReceiveMessagesAsync(
                 receiveBatch,
-                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(5),
                 cancellationToken)).Count;
             totalRemoved += batchRemovedCount;
-
             yield return new PurgeResult(totalRemoved);
         }
 
         yield return new PurgeResult(totalRemoved);
     }
+
     public async IAsyncEnumerable<ResendResult> ResendAsync(
-        string connectionName, 
+        string connectionName,
         string topicOrQueueName,
         string? subscriptionName,
-        SubQueue subQueue, 
-        string destinationTopicOrQueueName, 
+        SubQueue subQueue,
+        string destinationTopicOrQueueName,
+        long totalCount,
         CancellationToken cancellationToken)
     {
         var connection =
@@ -132,13 +134,13 @@ public class MessageService : IMessageService
             subscriptionName,
             subQueue,
             ReceiveMode.ReceiveAndDelete);
-        
+
         await using ServiceBusSender sender = client.CreateSender(destinationTopicOrQueueName);
 
         var totalResend = 0;
         int batchResendCount = -1;
 
-        while (batchResendCount > 0 || batchResendCount == -1)
+        while (totalResend <= totalCount && batchResendCount > 0 || batchResendCount == -1)
         {
             IReadOnlyList<ServiceBusReceivedMessage> messages = await receiver.ReceiveMessagesAsync(
                 receiveBatch,
@@ -146,8 +148,8 @@ public class MessageService : IMessageService
                 cancellationToken);
 
             await SendMessagesInternalAsync(
-                sender, 
-                messages.Select(p => p.MapToServiceBusMessage()).ToList(), 
+                sender,
+                messages.Select(p => p.MapToServiceBusMessage()).ToList(),
                 cancellationToken);
 
             batchResendCount = messages.Count;

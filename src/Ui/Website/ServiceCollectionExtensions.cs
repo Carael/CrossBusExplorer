@@ -1,5 +1,4 @@
 using CrossBusExplorer.Website.ViewModels;
-using Fluxor.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
@@ -16,6 +15,7 @@ public static class ServiceCollectionExtensions
         collection.AddScoped<IJobsViewModel, JobsViewModel>();
         collection.AddScoped<ITopicViewModel, TopicViewModel>();
         collection.AddScoped<ISubscriptionViewModel, SubscriptionViewModel>();
+        collection.AddScoped<IRulesViewModel, RulesViewModel>();
         
         return collection.AddMudServices(config =>
         {

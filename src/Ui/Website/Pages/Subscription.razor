@@ -1,14 +1,233 @@
 @page "/subscription/{ConnectionName}/{TopicName}/{SubscriptionName}"
-<PageTitle>Topic @TopicName </PageTitle>
-<MudText Typo="Typo.h3" GutterBottom="true">Topic @TopicName </MudText>
+@page "/new-subscription/{ConnectionName}/{TopicName}"
+@using CrossBusExplorer.Website.ViewModels
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+
+<PageTitle>Subscription @SubscriptionName</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Subscription @SubscriptionName</MudText>
+
+<MudTooltip Text="Add new subscription">
+    <MudIconButton Icon="@Icons.Material.Outlined.Add"
+                   OnClick="@(() => Model.NavigateToNewSubscriptionForm(ConnectionName, TopicName))"/>
+</MudTooltip>
+@if (Model.Form?.OperationType != OperationType.Create)
+{
+    <MudTooltip Text="Clone subscription">
+        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                       OnClick="@(() => Model.CloneSubscriptionAsync(ConnectionName, TopicName, SubscriptionName, default))"/>
+    </MudTooltip>
+
+    <MudTooltip Text="Refresh">
+        <MudIconButton Icon="@Icons.Material.Outlined.Refresh"
+                       OnClick="@(() => Model.InitializeFormAsync(ConnectionName, TopicName, SubscriptionName, default))"/>
+    </MudTooltip>
+}
+
+<MudTabs Elevation="1" Rounded="true" Border="true" ActivePanelIndex="_activePanel">
+    <MudTabPanel Text="Details" ToolTip="Details">
+        @if (Model.Form != null)
+        {
+            <EditForm Model="@Model.Form" OnValidSubmit="@(OnValidSaveForm)">
+                <DataAnnotationsValidator/>
+                <MudCard>
+                    <MudCardContent>
+                        <MudGrid>
+                            <MudItem xs="4">
+                                <MudTextField @bind-Value="@Model.Form.TopicName" For="@(() => Model.Form.TopicName)" Margin="Margin.Dense" Variant="Variant.Text"Disabled="true"/>
+                                <MudTextField @bind-Value="@Model.Form.SubscriptionName" For="@(() => Model.Form.SubscriptionName)" Margin="Margin.Dense" Variant="Variant.Text"Disabled="@(Model.Form?.OperationType == OperationType.Update)"/>
+                                <MudTextField @bind-Value="@Model.Form.UserMetadata" For="@(() => Model.Form.UserMetadata)" Margin="Margin.Dense" Variant="Variant.Text"/>
+                                <MudTextField @bind-Value="@Model.Form.ForwardTo" For="@(() => Model.Form.ForwardTo)" Margin="Margin.Dense" Variant="Variant.Text"/>
+                                <MudTextField @bind-Value="@Model.Form.ForwardDeadLetteredMessagesTo" For="@(() => Model.Form.ForwardDeadLetteredMessagesTo)" Margin="Margin.Dense" Variant="Variant.Text"/>
+                                <MudSlider Step="1" @bind-Value="Model.Form.MaxDeliveryCount" Max="100" Variant="Variant.Text">Max delivery count: @Model.Form.MaxDeliveryCount</MudSlider>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudTextField @bind-Value="@Model.Form.AutoDeleteOnIdle"
+                                              T="TimeSpan?"
+                                              For="@(() => Model.Form.AutoDeleteOnIdle)"
+                                              Pattern="@WellKnown.Regex.TimeSpan"
+                                              Converter="@WellKnown.Converters.TimeSpanConverter"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField @bind-Value="@Model.Form.DefaultMessageTimeToLive"
+                                              T="TimeSpan?"
+                                              For="@(() => Model.Form.DefaultMessageTimeToLive)"
+                                              Pattern="@WellKnown.Regex.TimeSpan"
+                                              Converter="@WellKnown.Converters.TimeSpanConverter"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField @bind-Value="@Model.Form.LockDuration"
+                                              T="TimeSpan?"
+                                              For="@(() => Model.Form.LockDuration)"
+                                              Pattern="@WellKnown.Regex.TimeSpan"
+                                              Converter="@WellKnown.Converters.TimeSpanConverter"
+                                              Margin="Margin.Dense"/>
+                                <MudCheckBox @bind-Checked="@Model.Form.DeadLetteringOnMessageExpiration"
+                                             For="@(() => Model.Form.DeadLetteringOnMessageExpiration)"
+                                             Size="Size.Small"
+                                             Dense="true"
+                                             Margin="@Margin.Dense"/>
+
+                                <MudCheckBox @bind-Checked="@Model.Form.EnableBatchedOperations"
+                                             For="@(() => Model.Form.EnableBatchedOperations)"
+                                             Size="Size.Small"
+                                             Dense="true"
+                                             Margin="@Margin.Dense">
+                                </MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.EnableDeadLetteringOnFilterEvaluationExceptions"
+                                             Label="Enable dead lettering on filter evaluation exceptions"
+                                             Size="Size.Small"
+                                             Margin="@Margin.Dense"
+                                             Dense="true">
+                                </MudCheckBox>
+                                <MudCheckBox @bind-Checked="@Model.Form.RequiresSession"
+                                             Label="Requires session"
+                                             Size="Size.Small"
+                                             Margin="@Margin.Dense"
+                                             Dense="true"
+                                             Disabled="@(Model.Form?.OperationType == OperationType.Update)">
+                                </MudCheckBox>
+
+                            </MudItem>
+                            <MudItem xs="4">
+                                @if (Model.SubscriptionDetails != null)
+                                {
+                                    <MudField Disabled="true"
+                                              Label="Status"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.Status
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Created at"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.CreatedAt.ToUniversal()
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Accessed at"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.AccessedAt.ToUniversal()
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Active messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.ActiveMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Dead letter messages count"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.DeadLetterMessagesCount
+                                    </MudField>
+                                    <MudField Disabled="true"
+                                              Label="Transfer message count"
+                                              Margin="Margin.Dense">
+                                        @Model.SubscriptionDetails.Info.TransferMessagesCount
+                                    </MudField>
+                                }
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudTooltip Text="Save">
+                            <MudIconButton Icon=@Icons.Filled.Save
+                                           ButtonType="ButtonType.Submit"
+                                           Color="Color.Success"
+                                           Class="px-10">
+                            </MudIconButton>
+                        </MudTooltip>
+                        @if (Model.Form?.OperationType != OperationType.Create)
+                        {
+                            if (Model.SubscriptionDetails.Info.Status == ServiceBusEntityStatus.Active)
+                            {
+                                <MudTooltip Text="Disable">
+                                    <MudIconButton Icon=@Icons.Filled.Lock
+                                                   ButtonType="ButtonType.Button"
+                                                   OnClick="@(() => Model.UpdateSubscriptionStatusAsync(ConnectionName, TopicName, SubscriptionName, ServiceBusEntityStatus.Disabled, default))" Color="Color.Default" Class="px-10">
+                                    </MudIconButton>
+                                </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="Activate">
+                                    <MudIconButton Icon=@Icons.Filled.LockOpen
+                                                   ButtonType="ButtonType.Button"
+                                                   OnClick="@(() => Model.UpdateSubscriptionStatusAsync(ConnectionName, TopicName, SubscriptionName, ServiceBusEntityStatus.Active, default))" Color="Color.Default" Class="px-10">
+                                    </MudIconButton>
+                                </MudTooltip>
+                            }
+                            <MudTooltip Text="Purge messages">
+                                <MudIconButton Icon=@Icons.Filled.RemoveFromQueue
+                                               ButtonType="ButtonType.Button"
+                                               OnClick="@(() => Model.PurgeMessagesAsync(ConnectionName, TopicName, SubscriptionName, default))"
+                                               Color="Color.Default" Class="px-10">
+                                </MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Resend dead letter messages">
+                                <MudIconButton Icon=@Icons.Filled.Refresh
+                                               ButtonType="ButtonType.Button"
+                                               Disabled=@(Model.SubscriptionDetails.Info.DeadLetterMessagesCount == 0)
+                                               OnClick="@(() => Model.ResendDeadLettersAsync(ConnectionName, TopicName, SubscriptionName, default))"
+                                               Color="Color.Default" Class="px-10">
+                                </MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Delete">
+                                <MudIconButton Icon=@Icons.Filled.Delete
+                                               ButtonType="ButtonType.Button"
+                                               OnClick="@(() => Model.DeleteSubscriptionAsync(ConnectionName, TopicName, SubscriptionName, default))"
+                                               Color="Color.Error" Class="px-10">
+                                </MudIconButton>
+                            </MudTooltip>
+                        }
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+        }
+    </MudTabPanel>
+    @if (Model.Form?.OperationType == OperationType.Update)
+    {
+        <MudTabPanel Text="Messages" ToolTip="Messages">
+            <Messages ConnectionName="@ConnectionName" QueueOrTopicName="@TopicName" SubscriptionName="@SubscriptionName"/>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Rules" ToolTip="Rules">
+            <Rules ConnectionName="@ConnectionName" TopicName="@TopicName" SubscriptionName="@SubscriptionName"></Rules>
+        </MudTabPanel>
+    }
+</MudTabs>
+
 
 @code {
+    [Inject]
+    public ISubscriptionViewModel Model { get; set; }
+
     [Parameter]
     public string? ConnectionName { get; set; }
-    
+
     [Parameter]
     public string? TopicName { get; set; }
-    
+
     [Parameter]
     public string? SubscriptionName { get; set; }
+
+    int _activePanel = 0;
+
+    protected override void OnInitialized()
+    {
+        _activePanel = 0;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ConnectionName != null)
+        {
+            await Model.InitializeFormAsync(ConnectionName, TopicName, SubscriptionName, default);
+        }
+    }
+
+    private async Task OnValidSaveForm()
+    {
+        Model.SaveSubscriptionFormAsync(ConnectionName!);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.PropertyChanged += (_, _) => StateHasChanged();
+    }
 }

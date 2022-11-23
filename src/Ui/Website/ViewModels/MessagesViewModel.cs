@@ -127,7 +127,7 @@ public class MessagesViewModel : IMessagesViewModel
             {
                 FullWidth = true,
                 FullScreen = false,
-                MaxWidth = MaxWidth.Large,
+                MaxWidth = MaxWidth.ExtraLarge,
                 CloseButton = true,
                 CloseOnEscapeKey = true,
                 Position = DialogPosition.Center

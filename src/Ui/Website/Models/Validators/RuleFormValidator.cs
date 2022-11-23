@@ -7,25 +7,31 @@ using CrossBusExplorer.Website.Extensions;
 using FluentValidation;
 namespace CrossBusExplorer.Website.Models.Validators;
 
-public class ReceiveMessageFormValidator : AbstractValidator<ReceiveMessagesForm>
+public class RuleFormValidator : AbstractValidator<RuleFormModel>
 {
-    public ReceiveMessageFormValidator()
+    public RuleFormValidator()
     {
-        RuleFor(p => p.MessagesCount)
-            .GreaterThan(0)
+        RuleFor(p => p.Name)
+            .NotNull()
             .NotEmpty()
-            .When(p => p.Type == ReceiveType.ByCount)
-            .WithMessage($"When mode is set to {ReceiveMode.PeekLock} then " +
-                         $"{nameof(ReceiveMessagesForm.MessagesCount)} hast to be" +
-                         $" greater then 0.");
+            .WithMessage("Name is required.");
+
+        RuleFor(p => p.Value)
+            .NotNull()
+            .NotEmpty()
+            .When(p => p.Type is RuleType.CorrelationId or RuleType.Sql)
+            .WithMessage($"When type is set to {RuleType.Sql} or " +
+                         $"{RuleType.CorrelationId} the value must be set.");
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue =>
         async (model, propertyName) =>
         {
             var result = await ValidateAsync(
-                ValidationContext<ReceiveMessagesForm>.CreateWithOptions((ReceiveMessagesForm)model,
+                ValidationContext<RuleFormModel>.CreateWithOptions(
+                    (RuleFormModel)model,
                     x => x.IncludeProperties(propertyName.SplitAndGetLastSection('.'))));
+
             if (result.IsValid)
                 return Array.Empty<string>();
 

@@ -77,6 +77,7 @@ public class PurgeMessagesJob : IJob
                 _queueOrTopicName,
                 _subscriptionName,
                 _subQueue,
+                _totalCount,
                 _cancellationTokenSource.Token))
             {
                 Progress = JobsHelper.GetProgress(_totalCount, result.PurgedCount);

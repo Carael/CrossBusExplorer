@@ -1,0 +1,147 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.Website.Models.Validators
+@using CrossBusExplorer.Website.ViewModels
+@inherits LayoutComponentBase
+
+<MudPaper>
+    <div class="d-flex gap-2">
+        <MudTooltip Text="Create rule">
+            <MudIconButton Icon="@Icons.Filled.Add" OnClick="@(() => Model.ShowCreateRuleForm())" ButtonType="ButtonType.Button">Create rule</MudIconButton>
+        </MudTooltip>
+    </div>
+
+    <MudTable Items="Model.Rules" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh>
+                Actions
+            </MudTh>
+            <MudTh>
+                Name
+            </MudTh>
+            <MudTh>
+                Type
+            </MudTh>
+            <MudTh>
+                Value
+            </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Actions">
+                <MudTooltip Text="Edit rule">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => Model.ShowEditRuleForm(context))"/>
+                </MudTooltip>
+                <MudTooltip Text="Delete rule">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => Model.DeleteRuleAsync(ConnectionName, TopicName, SubscriptionName, context, default))"/>
+                </MudTooltip>
+            </MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Type">@context.Type</MudTd>
+            <MudTd DataLabel="Value">@(context.Value ?? "-")</MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+<MudDialog @bind-IsVisible="Model.DialogVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @(Model.Form.OperationType == OperationType.Create ? "Create" : "Edit") rule for subscription @SubscriptionName (@TopicName topic)
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="3">
+            <MudForm @ref="@_form" Model="@Model.Form" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+
+                <MudField Variant="Variant.Outlined" Label="Name">
+                    <MudTextField @bind-Value="Model.Form.Name"
+                                  For="@(() => Model.Form.Name)"
+                                  Disabled="@(Model.Form.OperationType == OperationType.Update)"
+                                  Class="px-0 ma-0 pa-0 py-0"
+                                  Immediate="true"
+                                  HelperText="Name">
+                    </MudTextField>
+                </MudField>
+
+                <MudField Variant="Variant.Outlined" Label="Rule type">
+                    <MudRadioGroup @bind-SelectedOption="Model.Form.Type"
+                                   For="@(() => Model.Form.Type)">
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="RuleType.TrueFilter">
+                            True rule
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="RuleType.FalseFilter">
+                            False rule
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="RuleType.Sql">
+                            Sql rule
+                        </MudRadio>
+                        <MudRadio Dense="true"
+                                  Size="Size.Small"
+                                  Option="RuleType.CorrelationId">
+                            CorrelationId rule
+                        </MudRadio>
+                    </MudRadioGroup>
+                </MudField>
+
+                <MudField Variant="Variant.Outlined" Label="Filter value">
+                    <MudTextField @bind-Value="Model.Form.Value"
+                                  For="@(() => Model.Form.Value)"
+                                  Lines="5"
+                                  Disabled="@(Model.Form.Type == RuleType.TrueFilter || Model.Form.Type == RuleType.FalseFilter)"
+                                  Class="px-0 ma-0 pa-0 py-0"
+                                  Immediate="true"
+                                  HelperText="Filter value">
+                    </MudTextField>
+                </MudField>
+            </MudForm>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton ButtonType="ButtonType.Reset"
+                   Color="Color.Default"
+                   OnClick="@(() => { Model.DialogVisible = false; })"
+                   Class="px-10">
+            Close
+        </MudButton>
+        <MudButton ButtonType="ButtonType.Button"
+                   Color="Color.Success"
+                   OnClick="@(() => this.OnFormSubmit())"
+                   Class="px-10">
+            Submit
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string ConnectionName { get; set; }
+    [Parameter]
+    public string TopicName { get; set; }
+    [Parameter]
+    public string SubscriptionName { get; set; }
+    [Inject]
+    IRulesViewModel Model { get; set; }
+    MudForm _form;
+    RuleFormValidator _validator = new RuleFormValidator();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.InitializeAsync(ConnectionName, TopicName, SubscriptionName, default);
+
+        Model.PropertyChanged += (_, _) => StateHasChanged();
+    }
+    private async Task OnFormSubmit()
+    {
+        await _form.Validate();
+
+        if (_form.IsValid)
+        {
+            await Model.OnSubmitFormAsync(ConnectionName, TopicName, SubscriptionName, default);
+        }
+    }
+}
