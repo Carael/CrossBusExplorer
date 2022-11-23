@@ -1,5 +1,4 @@
 using CrossBusExplorer.Website.ViewModels;
-using Fluxor.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
