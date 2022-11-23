@@ -19,7 +19,8 @@
 else
 {
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@TopicSubscriptionsModel.Topic.Name>
-        <MudNavLink Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
+        <MudNavLink Match="NavLinkMatch.All" 
+                    Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
                     Icon="@Icons.Filled.Topic">
             View topic details
         </MudNavLink>
@@ -33,7 +34,8 @@ else
             }
             @if (TopicSubscriptionsModel.Loaded)
             {
-                <MudNavLink Href=@($"new-subscription/{ConnectionName}/{TopicSubscriptionsModel.Topic.FullName}")
+                <MudNavLink Match="NavLinkMatch.All"
+                            Href=@($"new-subscription/{ConnectionName}/{TopicSubscriptionsModel.Topic.FullName}")
                             Icon="@Icons.Filled.Add">
                     Create new subscription
                 </MudNavLink>
@@ -41,7 +43,8 @@ else
                 @foreach (var subscription in TopicSubscriptionsModel.Subscriptions)
                 {
                     <MudTooltip Text="@($"{subscription.SubscriptionName} ({subscription.ActiveMessagesCount}, " + $"{subscription.DeadLetterMessagesCount}, " + $"{subscription.TransferMessagesCount}")">
-                        <MudNavLink Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
+                        <MudNavLink Match="NavLinkMatch.All"
+                                    Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
                                     Icon="@Icons.Filled.FormatLineSpacing">
                             @subscription.SubscriptionName (@subscription.ActiveMessagesCount,
                             @subscription.DeadLetterMessagesCount,

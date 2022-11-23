@@ -6,8 +6,8 @@
 @using System.Net
 @using System.Web
 <MudNavMenu>
-    <MudNavLink Href="connections"
-                Match="NavLinkMatch.All"
+    <MudNavLink Match="NavLinkMatch.All"
+                Href="connections"
                 Icon="@Icons.Material.Filled.EditNote">
         Manage connections
     </MudNavLink>
@@ -26,7 +26,8 @@
                 }
                 else
                 {
-                    <MudNavLink Href=@($"new-queue/{menuItem.ConnectionName}")
+                    <MudNavLink Match="NavLinkMatch.All"
+                                Href=@($"new-queue/{menuItem.ConnectionName}")
                                 Icon="@Icons.Filled.Add">
                         Create new queue
                     </MudNavLink>
@@ -34,7 +35,8 @@
 
                 @foreach (var queue in menuItem.Queues)
                 {
-                    <MudNavLink Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
+                    <MudNavLink Match="NavLinkMatch.All"
+                                Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
                                 Icon="@Icons.Filled.Queue">
                         @queue.Name
                         (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
@@ -44,6 +46,7 @@
 
             <MudNavGroup Icon="@Icons.Filled.Folder"
                          Title="Topics"
+                         
                          @onclick="@(() => OnTopicsExpanded(menuItem))">
 
                 @if (menuItem.LoadingTopics)
@@ -52,7 +55,8 @@
                 }
                 else
                 {
-                    <MudNavLink Href=@($"new-topic/{menuItem.ConnectionName}")
+                    <MudNavLink Match="NavLinkMatch.All" 
+                                Href=@($"new-topic/{menuItem.ConnectionName}")
                                 Icon="@Icons.Filled.Add">
                         Create new topic
                     </MudNavLink>
