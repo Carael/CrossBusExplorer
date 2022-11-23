@@ -16,7 +16,7 @@
     <MudTextField
         Variant="Variant.Outlined"
         Label="Body"
-        Disabled="@(!EditMode)"
+        ReadOnly="@(!EditMode)"
         Lines="26"
         T="string"
         @bind-Value="@_formModel.Body">
@@ -24,192 +24,276 @@
 </MudPaper>
 <MudPaper Width="40%" Class="d-flex flex-column gap-4">
 <MudField Label="System properties" Variant="Variant.Outlined">
-    <MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
-        <thead>
-        <tr>
-            <th>Property</th>
-            <th>Value</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>@nameof(Message.Id)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.Id)"
-                              @bind-Value="@_formModel.Id"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.Subject)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.Subject)"
-                              @bind-Value="@_formModel.Subject"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.To)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.To)"
-                              bind-Value="@_formModel.To"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.ContentType)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.ContentType)"
-                              @bind-Value="@_formModel.ContentType"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.CorrelationId)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.CorrelationId)"
-                              @bind-Value="@_formModel.CorrelationId"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.PartitionKey)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.PartitionKey)"
-                              @bind-Value="@_formModel.PartitionKey"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(Message.SystemProperties.ReplyTo)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.ReplyTo)"
-                              bind-Value="@_formModel.ReplyTo"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.SessionId)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              T="string"
-                              For="@(() => _formModel.SessionId)"
-                              bind-Value="@_formModel.SessionId"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.ScheduledEnqueueTime)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              For="@(() => _formModel.ScheduledEnqueueTime)"
-                              T="DateTimeOffset?"
-                              Format="@WellKnown.Format.DateFormat"
-                              Converter="@WellKnown.Converters.DateTimeOffsetConverter"
-                              @bind-Value="@_formModel.ScheduledEnqueueTime"/>
-            </td>
-        </tr>
-        <tr>
-            <td>@nameof(_formModel.TimeToLive)</td>
-            <td>
-                <MudTextField Disabled="@(!EditMode)"
-                              T="TimeSpan?"
-                              Variant="Variant.Text"
-                              Margin="Margin.Dense"
-                              For="@(() => _formModel.TimeToLive)"
-                              Pattern="@WellKnown.Regex.TimeSpan"
-                              Converter="@WellKnown.Converters.TimeSpanConverter"
-                              @bind-Value="@_formModel.TimeToLive"/>
-            </td>
-        </tr>
-        @if (Message != null)
+<MudSimpleTable Dense="true" Class="overflow-y-auto" Style="height: 250px;">
+<thead>
+<tr>
+    <th>Property</th>
+    <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>@nameof(Message.Id)</td>
+    <td>
+        @if (EditMode)
         {
-            <tr>
-                <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
-                <td>@Message?.SystemProperties.SequenceNumber"</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.State)</td>
-                <td>@Message.SystemProperties.State</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
-                <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
-                <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
-                <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
-            </tr>
-
-            <tr>
-                <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
-                <td>@Message.SystemProperties.DeliveryCount</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
-                <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
-                <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.LockedUntil)</td>
-                <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.LockToken)</td>
-                <td>@Message.SystemProperties.LockToken</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
-                <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
-                <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
-            </tr>
-            <tr>
-                <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
-                <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
-            </tr>
+            <MudTextField
+                Variant="Variant.Text"
+                Margin="Margin.Dense"
+                T="string"
+                FullWidth="true"
+                For="@(() => _formModel.Id)"
+                @bind-Value="@_formModel.Id"/>
         }
+        else
+        {
+            @(_formModel.Id ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(Message.Subject)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.Subject)"
+                          @bind-Value="@_formModel.Subject"/>
+        }
+        else
+        {
+            @(_formModel.Subject ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.To)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.To)"
+                          bind-Value="@_formModel.To"/>
+        }
+        else
+        {
+            @(_formModel.To ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.ContentType)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.ContentType)"
+                          @bind-Value="@_formModel.ContentType"/>
+        }
+        else
+        {
+            @(_formModel.ContentType ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.CorrelationId)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.CorrelationId)"
+                          @bind-Value="@_formModel.CorrelationId"/>
+        }
+        else
+        {
+            @(_formModel.CorrelationId ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.PartitionKey)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.PartitionKey)"
+                          @bind-Value="@_formModel.PartitionKey"/>
+        }
+        else
+        {
+            @(_formModel.PartitionKey ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(Message.SystemProperties.ReplyTo)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.ReplyTo)"
+                          bind-Value="@_formModel.ReplyTo"/>
+        }
+        else
+        {
+            @(_formModel.ReplyTo ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.SessionId)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          T="string"
+                          FullWidth="true"
+                          For="@(() => _formModel.SessionId)"
+                          bind-Value="@_formModel.SessionId"/>
+        }
+        else
+        {
+            @(_formModel.SessionId ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.ScheduledEnqueueTime)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          For="@(() => _formModel.ScheduledEnqueueTime)"
+                          T="DateTimeOffset?"
+                          Format="@WellKnown.Format.DateFormat"
+                          FullWidth="true"
+                          Converter="@WellKnown.Converters.DateTimeOffsetConverter"
+                          @bind-Value="@_formModel.ScheduledEnqueueTime"/>
+        }
+        else
+        {
+            @(_formModel.ScheduledEnqueueTime?.ToString() ?? "-")
+        }
+    </td>
+</tr>
+<tr>
+    <td>@nameof(_formModel.TimeToLive)</td>
+    <td>
+        @if (EditMode)
+        {
+            <MudTextField Disabled="@(!EditMode)"
+                          T="TimeSpan?"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          For="@(() => _formModel.TimeToLive)"
+                          Pattern="@WellKnown.Regex.TimeSpan"
+                          FullWidth="true"
+                          Converter="@WellKnown.Converters.TimeSpanConverter"
+                          @bind-Value="@_formModel.TimeToLive"/>
+        }
+        else
+        {
+            @(_formModel.TimeToLive?.ToTimeSpanString() ?? "-")
+        }
+    </td>
+</tr>
+@if (Message != null)
+{
+    <tr>
+        <td>@nameof(Message.SystemProperties.SequenceNumber)</td>
+        <td>@Message?.SystemProperties.SequenceNumber"</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.State)</td>
+        <td>@Message.SystemProperties.State</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.DeadLetterReason)</td>
+        <td>@(Message.SystemProperties.DeadLetterReason ?? "-")</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.DeadLetterSource)</td>
+        <td>@(Message.SystemProperties.DeadLetterSource ?? "-")</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.DeadLetterErrorDescription)</td>
+        <td>@(Message.SystemProperties.DeadLetterErrorDescription ?? "-")</td>
+    </tr>
 
-        </tbody>
-    </MudSimpleTable>
+    <tr>
+        <td>@nameof(Message.SystemProperties.DeliveryCount)</td>
+        <td>@Message.SystemProperties.DeliveryCount</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.EnqueuedTime)</td>
+        <td>@Message.SystemProperties.EnqueuedTime.ToUniversal()</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.ExpiresAt)</td>
+        <td>@Message.SystemProperties.ExpiresAt.ToUniversal()</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.LockedUntil)</td>
+        <td>@Message.SystemProperties.LockedUntil.ToUniversal()</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.LockToken)</td>
+        <td>@Message.SystemProperties.LockToken</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.ReplyToSessionId)</td>
+        <td>@(Message.SystemProperties.ReplyToSessionId ?? "-")</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.EnqueuedSequenceNumber)</td>
+        <td>@Message.SystemProperties.EnqueuedSequenceNumber</td>
+    </tr>
+    <tr>
+        <td>@nameof(Message.SystemProperties.TransactionPartitionKey)</td>
+        <td>@(Message.SystemProperties.TransactionPartitionKey ?? "-")</td>
+    </tr>
+}
+
+</tbody>
+</MudSimpleTable>
 </MudField>
 <MudField Label="Application properties" Variant="Variant.Outlined">
     <MudSimpleTable Dense="true" Style="overflow-y: auto; height: 185px;">
         <thead>
         <tr>
+            @if (EditMode)
+            {
+                <th></th>
+            }
             <th>Property</th>
             <th>Value</th>
         </tr>
@@ -218,23 +302,49 @@
         @foreach (var userProperty in _formModel.ApplicationProperties)
         {
             <tr>
+                @if (EditMode)
+                {
+                    <td>
+                        <MudIconButton
+                            Size="Size.Small"
+                            Icon="@Icons.Filled.Remove"
+                            Title="Remove"
+                            OnClick="@(() => RemoveApplicationProperty((userProperty)))">
+                        </MudIconButton>
+                    </td>
+                }
                 <td>
-                    <MudTextField Disabled="@(!EditMode)"
-                                  T="string"
-                                  Variant="Variant.Text"
-                                  Margin="Margin.Dense"
-                                  Required="true"
-                                  For="@(() => userProperty.Key)"
-                                  @bind-Value="@userProperty.Key"/>
+                    @if (EditMode)
+                    {
+                        <MudTextField T="string"
+                                      Variant="Variant.Text"
+                                      Margin="Margin.Dense"
+                                      Required="true"
+                                      FullWidth="true"
+                                      For="@(() => userProperty.Key)"
+                                      @bind-Value="@userProperty.Key"/>
+                    }
+                    else
+                    {
+                        @userProperty.Key
+                    }
                 </td>
                 <td>
-                    <MudTextField Disabled="@(!EditMode)"
-                                  T="string"
-                                  Variant="Variant.Text"
-                                  Margin="Margin.Dense"
-                                  Required="true"
-                                  For="@(() => userProperty.Value)"
-                                  @bind-Value="@userProperty.Value"/>
+                    @if (EditMode)
+                    {
+                        <MudTextField
+                            T="string"
+                            Variant="Variant.Text"
+                            Margin="Margin.Dense"
+                            Required="true"
+                            FullWidth="true"
+                            For="@(() => userProperty.Value)"
+                            @bind-Value="@userProperty.Value"/>
+                    }
+                    else
+                    {
+                        @userProperty.Value
+                    }
                 </td>
             </tr>
         }
@@ -315,8 +425,14 @@
     {
         StateHasChanged();
     }
+
     private void AddNewApplicationProperty()
     {
         _formModel.ApplicationProperties.Add(new KeyValuePair());
+    }
+
+    private void RemoveApplicationProperty(KeyValuePair userProperty)
+    {
+        _formModel.ApplicationProperties.Remove(userProperty);
     }
 }
