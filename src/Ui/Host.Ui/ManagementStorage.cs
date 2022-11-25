@@ -25,6 +25,6 @@ public class ManagementStorage : IManagementStorage
     }
 
     private string FilePath => Path.Combine(
-        FileSystem.Current.AppDataDirectory,
+        FileSystem.AppDataDirectory,
         ServiceBusConnectionsFileName);
 }

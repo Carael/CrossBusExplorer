@@ -4,30 +4,40 @@ using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 namespace CrossBusExplorer.Website.Pages;
 
 public partial class Connections
 {
-    private readonly DialogOptions _saveDialogOptions = new DialogOptions { FullWidth = true };
+    private readonly DialogOptions _saveDialogOptions = new DialogOptions
+        { FullWidth = true, CloseOnEscapeKey = true };
+    private readonly ISnackbar _snackbar;
+    private readonly IDialogService _dialogService;
+    private readonly IConnectionsViewModel _model;
 
     private bool _saveDialogVisible;
     private SaveConnectionForm _saveEditConnectionForm = null!;
-    
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-    [Inject]
-    private IDialogService DialogService { get; set; } = null!;
-    [Inject]
-    private IConnectionsViewModel Model { get; set; }
+    private EditForm _editForm;
+    private MudDialog _dialog;
+
+    public Connections(
+        ISnackbar snackbar,
+        IDialogService dialogService,
+        IConnectionsViewModel connectionsViewModel)
+    {
+        _snackbar = snackbar;
+        _dialogService = dialogService;
+        _model = connectionsViewModel;
+    }
 
     protected override void OnInitialized()
     {
-        Model.PropertyChanged += (_, _) =>
+        _model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
-        
+
         base.OnInitialized();
     }
 
@@ -42,7 +52,7 @@ public partial class Connections
 
     private async Task OnValidSaveConnectionSubmit()
     {
-        await Model.SaveConnectionAsync(
+        await _model.SaveConnectionAsync(
             _saveEditConnectionForm.Name ??
             ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(
                 _saveEditConnectionForm.ConnectionString!),
@@ -51,15 +61,15 @@ public partial class Connections
 
         _saveDialogVisible = false;
 
-        Snackbar.Add($"Connection {_saveEditConnectionForm.Name} added.", Severity.Success);
-        
+        _snackbar.Add($"Connection {_saveEditConnectionForm.Name} added.", Severity.Success);
+
     }
     private void ViewConnectionString(string connectionString)
     {
         var parameters = new DialogParameters();
         parameters.Add(nameof(ViewDialog.ContentText), connectionString);
 
-        DialogService.Show<ViewDialog>(
+        _dialogService.Show<ViewDialog>(
             "Service bus connection string",
             parameters,
             new DialogOptions
@@ -75,16 +85,28 @@ public partial class Connections
             "ContentText",
             $"Are you sure you want to remove {serviceBusConnection.Name} connection?");
 
-        var dialog = DialogService.Show<ConfirmDialog>("Confirm", parameters);
+        var dialog = _dialogService.Show<ConfirmDialog>(
+            "Confirm",
+            parameters,
+            new DialogOptions { CloseOnEscapeKey = true });
+
         var result = await dialog.Result;
 
         if (result.Data is true)
         {
-            Model.RemoveConnectionAsync(serviceBusConnection, default);
+            _model.RemoveConnectionAsync(serviceBusConnection, default);
 
-            Snackbar.Add(
-                $"Connection {serviceBusConnection.Name} successfully deleted.", 
+            _snackbar.Add(
+                $"Connection {serviceBusConnection.Name} successfully deleted.",
                 Severity.Success);
+        }
+    }
+
+    private async Task Submit()
+    {
+        if (_editForm.EditContext.Validate())
+        {
+            await OnValidSaveConnectionSubmit();
         }
     }
 }

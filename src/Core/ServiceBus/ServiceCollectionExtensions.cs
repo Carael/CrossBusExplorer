@@ -8,10 +8,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServiceBusServices(this IServiceCollection collection)
     {
         return collection
-            .AddSingleton<IQueueService, QueueService>()
-            .AddSingleton<ITopicService, TopicService>()
-            .AddSingleton<IMessageService, MessageService>()
-            .AddSingleton<IRuleService, RuleService>()
-            .AddSingleton<ISubscriptionService, SubscriptionService>();
+            .AddScoped<IQueueService, QueueService>()
+            .AddScoped<ITopicService, TopicService>()
+            .AddScoped<IMessageService, MessageService>()
+            .AddScoped<IRuleService, RuleService>()
+            .AddScoped<ISubscriptionService, SubscriptionService>();
     }
 }

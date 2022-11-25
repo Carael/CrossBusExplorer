@@ -17,7 +17,7 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
-		#if DEBUG
+#if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
 		builder.Services.AddMudServices();
@@ -25,6 +25,7 @@ public static class MauiProgram
 		builder.Services.AddServiceBusServices();
 		builder.Services.AddManagement();
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
+		builder.Services.AddSingleton<IUserSettingsService, UserSettingsService>();
 
 		return builder.Build();
 	}

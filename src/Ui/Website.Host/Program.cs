@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
@@ -14,7 +15,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddWebsiteServices();
 builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
-builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
+builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
+builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 

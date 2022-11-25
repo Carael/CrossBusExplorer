@@ -7,7 +7,7 @@
 <MudTooltip Text="Add service bus connection">
     <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => OpenSaveDialog())"/>
 </MudTooltip>
-<MudTable Items="Model.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
+<MudTable Items="_model.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
     <HeaderContent>
         <MudTh>
             Actions
@@ -48,7 +48,7 @@
     </PagerContent>
 </MudTable>
 
-<MudDialog @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
+<MudDialog @ref="_dialog" @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/> Save service bus connection
@@ -83,15 +83,3 @@
         </MudButton>
     </DialogActions>
 </MudDialog>
-
-@code{
-    EditForm _editForm;
-    
-    async Task Submit()
-    {
-        if (_editForm.EditContext.Validate())
-        {
-            await OnValidSaveConnectionSubmit();
-        }
-    }
-}
