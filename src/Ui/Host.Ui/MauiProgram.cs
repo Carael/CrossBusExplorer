@@ -2,8 +2,7 @@
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
 using MudBlazor.Services;
-
-namespace Maui;
+namespace CrossBusExplorer.Host.Ui;
 
 public static class MauiProgram
 {

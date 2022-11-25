@@ -1,6 +1,6 @@
 using System.Text;
 using CrossBusExplorer.Management;
-namespace Maui;
+namespace CrossBusExplorer.Host.Ui;
 
 public class ManagementStorage : IManagementStorage
 {

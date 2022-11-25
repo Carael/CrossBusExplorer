@@ -1,6 +1,5 @@
 ﻿using Foundation;
-
-namespace Maui;
+namespace CrossBusExplorer.Host.Ui.Platforms.MacCatalyst;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
