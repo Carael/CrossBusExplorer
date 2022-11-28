@@ -13,7 +13,7 @@
         <AssemblyName>Cross Bus Explorer</AssemblyName>
         <Title>Cross Bus Explorer</Title>
         <Nullable>enable</Nullable>
-<!--        <EnableWindowsTargeting>true</EnableWindowsTargeting>-->
+        <!--        <EnableWindowsTargeting>true</EnableWindowsTargeting>-->
 
         <!-- Display name -->
         <ApplicationTitle>Cross Bus Explorer</ApplicationTitle>
@@ -23,8 +23,8 @@
         <ApplicationIdGuid>275C3E82-3150-4869-89BE-9EE91D783534</ApplicationIdGuid>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>0.01</ApplicationDisplayVersion>
+        <ApplicationVersion>0.01</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -34,39 +34,39 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     </PropertyGroup>
 
-<!--    <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">-->
-<!--        <RuntimeIdentifier>maccatalyst-x64</RuntimeIdentifier>-->
-<!--        <PlatformTarget>x64</PlatformTarget>-->
-<!--    </PropertyGroup>-->
+        <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+            <RuntimeIdentifier>maccatalyst-x64</RuntimeIdentifier>
+            <PlatformTarget>x64</PlatformTarget>
+        </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
-      <CreatePackage>false</CreatePackage>
+        <CreatePackage>false</CreatePackage>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-      <WarningLevel>4</WarningLevel>
+        <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-maccatalyst|AnyCPU'">
-      <CreatePackage>false</CreatePackage>
+        <CreatePackage>false</CreatePackage>
     </PropertyGroup>
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4"/>
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
         <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
-        <MauiFont Include="Resources\Fonts\*" />
+        <MauiImage Include="Resources\Images\*"/>
+        <MauiFont Include="Resources\Fonts\*"/>
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\Management\Management.csproj" />
-        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
-        <ProjectReference Include="..\Website\Website.csproj" />
+        <ProjectReference Include="..\..\Core\Management\Management.csproj"/>
+        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj"/>
+        <ProjectReference Include="..\Website\Website.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MudBlazor" Version="6.1.2" />
+        <PackageReference Include="MudBlazor" Version="6.1.2"/>
     </ItemGroup>
 </Project>
