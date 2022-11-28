@@ -2,8 +2,7 @@
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
 using MudBlazor.Services;
-
-namespace Maui;
+namespace CrossBusExplorer.Host.Ui;
 
 public static class MauiProgram
 {
@@ -16,16 +15,18 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			});
+#if DEBUG
+		builder.Services.AddBlazorWebViewDeveloperTools();
+		builder.Services.AddBlazorWebView();
+#endif
 
 		builder.Services.AddMauiBlazorWebView();
-		#if DEBUG
-		builder.Services.AddBlazorWebViewDeveloperTools();
-#endif
 		builder.Services.AddMudServices();
 		builder.Services.AddWebsiteServices();
 		builder.Services.AddServiceBusServices();
 		builder.Services.AddManagement();
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
+		builder.Services.AddSingleton<IUserSettingsService, UserSettingsService>();
 
 		return builder.Build();
 	}

@@ -26,7 +26,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Management.Contracts", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "src\Ui\Website\Website.csproj", "{F0A62306-E4E5-4EAC-9A91-599DE1FB96D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maui", "src\Ui\Maui\Maui.csproj", "{18470851-2BDA-48DB-B48B-BC4BC67C6EDC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host.Ui", "src\Ui\Host.Ui\Host.Ui.csproj", "{18470851-2BDA-48DB-B48B-BC4BC67C6EDC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{ED6798A6-AFA8-4762-942A-A041F89C402C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

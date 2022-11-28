@@ -1,67 +1,88 @@
-﻿@using CrossBusExplorer.Website.ViewModels
+﻿@using CrossBusExplorer.Website.Models
 @inherits LayoutComponentBase
-@inject IConnectionsViewModel ConnectionsViewModel
+@inject IConnectionsViewModel _connectionsViewModel
+@inject IUserSettingsService _userSettingsService
 
-<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode"/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
+<ErrorBoundary @ref="@_errorBoundary">
+    <ChildContent>
+        @if (_userSettings != null)
+        {
+            <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
+        }
+        <MudDialogProvider/>
+        <MudSnackbarProvider/>
 
-<MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                       Color="Color.Inherit"
-                       Edge="Edge.Start"
-                       OnClick="@((e) => DrawerToggle())"/>
-        <MudSpacer/>
-        <Jobs/>
-        <MudTooltip Text="Change theme">
-            <MudMenu Icon="@Icons.Filled.MoreVert">
-                <MudMenuItem OnClick="@(() => ChangeDarkMode(false))">Normal</MudMenuItem>
-                <MudMenuItem OnClick="@(() => ChangeDarkMode(true))">Dark</MudMenuItem>
-            </MudMenu>
-        </MudTooltip>
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Width="25%">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
-        </MudDrawerHeader>
-        <ServiceBusNavMenu/>
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-2 pt-2">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+        <MudLayout>
+            <MudAppBar Elevation="0">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                               Color="Color.Inherit"
+                               Edge="Edge.Start"
+                               OnClick="@((e) => DrawerToggle())"/>
+                <MudSpacer/>
+                <Jobs/>
+                <MudTooltip Text="Change theme">
+                    <MudMenu Icon="@Icons.Filled.MoreVert">
+                        <MudMenuItem OnClick="@(() => ChangeDarkMode(false))">Normal</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => ChangeDarkMode(true))">Dark</MudMenuItem>
+                    </MudMenu>
+                </MudTooltip>
+            </MudAppBar>
+            <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Width="25%">
+                <MudDrawerHeader>
+                    <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
+                </MudDrawerHeader>
+                <ServiceBusNavMenu/>
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.Large" Class="my-2 pt-2">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </ChildContent>
+    <ErrorContent>
+        <p>Exception: @context.Message</p>
+    </ErrorContent>
+
+
+</ErrorBoundary>
 
 @code {
+    private ErrorBoundary? _errorBoundary;
     bool _drawerOpen = true;
     private MudThemeProvider _mudThemeProvider = null!;
-    private bool _isDarkMode;
 
     private bool _isOpen;
+    private UserSettings _userSettings;
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
 
+    protected override void OnParametersSet()
+    {
+        _errorBoundary?.Recover();
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        await ConnectionsViewModel.InitializeAsync(default);
+        await _connectionsViewModel.InitializeAsync(default);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            _userSettings = await _userSettingsService.GetAsync(default);
             StateHasChanged();
         }
     }
     private async Task ChangeDarkMode(bool isDarkMode)
     {
-        _isDarkMode = isDarkMode;
+        _userSettings.IsDarkMode = isDarkMode;
         StateHasChanged();
+
+        await _userSettingsService.SaveAsync(_userSettings, default);
     }
 }

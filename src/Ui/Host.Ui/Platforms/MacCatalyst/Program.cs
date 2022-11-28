@@ -1,7 +1,5 @@
-﻿using ObjCRuntime;
-using UIKit;
-
-namespace Maui;
+﻿using UIKit;
+namespace CrossBusExplorer.Host.Ui.Platforms.MacCatalyst;
 
 public class Program
 {

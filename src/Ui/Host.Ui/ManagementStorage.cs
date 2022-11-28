@@ -1,6 +1,6 @@
 using System.Text;
 using CrossBusExplorer.Management;
-namespace Maui;
+namespace CrossBusExplorer.Host.Ui;
 
 public class ManagementStorage : IManagementStorage
 {
@@ -25,6 +25,6 @@ public class ManagementStorage : IManagementStorage
     }
 
     private string FilePath => Path.Combine(
-        FileSystem.Current.AppDataDirectory,
+        FileSystem.AppDataDirectory,
         ServiceBusConnectionsFileName);
 }

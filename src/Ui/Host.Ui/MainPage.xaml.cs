@@ -1,4 +1,4 @@
-﻿namespace Maui;
+﻿namespace CrossBusExplorer.Host.Ui;
 
 public partial class MainPage : ContentPage
 {

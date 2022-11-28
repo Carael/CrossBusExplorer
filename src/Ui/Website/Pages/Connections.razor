@@ -24,9 +24,6 @@
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Actions">
-            <MudTooltip Text="Connect to service bus">
-                <MudIconButton Icon="@Icons.Material.Outlined.Link"/>
-            </MudTooltip>
             <MudTooltip Text="Edit service bus connection">
                 <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenSaveDialog(context))"/>
             </MudTooltip>
@@ -48,7 +45,7 @@
     </PagerContent>
 </MudTable>
 
-<MudDialog @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
+<MudDialog @ref="_dialog" @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/> Save service bus connection
@@ -85,13 +82,10 @@
 </MudDialog>
 
 @code{
-    EditForm _editForm;
-    
-    async Task Submit()
-    {
-        if (_editForm.EditContext.Validate())
-        {
-            await OnValidSaveConnectionSubmit();
-        }
-    }
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = null!;
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private IConnectionsViewModel Model { get; set; }
 }
