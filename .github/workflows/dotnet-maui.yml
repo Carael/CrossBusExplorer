@@ -199,4 +199,4 @@ jobs:
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-macos
-          path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/publish/*.pkg
+          path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
