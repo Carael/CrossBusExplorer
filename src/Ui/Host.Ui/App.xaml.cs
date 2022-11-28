@@ -1,5 +1,4 @@
-﻿using Maui;
-namespace CrossBusExplorer.Host.Ui;
+﻿namespace CrossBusExplorer.Host.Ui;
 
 public partial class App : Application
 {

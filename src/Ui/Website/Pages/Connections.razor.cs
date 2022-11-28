@@ -12,28 +12,16 @@ public partial class Connections
 {
     private readonly DialogOptions _saveDialogOptions = new DialogOptions
         { FullWidth = true, CloseOnEscapeKey = true };
-    private readonly ISnackbar _snackbar;
-    private readonly IDialogService _dialogService;
-    private readonly IConnectionsViewModel _model;
 
     private bool _saveDialogVisible;
     private SaveConnectionForm _saveEditConnectionForm = null!;
     private EditForm _editForm;
     private MudDialog _dialog;
-
-    public Connections(
-        ISnackbar snackbar,
-        IDialogService dialogService,
-        IConnectionsViewModel connectionsViewModel)
-    {
-        _snackbar = snackbar;
-        _dialogService = dialogService;
-        _model = connectionsViewModel;
-    }
+    
 
     protected override void OnInitialized()
     {
-        _model.PropertyChanged += (_, _) =>
+        Model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
@@ -52,7 +40,7 @@ public partial class Connections
 
     private async Task OnValidSaveConnectionSubmit()
     {
-        await _model.SaveConnectionAsync(
+        await Model.SaveConnectionAsync(
             _saveEditConnectionForm.Name ??
             ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(
                 _saveEditConnectionForm.ConnectionString!),
@@ -61,7 +49,7 @@ public partial class Connections
 
         _saveDialogVisible = false;
 
-        _snackbar.Add($"Connection {_saveEditConnectionForm.Name} added.", Severity.Success);
+        Snackbar.Add($"Connection {_saveEditConnectionForm.Name} added.", Severity.Success);
 
     }
     private void ViewConnectionString(string connectionString)
@@ -69,7 +57,7 @@ public partial class Connections
         var parameters = new DialogParameters();
         parameters.Add(nameof(ViewDialog.ContentText), connectionString);
 
-        _dialogService.Show<ViewDialog>(
+        DialogService.Show<ViewDialog>(
             "Service bus connection string",
             parameters,
             new DialogOptions
@@ -85,7 +73,7 @@ public partial class Connections
             "ContentText",
             $"Are you sure you want to remove {serviceBusConnection.Name} connection?");
 
-        var dialog = _dialogService.Show<ConfirmDialog>(
+        var dialog = DialogService.Show<ConfirmDialog>(
             "Confirm",
             parameters,
             new DialogOptions { CloseOnEscapeKey = true });
@@ -94,9 +82,9 @@ public partial class Connections
 
         if (result.Data is true)
         {
-            _model.RemoveConnectionAsync(serviceBusConnection, default);
+            Model.RemoveConnectionAsync(serviceBusConnection, default);
 
-            _snackbar.Add(
+            Snackbar.Add(
                 $"Connection {serviceBusConnection.Name} successfully deleted.",
                 Severity.Success);
         }

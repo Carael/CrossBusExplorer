@@ -13,6 +13,7 @@
         <AssemblyName>Cross Bus Explorer</AssemblyName>
         <Title>Cross Bus Explorer</Title>
         <Nullable>enable</Nullable>
+<!--        <EnableWindowsTargeting>true</EnableWindowsTargeting>-->
 
         <!-- Display name -->
         <ApplicationTitle>Cross Bus Explorer</ApplicationTitle>
@@ -33,10 +34,10 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
-        <RuntimeIdentifier>maccatalyst-arm64</RuntimeIdentifier>
-        <PlatformTarget>arm64</PlatformTarget>
-    </PropertyGroup>
+<!--    <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">-->
+<!--        <RuntimeIdentifier>maccatalyst-x64</RuntimeIdentifier>-->
+<!--        <PlatformTarget>x64</PlatformTarget>-->
+<!--    </PropertyGroup>-->
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
       <CreatePackage>false</CreatePackage>

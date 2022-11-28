@@ -7,7 +7,7 @@
 <MudTooltip Text="Add service bus connection">
     <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => OpenSaveDialog())"/>
 </MudTooltip>
-<MudTable Items="_model.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
+<MudTable Items="Model.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
     <HeaderContent>
         <MudTh>
             Actions
@@ -80,3 +80,12 @@
         </MudButton>
     </DialogActions>
 </MudDialog>
+
+@code{
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = null!;
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+    [Inject]
+    private IConnectionsViewModel Model { get; set; }
+}

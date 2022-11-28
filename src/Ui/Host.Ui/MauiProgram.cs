@@ -15,11 +15,12 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			});
-
-		builder.Services.AddMauiBlazorWebView();
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
+		builder.Services.AddBlazorWebView();
 #endif
+
+		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddMudServices();
 		builder.Services.AddWebsiteServices();
 		builder.Services.AddServiceBusServices();
@@ -27,10 +28,6 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IManagementStorage, ManagementStorage>();
 		builder.Services.AddSingleton<IUserSettingsService, UserSettingsService>();
 
-#if DEBUG
-        builder.Services.AddBlazorWebViewDeveloperTools();
-#endif
-
-        return builder.Build();
+		return builder.Build();
 	}
 }
