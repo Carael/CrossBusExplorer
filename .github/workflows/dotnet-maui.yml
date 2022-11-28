@@ -2,8 +2,8 @@ name: Build Maui project
 
 on:
   push:
-    branches:
-      - main
+    tags:
+    - '*'
     paths:
       - 'src/**/*'
       - '.github/workflows/dotnet-maui.yml' 
@@ -152,7 +152,7 @@ jobs:
 # >>>>>>> MacCatalyst Build <<<<<<< #
 # ********************************* #
   maui-macos:
-    runs-on: macos-14
+    runs-on: macos-12
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -186,7 +186,7 @@ jobs:
     - name: Restore NuGet packages
       shell: bash
       run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
-      
+         
     - name: Publish MAUI MacCatalyst project
       shell: bash
       run: dotnet build ${{ env.PROJECT_PATH }} -f:net7.0-maccatalyst -c:Release /p:CreatePackage=true
