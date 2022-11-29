@@ -13,7 +13,6 @@
         <AssemblyName>Cross Bus Explorer</AssemblyName>
         <Title>Cross Bus Explorer</Title>
         <Nullable>enable</Nullable>
-        <!--        <EnableWindowsTargeting>true</EnableWindowsTargeting>-->
 
         <!-- Display name -->
         <ApplicationTitle>Cross Bus Explorer</ApplicationTitle>
@@ -34,10 +33,18 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     </PropertyGroup>
 
-        <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
-            <RuntimeIdentifier>maccatalyst-x64</RuntimeIdentifier>
-            <PlatformTarget>x64</PlatformTarget>
-        </PropertyGroup>
+    <PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+        <RuntimeIdentifier>maccatalyst-x64</RuntimeIdentifier>
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(Configuration)' == 'Release'">
+        <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+        <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    </PropertyGroup>
+    <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(RuntimeIdentifierOverride)' != ''">
+        <RuntimeIdentifier>$(RuntimeIdentifierOverride)</RuntimeIdentifier>
+    </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
         <CreatePackage>false</CreatePackage>
@@ -50,23 +57,28 @@
     </PropertyGroup>
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4"/>
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
         <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
-        <MauiFont Include="Resources\Fonts\*" />
+        <MauiImage Include="Resources\Images\*"/>
+        <MauiFont Include="Resources\Fonts\*"/>
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\Management\Management.csproj" />
-        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
-        <ProjectReference Include="..\Website\Website.csproj" />
+        <ProjectReference Include="..\..\Core\Management\Management.csproj"/>
+        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj"/>
+        <ProjectReference Include="..\Website\Website.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MudBlazor" Version="6.1.2" />
+        <!--        <PackageReference Include="Microsoft.UI.Xaml" Version="2.8.1" />-->
+        <PackageReference Include="MudBlazor" Version="6.1.2"/>
     </ItemGroup>
+
+    <!--    <ItemGroup>-->
+    <!--      <Content Include="Platforms\Windows\App.xaml" />-->
+    <!--    </ItemGroup>-->
 </Project>
