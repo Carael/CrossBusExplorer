@@ -201,6 +201,8 @@ jobs:
       with:
           name: crossbusexplorer-macos
           path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
+    - name: Zip osx-x64
+      run: (cd src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/ ; zip -r CrossBusExplorer_osx-x64.zip *.pkg)
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -217,6 +219,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
-        asset_name: CrossBusExplorer_osx-x64.pkg
+        asset_path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/CrossBusExplorer_osx-x64.zip
+        asset_name: CrossBusExplorer_osx-x64.zip
         asset_content_type: application/package
