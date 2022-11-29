@@ -16,7 +16,7 @@ jobs:
 # ***************************** #
 # >>>>>>> Windows Build <<<<<<< #
 # ***************************** #
-  maui-windows:
+  publish-windows:
     runs-on: windows-2022
     steps:
     - name: Checkout
@@ -62,35 +62,13 @@ jobs:
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-          name: crossbusexplorer-windows
+          name: crossbusexplorer-win-x64
           path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
-
-    - name: Zip win10-x64
-      run: (cd src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/ ; zip -r CrossBusExplorer_win-x64.zip *.msix)
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.RELEASE_VERSION }}
-        release_name: ${{ env.RELEASE_VERSION }}
-        draft: false
-        prerelease: false
-    - name: Upload win-x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/CrossBusExplorer_win-x64.zip
-        asset_name: CrossBusExplorer_win-x64.zip
-        asset_content_type: application/zip
 
 # ********************************* #
 # >>>>>>> MacCatalyst Build <<<<<<< #
 # ********************************* #
-  maui-macos:
+  publish-macos:
     runs-on: macos-12
     steps:
     - name: Checkout
@@ -132,10 +110,30 @@ jobs:
     - name: Upload MacCatalyst Artifact
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-          name: crossbusexplorer-macos
+          name: crossbusexplorer-macos-x64
           path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
-    - name: Zip osx-x64
-      run: (cd src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/ ; zip -r CrossBusExplorer_osx-x64.zip *.pkg)
+
+# ********************************* #
+# >>>>>>> MacCatalyst Build <<<<<<< #
+# ********************************* #
+  create-release:
+    needs: [publish-windows, publish-macos]
+    runs-on: macos-12
+    steps:
+    - name: Download macos-x64 build artifact
+      uses: actions/download-artifact@v3.0.1
+      with:
+        # Artifact name
+        name: crossbusexplorer-macos-x64
+        # Destination path
+        path: crossbusexplorer-macos-x64.zip
+    - name: Download windows-x64 build artifact
+      uses: actions/download-artifact@v3.0.1
+      with:
+        # Artifact name
+        name: crossbusexplorer-win-x64
+        # Destination path
+        path: crossbusexplorer-win-x64.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -152,6 +150,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/CrossBusExplorer_osx-x64.zip
-        asset_name: CrossBusExplorer_osx-x64.zip
+        asset_path: crossbusexplorer-macos-x64.zip
+        asset_name: crossbusexplorer-macos-x64.zip
+        asset_content_type: application/zip
+    - name: Upload win-x64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: crossbusexplorer-win-x64.zip
+        asset_name: crossbusexplorer-win-x64.zip
         asset_content_type: application/zip
