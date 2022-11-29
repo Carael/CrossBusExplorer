@@ -137,13 +137,15 @@ jobs:
     needs: [publish-macos]
     runs-on: ubuntu-latest
     steps:
-    - name: Create download folder
+    - name: Create downloads folder
       run: mkdir downloads
     - name: Download macos-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
         name: crossbusexplorer-macos-x64
-        path: downloads/crossbusexplorer-macos-x64.zip
+        path: downloads/crossbusexplorer-macos-x64
+    - name: Zip macos-x64
+      run: (cd downloads/crossbusexplorer-macos-x64 ; zip -r crossbusexplorer-macos-x64 *)
     # - name: Download windows-x64 build artifact
     #   uses: actions/download-artifact@v3.0.1
     #   with:
@@ -170,7 +172,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/CrossBusExplorer/CrossBusExplorer/downloads/crossbusexplorer-macos-x64.zip
+        asset_path: /downloads/crossbusexplorer-macos-x64/crossbusexplorer-macos-x64.zip
         asset_name: crossbusexplorer-macos-x64.zip
         asset_content_type: application/zip
     # - name: Upload win-x64
