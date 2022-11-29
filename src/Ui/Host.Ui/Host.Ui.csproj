@@ -13,7 +13,6 @@
         <AssemblyName>Cross Bus Explorer</AssemblyName>
         <Title>Cross Bus Explorer</Title>
         <Nullable>enable</Nullable>
-        <!--        <EnableWindowsTargeting>true</EnableWindowsTargeting>-->
 
         <!-- Display name -->
         <ApplicationTitle>Cross Bus Explorer</ApplicationTitle>
@@ -67,6 +66,11 @@
     </ItemGroup>
 
     <ItemGroup>
+<!--        <PackageReference Include="Microsoft.UI.Xaml" Version="2.8.1" />-->
         <PackageReference Include="MudBlazor" Version="6.1.2" />
     </ItemGroup>
+
+<!--    <ItemGroup>-->
+<!--      <Content Include="Platforms\Windows\App.xaml" />-->
+<!--    </ItemGroup>-->
 </Project>
