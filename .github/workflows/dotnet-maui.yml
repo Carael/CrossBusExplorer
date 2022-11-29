@@ -142,21 +142,21 @@ jobs:
         # Artifact name
         name: crossbusexplorer-macos-x64
         # Destination path
-        path: /
+        path: ./
     - name: Download windows-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
         # Artifact name
         name: crossbusexplorer-win-x64
         # Destination path
-        path: /
+        path: ./
     - name: Download windows-arm64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
         # Artifact name
         name: crossbusexplorer-win-arm64
         # Destination path
-        path: /
+        path: ./
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
