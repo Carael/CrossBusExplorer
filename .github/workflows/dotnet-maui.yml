@@ -16,70 +16,70 @@ jobs:
 # ***************************** #
 # >>>>>>> Windows Build <<<<<<< #
 # ***************************** #
-  publish-windows:
-    runs-on: windows-2022
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+  # publish-windows:
+  #   runs-on: windows-2022
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 0
 
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
+  #   - name: Setup .NET Core SDK
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: '7.0.x'
+  #       include-prerelease: true
 
-    # For WinUI builds
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+  #   # For WinUI builds
+  #   - name: Add msbuild to PATH
+  #     uses: microsoft/setup-msbuild@v1.1
 
-    - name: Generate version number using date and run number
-      shell: pwsh
-      id: version-creator
-      run: |
-        $buildDay = Get-Date -Format "yyyy.Mdd"
-        $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
-        echo "::set-output name=APP_VERSION::$ver"
+  #   - name: Generate version number using date and run number
+  #     shell: pwsh
+  #     id: version-creator
+  #     run: |
+  #       $buildDay = Get-Date -Format "yyyy.Mdd"
+  #       $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
+  #       echo "::set-output name=APP_VERSION::$ver"
 
-    - name: Decrypt PFX file
-      run: |
-        echo "${{ secrets.WINDOWS_PFX_FILE }}" > cert.pfx.asc
-        certutil -decode cert.pfx.asc cert.pfx
+  #   - name: Decrypt PFX file
+  #     run: |
+  #       echo "${{ secrets.WINDOWS_PFX_FILE }}" > cert.pfx.asc
+  #       certutil -decode cert.pfx.asc cert.pfx
 
-    - name: Add Cert to Store
-      run: |
-        certutil -user -q -p ${{ secrets.WINDOWS_PFX_PASSWORD }} -importpfx cert.pfx NoRoot
+  #   - name: Add Cert to Store
+  #     run: |
+  #       certutil -user -q -p ${{ secrets.WINDOWS_PFX_PASSWORD }} -importpfx cert.pfx NoRoot
 
-    - name: Install MAUI workloads (required for GitHub-hosted runners)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+  #   - name: Install MAUI workloads (required for GitHub-hosted runners)
+  #     shell: pwsh
+  #     run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
-    - name: Restore NuGet packages
-      shell: pwsh
-      run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
+  #   - name: Restore NuGet packages
+  #     shell: pwsh
+  #     run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
     
-    - name: Publish Maui WinUI project x64
-      shell: pwsh
-      run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+  #   - name: Publish Maui WinUI project x64
+  #     shell: pwsh
+  #     run: |
+  #       dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
 
-    - name: Publish Maui WinUI project arm64
-      shell: pwsh
-      run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+  #   - name: Publish Maui WinUI project arm64
+  #     shell: pwsh
+  #     run: |
+  #       dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
 
-    - name: Upload Windows Artifact x64
-      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-      with:
-          name: crossbusexplorer-win-x64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
+  #   - name: Upload Windows Artifact x64
+  #     uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+  #     with:
+  #         name: crossbusexplorer-win-x64
+  #         path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
 
-    - name: Upload Windows Artifact arm64
-      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-      with:
-          name: crossbusexplorer-win-arm64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
+  #   - name: Upload Windows Artifact arm64
+  #     uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+  #     with:
+  #         name: crossbusexplorer-win-arm64
+  #         path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
 
 # ********************************* #
 # >>>>>>> MacCatalyst Build <<<<<<< #
@@ -133,30 +133,27 @@ jobs:
 # >>>>>>> Release <<<<<<< #
 # ********************************* #
   create-release:
-    needs: [publish-windows, publish-macos]
-    runs-on: macos-12
+    # needs: [publish-windows, publish-macos]
+    needs: [publish-macos]
+    runs-on: ubuntu-latest
     steps:
+    - name: Create download folder
+      run: mkdir downloads
     - name: Download macos-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
-        # Artifact name
         name: crossbusexplorer-macos-x64
-        # Destination path
-        path: ./
-    - name: Download windows-x64 build artifact
-      uses: actions/download-artifact@v3.0.1
-      with:
-        # Artifact name
-        name: crossbusexplorer-win-x64
-        # Destination path
-        path: ./
-    - name: Download windows-arm64 build artifact
-      uses: actions/download-artifact@v3.0.1
-      with:
-        # Artifact name
-        name: crossbusexplorer-win-arm64
-        # Destination path
-        path: ./
+        path: downloads/crossbusexplorer-macos-x64.zip
+    # - name: Download windows-x64 build artifact
+    #   uses: actions/download-artifact@v3.0.1
+    #   with:
+    #     name: crossbusexplorer-win-x64
+    #     path: downloads/crossbusexplorer-win-x64.zip
+    # - name: Download windows-arm64 build artifact
+    #   uses: actions/download-artifact@v3.0.1
+    #   with:
+    #     name: crossbusexplorer-win-arm64
+    #     path: downloads/crossbusexplorer-win-arm64.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -173,24 +170,24 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: crossbusexplorer-macos-x64.zip
+        asset_path: downloads/crossbusexplorer-macos-x64.zip
         asset_name: crossbusexplorer-macos-x64.zip
         asset_content_type: application/zip
-    - name: Upload win-x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: crossbusexplorer-win-x64.zip
-        asset_name: crossbusexplorer-win-x64.zip
-        asset_content_type: application/zip
-    - name: Upload win-arm64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: crossbusexplorer-win-arm64.zip
-        asset_name: crossbusexplorer-win-arm64.zip
-        asset_content_type: application/zip
+    # - name: Upload win-x64
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: downloads/crossbusexplorer-win-x64.zip
+    #     asset_name: crossbusexplorer-win-x64.zip
+    #     asset_content_type: application/zip
+    # - name: Upload win-arm64
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: downloads/crossbusexplorer-win-arm64.zip
+    #     asset_name: crossbusexplorer-win-arm64.zip
+    #     asset_content_type: application/zip
