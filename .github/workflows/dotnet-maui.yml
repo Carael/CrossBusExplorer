@@ -63,10 +63,10 @@ jobs:
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-windows
-          path: src/Ui/Host.Ui/bin/Release//net7.0-windows10.0.19041.0/win10-x64/AppPackages/MauiBeach*/Cross*.msix
+          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
 
     - name: Zip win10-x64
-      run: (cd src/Ui/Host.Ui/bin/Release//net7.0-windows10.0.19041.0/win10-x64/AppPackages/ ; zip -r CrossBusExplorer_win-x64.zip *.msix)
+      run: (cd src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/ ; zip -r CrossBusExplorer_win-x64.zip *.msix)
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
