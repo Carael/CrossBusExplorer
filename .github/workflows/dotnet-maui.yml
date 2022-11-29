@@ -150,7 +150,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /CrossBusExplorer/CrossBusExplorer/crossbusexplorer-macos-x64.zip
+        asset_path: /CrossBusExplorer/crossbusexplorer-macos-x64.zip
         asset_name: crossbusexplorer-macos-x64.zip
         asset_content_type: application/zip
     - name: Upload win-x64
@@ -159,6 +159,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /CrossBusExplorer/CrossBusExplorer/crossbusexplorer-win-x64.zip
+        asset_path: /CrossBusExplorer/crossbusexplorer-win-x64.zip
         asset_name: crossbusexplorer-win-x64.zip
         asset_content_type: application/zip
