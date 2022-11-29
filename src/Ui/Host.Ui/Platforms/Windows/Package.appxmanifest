@@ -2,13 +2,10 @@
 <Package
         xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-        xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
         IgnorableNamespaces="uap rescap">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="0.0.0.0" />
-
-  <mp:PhoneIdentity PhoneProductId="EEC98023-BEB6-4DD0-A89F-4E326E274FE0" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <Identity Name="Cross Bus Explorer" Publisher="CN=CrossBusExplorer" Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>$placeholder$</DisplayName>
