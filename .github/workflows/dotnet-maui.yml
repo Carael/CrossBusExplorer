@@ -133,8 +133,7 @@ jobs:
 # >>>>>>> Release <<<<<<< #
 # ********************************* #
   create-release:
-    # needs: [publish-windows, publish-macos]
-    needs: [publish-macos]
+    needs: [publish-windows, publish-macos]
     runs-on: ubuntu-latest
     steps:
     - name: Create downloads folder
