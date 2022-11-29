@@ -114,7 +114,7 @@ jobs:
           path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
 
 # ********************************* #
-# >>>>>>> MacCatalyst Build <<<<<<< #
+# >>>>>>> Release <<<<<<< #
 # ********************************* #
   create-release:
     needs: [publish-windows, publish-macos]
