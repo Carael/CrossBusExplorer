@@ -147,14 +147,21 @@ jobs:
         # Artifact name
         name: crossbusexplorer-macos-x64
         # Destination path
-        path: crossbusexplorer-macos-x64.zip
+        path: /
     - name: Download windows-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
         # Artifact name
         name: crossbusexplorer-win-x64
         # Destination path
-        path: crossbusexplorer-win-x64.zip
+        path: /
+    - name: Download windows-arm64 build artifact
+      uses: actions/download-artifact@v3.0.1
+      with:
+        # Artifact name
+        name: crossbusexplorer-win-arm64
+        # Destination path
+        path: /
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -171,8 +178,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /
-        asset_name: crossbusexplorer-macos-x64
+        asset_path: crossbusexplorer-macos-x64.zip
+        asset_name: crossbusexplorer-macos-x64.zip
         asset_content_type: application/zip
     - name: Upload win-x64
       uses: actions/upload-release-asset@v1
@@ -180,6 +187,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /
-        asset_name: crossbusexplorer-win-x64
+        asset_path: crossbusexplorer-win-x64.zip
+        asset_name: crossbusexplorer-win-x64.zip
+        asset_content_type: application/zip
+    - name: Upload win-arm64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: crossbusexplorer-win-arm64.zip
+        asset_name: crossbusexplorer-win-arm64.zip
         asset_content_type: application/zip
