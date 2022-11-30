@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
+using ElectronNET.API;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Website.Host;
 
@@ -19,6 +20,10 @@ builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
 builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddElectron();
+builder.WebHost.UseElectron(args);
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,13 +34,24 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+//TODO: register hosted service that will start this?
+Task.Run(async () =>
+{
+    await Task.Delay(1000);
+    Electron.ReadAuth();
+    var window = await Electron.WindowManager.CreateWindowAsync();
+    window.OnClosed += () =>
+    {
+        Electron.App.Quit();
+    };
+    window.Show();
+});
 
 app.Run();
