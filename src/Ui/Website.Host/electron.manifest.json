@@ -3,13 +3,14 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "Website.Host",
+  "name": "CrossBusExplorer",
   "author": "",
   "singleInstance": false,
   "environment": "Production",
+  "description": "Cross Bus Explorer",
   "build": {
-    "appId": "com.Website.Host.app",
-    "productName": "Website.Host",
+    "appId": "com.crossbusexplorer.app",
+    "productName": "CrossBusExplorer",
     "copyright": "Copyright © 2020",
     "buildVersion": "1.0.0",
     "compression": "maximum",
