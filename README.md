@@ -12,3 +12,12 @@ Cross Bus Explorer is a Cross Platform Service Bus Explorer (Windows and MacOS).
 - Resend edited messages
 
 ![image](https://user-images.githubusercontent.com/6861396/204493783-9a98340f-5d00-4c67-848f-25b7c6df5c69.png)
+
+## Known issues
+### Windows Installer
+
+The windows installer is a MSIX which needs to be signed. Atm it's signed with self issues certificate. In order to install the app:
+
+View properties of the installer -> Digital Signatures -> Details of the Certificate -> View Certificate -> Install to local thrusted certificate store.
+
+This would not be needed once I sign the installer with proper certificate
