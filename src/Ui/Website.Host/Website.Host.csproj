@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="h5.ElectronNET.API" Version="21.3.1.34294" />
-    <PackageReference Include="MudBlazor" Version="6.1.2" />
+    <PackageReference Include="MudBlazor" Version="6.1.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
