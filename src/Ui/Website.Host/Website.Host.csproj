@@ -8,12 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="MudBlazor" Version="6.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data" />
-    <Folder Include="Shared" />
+    <PackageReference Include="MudBlazor" Version="6.1.4" />
   </ItemGroup>
 
   <ItemGroup>
