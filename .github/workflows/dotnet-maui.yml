@@ -73,13 +73,13 @@ jobs:
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-win-x64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
+          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/publish/*.*
 
     - name: Upload Windows Artifact arm64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-win-arm64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
+          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/publish/*.*
 
 # ********************************* #
 # >>>>>>> MacCatalyst Build <<<<<<< #
