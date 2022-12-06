@@ -51,7 +51,14 @@ Task.Run(async () =>
     
     
     var browserWindow = await Electron.WindowManager.CreateWindowAsync(
-   );
+        new BrowserWindowOptions
+        {
+            ZoomToPageWidth = true,
+            WebPreferences = new WebPreferences
+            {
+                ZoomFactor = 1
+            }
+        });
     
     await browserWindow.WebContents.Session.ClearCacheAsync();
     browserWindow.OnClose += () => app.StopAsync();
