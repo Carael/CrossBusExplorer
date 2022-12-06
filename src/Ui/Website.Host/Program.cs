@@ -3,6 +3,7 @@ using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
 using ElectronNET.API;
+using ElectronNET.API.Entities;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Website.Host;
 
@@ -44,14 +45,17 @@ app.MapFallbackToPage("/_Host");
 //TODO: register hosted service that will start this?
 Task.Run(async () =>
 {
-    await Task.Delay(1000);
     Electron.ReadAuth();
-    var window = await Electron.WindowManager.CreateWindowAsync();
-    window.OnClosed += () =>
-    {
-        Electron.App.Quit();
-    };
-    window.Show();
+    await Task.Delay(500);
+
+    
+    
+    var browserWindow = await Electron.WindowManager.CreateWindowAsync(
+   );
+    
+    await browserWindow.WebContents.Session.ClearCacheAsync();
+    browserWindow.OnClose += () => app.StopAsync();
+    browserWindow.OnReadyToShow += () => browserWindow.Show();
 });
 
 app.Run();
