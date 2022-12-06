@@ -39,8 +39,8 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(Configuration)' == 'Release'">
-        <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
-        <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+        <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+        <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
     </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(RuntimeIdentifierOverride)' != ''">
         <RuntimeIdentifier>$(RuntimeIdentifierOverride)</RuntimeIdentifier>
