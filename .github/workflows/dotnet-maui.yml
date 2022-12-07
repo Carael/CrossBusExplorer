@@ -3,7 +3,7 @@ name: Build Maui project
 on:
   push:
     tags:
-    - '*'
+    - 'maui/*'
     paths:
       - 'src/**/*'
       - '.github/workflows/dotnet-maui.yml' 
