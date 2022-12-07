@@ -3,46 +3,46 @@
 @inject IConnectionsViewModel _connectionsViewModel
 @inject IUserSettingsService _userSettingsService
 
-<ErrorBoundary @ref="@_errorBoundary">
-    <ChildContent>
-        <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
-            <MudDialogProvider/>
-        <MudSnackbarProvider/>
 
-        <MudLayout>
-            <MudAppBar Elevation="0">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                               Color="Color.Inherit"
-                               Edge="Edge.Start"
-                               OnClick="@((e) => DrawerToggle())"/>
-                <MudSpacer/>
-                <Jobs/>
-                <MudTooltip Text="Change theme">
-                    <MudMenu Icon="@Icons.Filled.MoreVert">
-                        <MudMenuItem OnClick="@(() => ChangeDarkMode(false))">Normal</MudMenuItem>
-                        <MudMenuItem OnClick="@(() => ChangeDarkMode(true))">Dark</MudMenuItem>
-                    </MudMenu>
-                </MudTooltip>
-            </MudAppBar>
-            <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Width="25%">
-                <MudDrawerHeader>
-                    <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
-                </MudDrawerHeader>
-                <ServiceBusNavMenu/>
-            </MudDrawer>
-            <MudMainContent>
-                <MudContainer MaxWidth="MaxWidth.Large" Class="my-2 pt-2">
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="0">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@((e) => DrawerToggle())"/>
+        <MudSpacer/>
+        <Jobs/>
+        <MudTooltip Text="Change theme">
+            <MudMenu Icon="@Icons.Filled.MoreVert">
+                <MudMenuItem OnClick="@(() => ChangeDarkMode(false))">Normal</MudMenuItem>
+                <MudMenuItem OnClick="@(() => ChangeDarkMode(true))">Dark</MudMenuItem>
+            </MudMenu>
+        </MudTooltip>
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Width="25%">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
+        </MudDrawerHeader>
+        <ServiceBusNavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-2 pt-2">
+            <ErrorBoundary @ref="@_errorBoundary">
+                <ChildContent>
                     @Body
-                </MudContainer>
-            </MudMainContent>
-        </MudLayout>
-    </ChildContent>
-    <ErrorContent>
-        <p>Exception: @context.Message</p>
-    </ErrorContent>
+                </ChildContent>
+                <ErrorContent>
+                    <p>Exception: @context.Message</p>
+                </ErrorContent>
+            </ErrorBoundary>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-
-</ErrorBoundary>
 
 @code {
     private ErrorBoundary? _errorBoundary;

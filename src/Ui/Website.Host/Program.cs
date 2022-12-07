@@ -34,13 +34,10 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-//TODO: register hosted service that will start this?
 Task.Run(async () =>
 {
     Electron.ReadAuth();
     await Task.Delay(500);
-
-    
     
     var browserWindow = await Electron.WindowManager.CreateWindowAsync(
         new BrowserWindowOptions
@@ -51,7 +48,7 @@ Task.Run(async () =>
                 ZoomFactor = 1
             }
         });
-    
+
     await browserWindow.WebContents.Session.ClearCacheAsync();
     browserWindow.OnClose += () => app.StopAsync();
     browserWindow.OnReadyToShow += () => browserWindow.Show();

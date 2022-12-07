@@ -3,7 +3,7 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "Cross Bus Explorer",
+  "name": "CrossBusExplorer",
   "author": "Mariusz Matysek",
   "singleInstance": false,
   "environment": "Production",
