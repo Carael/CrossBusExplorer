@@ -3,16 +3,16 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "CrossBusExplorer",
-  "author": "",
+  "name": "Cross Bus Explorer",
+  "author": "Mariusz Matysek",
   "singleInstance": false,
   "environment": "Production",
   "description": "Cross Bus Explorer",
   "build": {
     "appId": "com.crossbusexplorer.app",
-    "productName": "CrossBusExplorer",
-    "copyright": "Copyright © 2020",
-    "buildVersion": "1.0.0",
+    "productName": "Cross Bus Explorer",
+    "copyright": "Copyright © 2022",
+    "buildVersion": "0.0.1",
     "compression": "maximum",
     "directories": {
       "output": "../../../bin/Desktop"
