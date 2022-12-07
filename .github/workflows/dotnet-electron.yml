@@ -49,19 +49,19 @@ jobs:
          
     - name: Publish Win
       shell: bash
-      run: electronize-h5 build /target win
+      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target win
 
     - name: Publish Linux
       shell: bash
-      run: electronize-h5 build /target linux
+      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target linux
 
     - name: Publish Osx
       shell: bash
-      run: electronize-h5 build /target osx
+      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target osx
 
     - name: Publish Osx
       shell: bash
-      run: electronize-h5 build /target osx-arm64
+      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target osx-arm64
 
     - name: Upload publish artifacts
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
