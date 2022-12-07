@@ -45,23 +45,32 @@ jobs:
 
     - name: Restore NuGet packages
       shell: bash
-      run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
+      run: 
+        dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
          
     - name: Publish Win
       shell: bash
-      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target win
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        electronize-h5 build /target win
 
     - name: Publish Linux
       shell: bash
-      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target linux
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        electronize-h5 build /target linux
 
     - name: Publish Osx
       shell: bash
-      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target osx
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        electronize-h5 build /target osx
 
     - name: Publish Osx
       shell: bash
-      run: electronize-h5 build ${{ env.PROJECT_PATH }} /target osx-arm64
+      run: |
+        cd ${{ env.PROJECT_PATH }}
+        electronize-h5 build /target osx-arm64
 
     - name: Upload publish artifacts
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
