@@ -51,25 +51,25 @@ jobs:
     - name: Publish Win
       shell: bash
       run: |
-        cd ${{ env.PROJECT_PATH }}
+        cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target win
 
     - name: Publish Linux
       shell: bash
       run: |
-        cd ${{ env.PROJECT_PATH }}
+        cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target linux
 
     - name: Publish Osx
       shell: bash
       run: |
-        cd ${{ env.PROJECT_PATH }}
+        cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target osx
 
     - name: Publish Osx
       shell: bash
       run: |
-        cd ${{ env.PROJECT_PATH }}
+        cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target osx-arm64
 
     - name: Upload publish artifacts
