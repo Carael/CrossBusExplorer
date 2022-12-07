@@ -60,13 +60,13 @@ jobs:
         cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target linux
 
-    - name: Publish Osx
+    - name: Publish Mac
       shell: bash
       run: |
         cd ${{ env.PROJECT_FOLDER }}
         electronize-h5 build /target osx
 
-    - name: Publish Osx
+    - name: Publish Mac Arm64
       shell: bash
       run: |
         cd ${{ env.PROJECT_FOLDER }}
