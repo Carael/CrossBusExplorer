@@ -43,8 +43,7 @@
       "icon": "../../../build/icon.png"
     },
     "mac": {
-      "icon": "../../../build/icon512x512.png",
-      "entitlements": "../../../build/entitlements.mac.inherit.plist"
+      "icon": "../../../build/icon512x512.png"
     }
   }
 }
