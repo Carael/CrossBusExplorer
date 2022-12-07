@@ -8,7 +8,7 @@ on:
       - 'src/**/*'
       - '.github/workflows/dotnet-eletron.yml' 
 env:
-  PROJECT_PATH: "src/Ui/Website.Host/Webite.Host.csproj"
+  PROJECT_PATH: "src/Ui/Website.Host/Website.Host.csproj"
   PROJECT_FOLDER: "src/Ui/Website.Host/"
   NUGETCONFIG_PATH: "nuget.config"
   RELEASE_VERSION: ${{ github.ref_name }}
