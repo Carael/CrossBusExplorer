@@ -5,11 +5,8 @@
 
 <ErrorBoundary @ref="@_errorBoundary">
     <ChildContent>
-        @if (_userSettings != null)
-        {
-            <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
-        }
-        <MudDialogProvider/>
+        <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
+            <MudDialogProvider/>
         <MudSnackbarProvider/>
 
         <MudLayout>
@@ -53,7 +50,7 @@
     private MudThemeProvider _mudThemeProvider = null!;
 
     private bool _isOpen;
-    private UserSettings _userSettings;
+    private UserSettings _userSettings = new UserSettings();
 
     void DrawerToggle()
     {
