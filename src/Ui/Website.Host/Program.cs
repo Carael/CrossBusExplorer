@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddWebsiteServices();
@@ -23,7 +22,6 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddElectron();
 builder.WebHost.UseElectron(args);
-
 
 var app = builder.Build();
 
@@ -46,12 +44,12 @@ Task.Run(async () =>
             WebPreferences = new WebPreferences
             {
                 ZoomFactor = 1
-            }
+            },
+            Icon = "../../../icon512x512.png"
         });
 
     await browserWindow.WebContents.Session.ClearCacheAsync();
     browserWindow.OnClose += () => app.StopAsync();
-    browserWindow.OnReadyToShow += () => browserWindow.Show();
-});
+    browserWindow.OnReadyToShow += () => browserWindow.Show(); });
 
 app.Run();
