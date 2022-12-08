@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Blazored.LocalStorage;
 using CrossBusExplorer.Website;
 using CrossBusExplorer.Website.Models;
@@ -5,19 +6,15 @@ namespace Website.Host;
 
 public class DefaultSettingsService : IUserSettingsService
 {
-    private const string key = "user_settings";
-    private readonly ILocalStorageService _localStorageService;
-    
-    public DefaultSettingsService(ILocalStorageService localStorageService)
-    {
-        _localStorageService = localStorageService;
-    }
-    
+    private const string FileName = "user_settings.json";
+
     public async Task<UserSettings> GetAsync(CancellationToken cancellationToken)
     {
-        if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
+        if (File.Exists(FilePath))
         {
-            return await _localStorageService.GetItemAsync<UserSettings>(key, cancellationToken);
+            var fileContent = await File.ReadAllTextAsync(FilePath, cancellationToken);
+
+            return JsonSerializer.Deserialize<UserSettings>(fileContent);
         }
 
         return new UserSettings();
@@ -25,6 +22,13 @@ public class DefaultSettingsService : IUserSettingsService
     
     public async Task SaveAsync(UserSettings userSettings, CancellationToken cancellationToken)
     {
-        await _localStorageService.SetItemAsync(key, userSettings, cancellationToken);
+        await File.WriteAllTextAsync(
+            FilePath,
+            JsonSerializer.Serialize(userSettings),
+            cancellationToken);
     }
+    
+    private string FilePath => Path.Combine(
+        Directory.GetCurrentDirectory(),
+        FileName);
 }

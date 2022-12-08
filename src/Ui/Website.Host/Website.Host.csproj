@@ -1,27 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-	  <TargetFramework>net7.0</TargetFramework>
-	  <Nullable>enable</Nullable>
-	  <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="MudBlazor" Version="6.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data" />
-    <Folder Include="Shared" />
+    <PackageReference Include="h5.ElectronNET.API" Version="21.3.1.34294" />
+    <PackageReference Include="MudBlazor" Version="6.1.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
     <ProjectReference Include="..\Website\Website.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <ContentIncludedByDefault Remove="wwwroot\css\custom.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="electron.manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

@@ -1,0 +1,49 @@
+{
+  "executable": "Website.Host",
+  "splashscreen": {
+    "imageFile": "../../../build/icon512x512.png"
+  },
+  "name": "CrossBusExplorer",
+  "author": "Mariusz Matysek",
+  "singleInstance": false,
+  "environment": "Production",
+  "description": "Cross Bus Explorer",
+  "build": {
+    "appId": "com.crossbusexplorer.app",
+    "productName": "Cross Bus Explorer",
+    "copyright": "Copyright © 2022",
+    "buildVersion": "0.2.0",
+    "compression": "maximum",
+    "directories": {
+      "output": "../../../bin/Desktop"
+    },
+    "extraResources": [
+      {
+        "from": "./bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "files": [
+      {
+        "from": "./ElectronHostHook/node_modules",
+        "to": "ElectronHostHook/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      "**/*"
+    ],
+    "win": {
+      "icon": "../../../build/icon.png"
+    },
+    "linux": {
+      "icon": "../../../build/icon.png"
+    },
+    "mac": {
+      "icon": "../../../build/icon512x512.png"
+    }
+  }
+}

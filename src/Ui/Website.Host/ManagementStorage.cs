@@ -1,29 +1,30 @@
 using System.Text;
-using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage
 {
-    private readonly ILocalStorageService _localStorageService;
-    private const string key = "service_bus_connection";
-
-    public ManagementStorage(ILocalStorageService localStorageService)
-    {
-        _localStorageService = localStorageService;
-    }
+    private const string ServiceBusConnectionsFileName = "cross_bus_explorer_connections.json";
     
     public async Task StoreAsync(string content, CancellationToken cancellationToken)
     {
-        await _localStorageService.SetItemAsStringAsync(key, content, cancellationToken);
+        await File.WriteAllTextAsync(
+            FilePath,
+            content,
+            Encoding.UTF8,
+            cancellationToken);
     }
     public async Task<string?> ReadAsync(CancellationToken cancellationToken)
     {
-        if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
+        if (File.Exists(FilePath))
         {
-            return await _localStorageService.GetItemAsStringAsync(key, cancellationToken);
+            return await File.ReadAllTextAsync(FilePath, cancellationToken);
         }
 
         return null;
     }
+
+    private string FilePath => Path.Combine(
+        Directory.GetCurrentDirectory(),
+        ServiceBusConnectionsFileName);
 }

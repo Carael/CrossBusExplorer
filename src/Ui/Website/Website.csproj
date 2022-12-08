@@ -41,7 +41,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="11.2.2" />
-		<PackageReference Include="MudBlazor" Version="6.1.2" />
+		<PackageReference Include="MudBlazor" Version="6.1.4" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
 	</ItemGroup>

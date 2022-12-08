@@ -2,6 +2,8 @@ using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
+using ElectronNET.API;
+using ElectronNET.API.Entities;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Website.Host;
 
@@ -9,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddWebsiteServices();
@@ -19,17 +20,10 @@ builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
 builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddElectron();
+builder.WebHost.UseElectron(args);
+
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
@@ -37,5 +31,25 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+Task.Run(async () =>
+{
+    Electron.ReadAuth();
+    await Task.Delay(500);
+    
+    var browserWindow = await Electron.WindowManager.CreateWindowAsync(
+        new BrowserWindowOptions
+        {
+            ZoomToPageWidth = true,
+            WebPreferences = new WebPreferences
+            {
+                ZoomFactor = 1
+            },
+            Icon = "../../../icon512x512.png"
+        });
+
+    await browserWindow.WebContents.Session.ClearCacheAsync();
+    browserWindow.OnClose += () => app.StopAsync();
+    browserWindow.OnReadyToShow += () => browserWindow.Show(); });
 
 app.Run();
