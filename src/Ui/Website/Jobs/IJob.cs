@@ -4,6 +4,7 @@ namespace CrossBusExplorer.Website.Jobs;
 
 public interface IJob : INotifyPropertyChanged
 {
+    public event JobCompletedEventHandler? OnCompleted;
     int Progress { get; }
     Task ExecuteAsync();
     void Cancel();

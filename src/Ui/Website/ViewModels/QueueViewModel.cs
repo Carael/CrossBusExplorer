@@ -20,8 +20,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 public class QueueViewModel : IQueueViewModel
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public event QueueAddedEventHandler? QueueAdded;
-    public event QueueRemovedEventHandler? QueueRemoved;
+    public event QueueOperationEventHandler? OnQueueOperation;
 
     private readonly ISnackbar _snackbar;
     private readonly NavigationManager _navigationManager;
@@ -65,8 +64,11 @@ public class QueueViewModel : IQueueViewModel
     {
         if (queueName != null)
         {
-            UpdateFormModel(
-                await _queueService.GetAsync(connectionName, queueName, cancellationToken));
+            var queue = await _queueService.GetAsync(connectionName, queueName, cancellationToken);
+            
+            UpdateFormModel(queue);
+
+            OnQueueOperation(connectionName, OperationType.Update, QueueDetails.Info);
         }
         else
         {
@@ -101,13 +103,13 @@ public class QueueViewModel : IQueueViewModel
             {
                 _navigationManager.NavigateTo(
                     $"queue/{connectionName}/{HttpUtility.UrlEncode(result.Data.Info.Name)}");
-
-                QueueAdded(connectionName, result.Data.Info);
             }
             else
             {
                 UpdateFormModel(result.Data);
             }
+            
+            OnQueueOperation(connectionName, operationType, result.Data.Info);
 
             _snackbar.Add("Saved successfully", Severity.Success);
         }
@@ -198,7 +200,9 @@ public class QueueViewModel : IQueueViewModel
                 _snackbar.Add(
                     $"Queue {queueName} successfully deleted.",
                     Severity.Success);
-                QueueRemoved(connectionName, queueName);
+                
+                OnQueueOperation(connectionName, OperationType.Delete, QueueDetails.Info);
+
                 NavigateToNewQueueForm(connectionName);
 
             }
@@ -236,16 +240,20 @@ public class QueueViewModel : IQueueViewModel
 
         if (dialogResult.Data is SubQueue subQueue)
         {
-            await _jobsViewModel.ScheduleJob(
-                new PurgeMessagesJob(
-                    connectionName,
-                    queueName,
-                    null,
-                    subQueue,
-                    GetTotalMessagesCount(subQueue),
-                    _messageService));
+            var job = new PurgeMessagesJob(
+                connectionName,
+                queueName,
+                null,
+                subQueue,
+                GetTotalMessagesCount(subQueue),
+                _messageService);
+            
+            job.OnCompleted += ReloadData;
+            
+            await _jobsViewModel.ScheduleJob(job);
         }
     }
+
     private long GetTotalMessagesCount(SubQueue subQueue) => subQueue switch
     {
         SubQueue.None => QueueDetails.Info.ActiveMessagesCount,
@@ -268,16 +276,27 @@ public class QueueViewModel : IQueueViewModel
 
         if (dialogResult.Data is true)
         {
-            await _jobsViewModel.ScheduleJob(
-                new ResendMessagesJob(
-                    connectionName,
-                    queueName,
-                    null,
-                    SubQueue.DeadLetter,
-                    queueName,
-                    GetTotalMessagesCount(SubQueue.DeadLetter),
-                    _messageService));
+            var job = new ResendMessagesJob(
+                connectionName,
+                queueName,
+                null,
+                SubQueue.DeadLetter,
+                queueName,
+                GetTotalMessagesCount(SubQueue.DeadLetter),
+                _messageService);
+            
+            job.OnCompleted += ReloadData;
+            
+            await _jobsViewModel.ScheduleJob(job);
         }
+    }
+
+    private async Task ReloadData(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName)
+    {
+        await InitializeForm(connectionName, queueOrTopicName, default);
     }
 
     private void UpdateFormModel(QueueDetails resultData)

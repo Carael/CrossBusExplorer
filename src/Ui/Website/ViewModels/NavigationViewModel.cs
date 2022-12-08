@@ -10,6 +10,7 @@ using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
+using CrossBusExplorer.Website.Pages;
 namespace CrossBusExplorer.Website.ViewModels;
 
 public class NavigationViewModel : INavigationViewModel
@@ -35,8 +36,7 @@ public class NavigationViewModel : INavigationViewModel
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
-        queueViewModel.QueueAdded += this.OnQueueAdded;
-        queueViewModel.QueueRemoved += this.QueueRemoved;
+        queueViewModel.OnQueueOperation += this.OnQueueOperation;
         topicViewModel.TopicAdded += this.OnTopicAdded;
         topicViewModel.TopicRemoved += this.OnTopicRemoved;
         subscriptionViewModel.SubscriptionAdded += this.OnSubscriptionAdded;
@@ -146,24 +146,46 @@ public class NavigationViewModel : INavigationViewModel
             this.Notify(PropertyChanged);
         }
     }
-
-    private void OnQueueAdded(string connectionName, QueueInfo queueInfo)
+    
+    private void OnQueueOperation(string connectionName, OperationType operationType, QueueInfo queueInfo)
     {
         var menuItem =
             MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-        menuItem.Queues.Add(queueInfo);
+        switch (operationType)
+        {
+
+            case OperationType.Create:
+                AddQueue(menuItem, queueInfo);
+                break;
+            case OperationType.Update:
+                UpdateQueue(menuItem, queueInfo);
+                break;
+            case OperationType.Delete:
+                DeleteQueue(menuItem, queueInfo);
+                break;
+            default:
+                throw new NotSupportedException($"Operation {operationType} is not supported.");
+        }
+    }
+    
+    private void UpdateQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
+    {
+        menuItem.Queues.AddOrReplace(p=>p.Name.EqualsInvariantIgnoreCase(queueInfo.Name), queueInfo);
+        
         this.Notify(PropertyChanged);
     }
-
-    private void QueueRemoved(string connectionName, string queueName)
+    
+    private void AddQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        var queue =
-            menuItem.Queues.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(queueName));
-        menuItem.Queues.Remove(queue);
+        menuItem.Queues.Add(queueInfo);
+        
+        this.Notify(PropertyChanged);
+    }
+    
+    private void DeleteQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
+    {
+        menuItem.Queues.Remove(queueInfo);
 
         this.Notify(PropertyChanged);
     }

@@ -36,7 +36,7 @@ Task.Run(async () =>
 {
     Electron.ReadAuth();
     await Task.Delay(500);
-    
+     
     var browserWindow = await Electron.WindowManager.CreateWindowAsync(
         new BrowserWindowOptions
         {

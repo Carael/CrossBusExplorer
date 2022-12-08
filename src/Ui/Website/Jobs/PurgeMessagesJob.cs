@@ -20,6 +20,8 @@ public class PurgeMessagesJob : IJob
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    
+    public event JobCompletedEventHandler? OnCompleted;
 
     public PurgeMessagesJob(
         string connectionName,
@@ -94,6 +96,8 @@ public class PurgeMessagesJob : IJob
             ErrorMessage = $"Job {Name} failed. Error: {ex.Message}.";
             Status = JobStatus.Failed;
         }
+        
+        await OnCompleted(_connectionName, _queueOrTopicName, _subscriptionName);
     }
 
     public void Cancel()

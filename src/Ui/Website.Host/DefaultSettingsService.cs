@@ -34,7 +34,9 @@ public class DefaultSettingsService : IUserSettingsService
     
     private async Task<string> FilePath(CancellationToken cancellationToken)
     {
-        var path = await Electron.App.GetPathAsync(PathName.UserData, cancellationToken);
+        var path = HybridSupport.IsElectronActive
+            ? await Electron.App.GetPathAsync(PathName.UserData, cancellationToken) :
+            Directory.GetCurrentDirectory();
 
         return Path.Combine(
             path,

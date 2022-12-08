@@ -7,8 +7,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public interface IQueueViewModel : INotifyPropertyChanged
 {
-    event QueueAddedEventHandler? QueueAdded;
-    event QueueRemovedEventHandler? QueueRemoved;
+    event QueueOperationEventHandler? OnQueueOperation;
     QueueFormModel? Form { get; }
     QueueDetails? QueueDetails { get; }
     Task InitializeForm(
