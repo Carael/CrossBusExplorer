@@ -15,7 +15,7 @@ env:
   
 jobs:
   publish:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -48,23 +48,23 @@ jobs:
       run: 
         dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
          
-    - name: Publish Win
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target win
+#     - name: Publish Win
+#       shell: bash
+#       run: |
+#         cd ${{ env.PROJECT_FOLDER }}
+#         electronize-h5 build /target win
 
-    - name: Publish Linux
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target linux
+#     - name: Publish Linux
+#       shell: bash
+#       run: |
+#         cd ${{ env.PROJECT_FOLDER }}
+#         electronize-h5 build /target linux
 
-    - name: Publish Mac
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target osx
+#     - name: Publish Mac
+#       shell: bash
+#       run: |
+#         cd ${{ env.PROJECT_FOLDER }}
+#         electronize-h5 build /target osx
 
     - name: Publish Mac Arm64
       shell: bash
@@ -92,17 +92,17 @@ jobs:
       with:
         name: crossbusexplorer-electron
         path: downloads/crossbusexplorer-electron
-    - name: Zip win
-      run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-win-x64 *.exe)
+#     - name: Zip win
+#       run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-win-x64 *.exe)
 
-    - name: Zip linux AppImage
-      run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-linux-appimage-x64 *.AppImage)
+#     - name: Zip linux AppImage
+#       run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-linux-appimage-x64 *.AppImage)
 
-    - name: Zip linux snap
-      run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-linux-snap-x64 *.snap)
+#     - name: Zip linux snap
+#       run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-linux-snap-x64 *.snap)
 
-    - name: Zip macos
-      run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-macos *.dmg)
+#     - name: Zip macos
+#       run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-macos *.dmg)
 
     - name: Zip macos-arm64
       run: (cd downloads/crossbusexplorer-electron ; zip -r crossbusexplorer-macos-arm64 *arm64.dmg)
@@ -117,15 +117,15 @@ jobs:
         release_name: ${{ env.RELEASE_VERSION }}
         draft: false
         prerelease: false
-    - name: Upload macos
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-macos.zip
-        asset_name: crossbusexplorer-macos.zip
-        asset_content_type: application/zip
+#     - name: Upload macos
+#       uses: actions/upload-release-asset@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.create_release.outputs.upload_url }}
+#         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-macos.zip
+#         asset_name: crossbusexplorer-macos.zip
+#         asset_content_type: application/zip
     - name: Upload macos-arm64
       uses: actions/upload-release-asset@v1
       env:
@@ -136,32 +136,32 @@ jobs:
         asset_name: crossbusexplorer-macos-arm64.zip
         asset_content_type: application/zip
         
-    - name: Upload win-x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-win-x64.zip
-        asset_name: crossbusexplorer-win-x64.zip
-        asset_content_type: application/zip
+#     - name: Upload win-x64
+#       uses: actions/upload-release-asset@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.create_release.outputs.upload_url }}
+#         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-win-x64.zip
+#         asset_name: crossbusexplorer-win-x64.zip
+#         asset_content_type: application/zip
 
-    - name: Upload linux snap x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-linux-snap-x64.zip
-        asset_name: crossbusexplorer-linux-snap-x64.zip
-        asset_content_type: application/zip
+#     - name: Upload linux snap x64
+#       uses: actions/upload-release-asset@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.create_release.outputs.upload_url }}
+#         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-linux-snap-x64.zip
+#         asset_name: crossbusexplorer-linux-snap-x64.zip
+#         asset_content_type: application/zip
 
-    - name: Upload linux appimage x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-linux-appimage-x64.zip
-        asset_name: crossbusexplorer-linux-appimage-x64.zip
-        asset_content_type: application/zip
+#     - name: Upload linux appimage x64
+#       uses: actions/upload-release-asset@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.create_release.outputs.upload_url }}
+#         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-linux-appimage-x64.zip
+#         asset_name: crossbusexplorer-linux-appimage-x64.zip
+#         asset_content_type: application/zip
