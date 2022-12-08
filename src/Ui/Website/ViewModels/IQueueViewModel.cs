@@ -10,7 +10,7 @@ public interface IQueueViewModel : INotifyPropertyChanged
     event QueueOperationEventHandler? OnQueueOperation;
     QueueFormModel? Form { get; }
     QueueDetails? QueueDetails { get; }
-    Task InitializeForm(
+    Task InitializeFormAsync(
         string connectionName,
         string? queueName,
         CancellationToken cancellationToken);

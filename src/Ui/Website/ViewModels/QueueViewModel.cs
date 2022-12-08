@@ -59,7 +59,7 @@ public class QueueViewModel : IQueueViewModel
         }
     }
 
-    public async Task InitializeForm(
+    public async Task InitializeFormAsync(
         string connectionName, string? queueName, CancellationToken cancellationToken)
     {
         if (queueName != null)
@@ -296,7 +296,7 @@ public class QueueViewModel : IQueueViewModel
         string queueOrTopicName,
         string? subscriptionName)
     {
-        await InitializeForm(connectionName, queueOrTopicName, default);
+        await InitializeFormAsync(connectionName, queueOrTopicName, default);
     }
 
     private void UpdateFormModel(QueueDetails resultData)

@@ -35,18 +35,26 @@
 
                 @foreach (var queue in menuItem.Queues)
                 {
+
                     <MudNavLink Match="NavLinkMatch.All"
                                 Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
                                 Icon="@Icons.Filled.Queue">
-                        @queue.Name
-                        (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount)
+                        <MudTooltip Placement="Placement.Right" Text="@($"{queue.Name} (Active messages: {queue.ActiveMessagesCount}, " + 
+                                            $"Dead letters: {queue.DeadLetterMessagesCount}, " + 
+                                            $"Transfer messages: {queue.InTransferMessagesCount}, " + 
+                                            $"Scheduled messages count: {queue.ScheduledMessagesCount})")">
+                            @queue.Name
+                            (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount,
+                            @queue.ScheduledMessagesCount)
+                        </MudTooltip>
                     </MudNavLink>
+
                 }
             </MudNavGroup>
 
             <MudNavGroup Icon="@Icons.Filled.Folder"
                          Title="Topics"
-                         
+
                          @onclick="@(() => OnTopicsExpanded(menuItem))">
 
                 @if (menuItem.LoadingTopics)
@@ -55,7 +63,7 @@
                 }
                 else
                 {
-                    <MudNavLink Match="NavLinkMatch.All" 
+                    <MudNavLink Match="NavLinkMatch.All"
                                 Href=@($"new-topic/{menuItem.ConnectionName}")
                                 Icon="@Icons.Filled.Add">
                         Create new topic
