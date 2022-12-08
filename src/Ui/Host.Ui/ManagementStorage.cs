@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using CrossBusExplorer.Management;
 namespace CrossBusExplorer.Host.Ui;
@@ -25,6 +26,6 @@ public class ManagementStorage : IManagementStorage
     }
 
     private string FilePath => Path.Combine(
-        Directory.GetCurrentDirectory(),
+        FileSystem.AppDataDirectory,
         ServiceBusConnectionsFileName);
 }

@@ -47,8 +47,7 @@ Task.Run(async () =>
             },
             Icon = "../../../icon512x512.png"
         });
-
-    await browserWindow.WebContents.Session.ClearCacheAsync();
+    
     browserWindow.OnClose += () => app.StopAsync();
     browserWindow.OnReadyToShow += () => browserWindow.Show(); });
 
