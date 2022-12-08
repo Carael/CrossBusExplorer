@@ -2,6 +2,8 @@ using System.Text.Json;
 using Blazored.LocalStorage;
 using CrossBusExplorer.Website;
 using CrossBusExplorer.Website.Models;
+using ElectronNET.API;
+using ElectronNET.API.Entities;
 namespace Website.Host;
 
 public class DefaultSettingsService : IUserSettingsService
@@ -10,9 +12,11 @@ public class DefaultSettingsService : IUserSettingsService
 
     public async Task<UserSettings> GetAsync(CancellationToken cancellationToken)
     {
-        if (File.Exists(FilePath))
+        var filePath = await FilePath(cancellationToken);
+        
+        if (File.Exists(filePath))
         {
-            var fileContent = await File.ReadAllTextAsync(FilePath, cancellationToken);
+            var fileContent = await File.ReadAllTextAsync(filePath, cancellationToken);
 
             return JsonSerializer.Deserialize<UserSettings>(fileContent);
         }
@@ -23,12 +27,17 @@ public class DefaultSettingsService : IUserSettingsService
     public async Task SaveAsync(UserSettings userSettings, CancellationToken cancellationToken)
     {
         await File.WriteAllTextAsync(
-            FilePath,
+            await FilePath(cancellationToken),
             JsonSerializer.Serialize(userSettings),
             cancellationToken);
     }
     
-    private string FilePath => Path.Combine(
-        Directory.GetCurrentDirectory(),
-        FileName);
+    private async Task<string> FilePath(CancellationToken cancellationToken)
+    {
+        var path = await Electron.App.GetPathAsync(PathName.UserData, cancellationToken);
+
+        return Path.Combine(
+            path,
+            FileName);
+    }  
 }
