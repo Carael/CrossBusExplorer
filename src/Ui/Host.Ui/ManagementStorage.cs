@@ -17,8 +17,6 @@ public class ManagementStorage : IManagementStorage
     }
     public async Task<string?> ReadAsync(CancellationToken cancellationToken)
     {
-        Debug.WriteLine(FilePath);
-        
         if (File.Exists(FilePath))
         {
             return await File.ReadAllTextAsync(FilePath, cancellationToken);
