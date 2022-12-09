@@ -20,7 +20,7 @@
 
     <MudTooltip Text="Refresh">
         <MudIconButton Icon="@Icons.Material.Outlined.Refresh"
-                       OnClick="@(() => Model.InitializeForm(ConnectionName, QueueName, default))"/>
+                       OnClick="@(() => Model.InitializeFormAsync(ConnectionName, QueueName, default))"/>
     </MudTooltip>
 }
 
@@ -233,7 +233,7 @@
     {
         if (ConnectionName != null)
         {
-            await Model.InitializeForm(ConnectionName, QueueName, default);
+            await Model.InitializeFormAsync(ConnectionName, QueueName, default);
         }
     }
 

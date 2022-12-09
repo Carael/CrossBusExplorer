@@ -19,7 +19,7 @@
 else
 {
     <MudNavGroup Icon="@Icons.Filled.Folder" Title=@TopicSubscriptionsModel.Topic.Name>
-        <MudNavLink Match="NavLinkMatch.All" 
+        <MudNavLink Match="NavLinkMatch.All"
                     Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
                     Icon="@Icons.Filled.Topic">
             View topic details
@@ -42,15 +42,17 @@ else
 
                 @foreach (var subscription in TopicSubscriptionsModel.Subscriptions)
                 {
-                    <MudTooltip Text="@($"{subscription.SubscriptionName} ({subscription.ActiveMessagesCount}, " + $"{subscription.DeadLetterMessagesCount}, " + $"{subscription.TransferMessagesCount}")">
-                        <MudNavLink Match="NavLinkMatch.All"
-                                    Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
-                                    Icon="@Icons.Filled.FormatLineSpacing">
+                    <MudNavLink Match="NavLinkMatch.All"
+                                Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
+                                Icon="@Icons.Filled.FormatLineSpacing">
+                        <MudTooltip Placement="Placement.Right" Text="@($"{subscription.SubscriptionName} (Active messages: {subscription.ActiveMessagesCount}, " + 
+                                            $"Dead letters: {subscription.DeadLetterMessagesCount}, " + 
+                                            $"Transfer messages: {subscription.TransferMessagesCount}")">
                             @subscription.SubscriptionName (@subscription.ActiveMessagesCount,
                             @subscription.DeadLetterMessagesCount,
                             @subscription.TransferMessagesCount)
-                        </MudNavLink>
-                    </MudTooltip>
+                        </MudTooltip>
+                    </MudNavLink>
                 }
             }
         </MudNavGroup>
@@ -62,7 +64,6 @@ else
     public INavigationViewModel Model { get; set; }
     [Parameter]
     public TopicSubscriptionsModel TopicSubscriptionsModel { get; set; } = null!;
-
     [Parameter]
     public string ConnectionName { get; set; } = null!;
 

@@ -10,6 +10,7 @@ using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
+using CrossBusExplorer.Website.Pages;
 namespace CrossBusExplorer.Website.ViewModels;
 
 public class NavigationViewModel : INavigationViewModel
@@ -35,12 +36,10 @@ public class NavigationViewModel : INavigationViewModel
         _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
         _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
-        queueViewModel.QueueAdded += this.OnQueueAdded;
-        queueViewModel.QueueRemoved += this.QueueRemoved;
+        queueViewModel.OnQueueOperation += this.OnQueueOperation;
         topicViewModel.TopicAdded += this.OnTopicAdded;
         topicViewModel.TopicRemoved += this.OnTopicRemoved;
-        subscriptionViewModel.SubscriptionAdded += this.OnSubscriptionAdded;
-        subscriptionViewModel.SubscriptionRemoved += this.OnSubscriptionRemoved;
+        subscriptionViewModel.OnSubscriptionOperation += this.OnSubscriptionOperation;
     }
 
     private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
@@ -147,23 +146,47 @@ public class NavigationViewModel : INavigationViewModel
         }
     }
 
-    private void OnQueueAdded(string connectionName, QueueInfo queueInfo)
+    private void OnQueueOperation(string connectionName, OperationType operationType,
+        QueueInfo queueInfo)
     {
         var menuItem =
             MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-        menuItem.Queues.Add(queueInfo);
+        switch (operationType)
+        {
+
+            case OperationType.Create:
+                AddQueue(menuItem, queueInfo);
+                break;
+            case OperationType.Update:
+                UpdateQueue(menuItem, queueInfo);
+                break;
+            case OperationType.Delete:
+                DeleteQueue(menuItem, queueInfo);
+                break;
+            default:
+                throw new NotSupportedException($"Operation {operationType} is not supported.");
+        }
+    }
+
+    private void UpdateQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
+    {
+        menuItem.Queues.AddOrReplace(p => p.Name.EqualsInvariantIgnoreCase(queueInfo.Name),
+            queueInfo);
+
         this.Notify(PropertyChanged);
     }
 
-    private void QueueRemoved(string connectionName, string queueName)
+    private void AddQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+        menuItem.Queues.Add(queueInfo);
 
-        var queue =
-            menuItem.Queues.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(queueName));
-        menuItem.Queues.Remove(queue);
+        this.Notify(PropertyChanged);
+    }
+
+    private void DeleteQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
+    {
+        menuItem.Queues.Remove(queueInfo);
 
         this.Notify(PropertyChanged);
     }
@@ -234,7 +257,7 @@ public class NavigationViewModel : INavigationViewModel
                     current.Subscriptions
                         .FirstOrDefault(p => p.SubscriptionName
                             .Equals(subscriptionName, StringComparison.InvariantCultureIgnoreCase));
-                
+
                 current.Subscriptions.Remove(subscription);
 
                 break;
@@ -261,7 +284,58 @@ public class NavigationViewModel : INavigationViewModel
         this.Notify(PropertyChanged);
     }
 
-    private void OnSubscriptionRemoved(
+    private void OnSubscriptionOperation(
+        string connectionName,
+        OperationType operationType,
+        SubscriptionInfo subscription)
+    {
+        ConnectionMenuItem menuItem =
+            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+
+        switch (operationType)
+        {
+
+            case OperationType.Create:
+            case OperationType.Update:
+                AddOrReplaceSubscription(menuItem, subscription);
+                break;
+            case OperationType.Delete:
+                RemoveSubscription(
+                    connectionName,
+                    subscription.TopicName,
+                    subscription.SubscriptionName);
+                break;
+            default:
+                throw new NotSupportedException($"Operation {operationType} is not supported.");
+        }
+
+    }
+
+    private void AddOrReplaceSubscription(ConnectionMenuItem menuItem,
+        SubscriptionInfo subscription)
+    {
+        for (int i = 0; i < menuItem.Topics.Count; i++)
+        {
+            var current = menuItem.Topics[i];
+
+            if (current.Topic.FullName != null &&
+                current.Topic.FullName.EqualsInvariantIgnoreCase(subscription.TopicName))
+            {
+                current.Subscriptions.AddOrReplace(
+                    p => p.SubscriptionName.EqualsInvariantIgnoreCase(
+                        subscription
+                            .SubscriptionName),
+                    subscription);
+                break;
+            }
+
+            TryAddSubscription(current, subscription);
+        }
+
+        this.Notify(PropertyChanged);
+    }
+
+    private void RemoveSubscription(
         string connectionName,
         string topicName,
         string subscriptionName)
@@ -291,28 +365,6 @@ public class NavigationViewModel : INavigationViewModel
         this.Notify(PropertyChanged);
     }
 
-    private void OnSubscriptionAdded(string connectionName, SubscriptionInfo subscription)
-    {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        for (int i = 0; i < menuItem.Topics.Count; i++)
-        {
-            var current = menuItem.Topics[i];
-
-            if (current.Topic.FullName != null &&
-                current.Topic.FullName.EqualsInvariantIgnoreCase(subscription.TopicName))
-            {
-                current.Subscriptions.Add(subscription);
-                break;
-            }
-
-            TryAddSubscription(current, subscription);
-        }
-
-        this.Notify(PropertyChanged);
-    }
-    
     private void TryAddSubscription(
         TopicSubscriptionsModel topicSubscriptionsModel,
         SubscriptionInfo subscription)
@@ -324,7 +376,10 @@ public class NavigationViewModel : INavigationViewModel
             if (current.Topic.FullName != null &&
                 current.Topic.FullName.EqualsInvariantIgnoreCase(subscription.TopicName))
             {
-                current.Subscriptions.Add(subscription);
+                current.Subscriptions.AddOrReplace(
+                    p => p.SubscriptionName
+                        .EqualsInvariantIgnoreCase(subscription.SubscriptionName),
+                    subscription);
 
                 break;
             }

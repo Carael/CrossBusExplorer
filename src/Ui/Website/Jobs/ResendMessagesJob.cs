@@ -18,6 +18,7 @@ public class ResendMessagesJob : IJob
     private readonly IMessageService _messageService;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
+    public event JobCompletedEventHandler? OnCompleted;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public ResendMessagesJob(
@@ -78,6 +79,8 @@ public class ResendMessagesJob : IJob
             ErrorMessage = $"Job {Name} failed. Error: {ex.Message}.";
             Status = JobStatus.Failed;
         }
+
+        await OnCompleted(_connectionName, _queueOrTopicName, _subscriptionName);
     }
 
     private JobStatus _status;

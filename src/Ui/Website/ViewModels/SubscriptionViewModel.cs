@@ -20,8 +20,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 public class SubscriptionViewModel : ISubscriptionViewModel
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public event SubscriptionAddedEventHandler? SubscriptionAdded;
-    public event SubscriptionRemovedEventHandler? SubscriptionRemoved;
+    public event SubscriptionOperationEventHandler? OnSubscriptionOperation;
 
     private readonly ISnackbar _snackbar;
     private readonly NavigationManager _navigationManager;
@@ -68,12 +67,15 @@ public class SubscriptionViewModel : ISubscriptionViewModel
     {
         if (topicName != null && subscriptionName != null)
         {
-            UpdateFormModel(
-                await _subscriptionService.GetAsync(
-                    connectionName,
-                    topicName,
-                    subscriptionName,
-                    cancellationToken));
+            var subscription = await _subscriptionService.GetAsync(
+                connectionName,
+                topicName,
+                subscriptionName,
+                cancellationToken);
+
+            UpdateFormModel(subscription);
+
+            OnSubscriptionOperation(connectionName, OperationType.Update, SubscriptionDetails.Info);
         }
         else
         {
@@ -111,13 +113,13 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                     $"subscription/{connectionName}/" +
                     $"{HttpUtility.UrlEncode(result.Data.Info.TopicName)}/" +
                     $"{HttpUtility.UrlEncode(result.Data.Info.SubscriptionName)}");
-
-                SubscriptionAdded(connectionName, result.Data.Info);
             }
             else
             {
                 UpdateFormModel(result.Data);
             }
+
+            OnSubscriptionOperation(connectionName, operationType, result.Data.Info);
 
             _snackbar.Add("Saved successfully", Severity.Success);
         }
@@ -164,32 +166,32 @@ public class SubscriptionViewModel : ISubscriptionViewModel
         CancellationToken cancellationToken)
     {
         var parameters = new DialogParameters();
-        
-         parameters.Add(nameof(CloneDialog.ConnectionName), connectionName);
-         parameters.Add(nameof(CloneDialog.SourceDialogName), sourceTopicName);
-        
-         var dialog = _dialogService.Show<CloneDialog>(
-             $"Clone subscription {sourceSubscriptionName}",
-             parameters,
-             new DialogOptions
-             {
-                 FullWidth = true,
-                 CloseOnEscapeKey = true
-             });
-        
-         var dialogResult = await dialog.Result;
-        
-         if (!dialogResult.Cancelled && dialogResult.Data is string newSubscriptionName)
-         {
-             var result = await _subscriptionService.CloneAsync(
-                 connectionName,
-                 newSubscriptionName,
-                 sourceTopicName,
-                 sourceSubscriptionName,
-                 cancellationToken);
-        
-             HandleSaveResult(connectionName, result, OperationType.Create);
-         }
+
+        parameters.Add(nameof(CloneDialog.ConnectionName), connectionName);
+        parameters.Add(nameof(CloneDialog.SourceDialogName), sourceTopicName);
+
+        var dialog = _dialogService.Show<CloneDialog>(
+            $"Clone subscription {sourceSubscriptionName}",
+            parameters,
+            new DialogOptions
+            {
+                FullWidth = true,
+                CloseOnEscapeKey = true
+            });
+
+        var dialogResult = await dialog.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data is string newSubscriptionName)
+        {
+            var result = await _subscriptionService.CloneAsync(
+                connectionName,
+                newSubscriptionName,
+                sourceTopicName,
+                sourceSubscriptionName,
+                cancellationToken);
+
+            HandleSaveResult(connectionName, result, OperationType.Create);
+        }
     }
     public async Task DeleteSubscriptionAsync(
         string connectionName,
@@ -220,7 +222,6 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                 _snackbar.Add(
                     $"Subscription {subscriptionName} successfully deleted.",
                     Severity.Success);
-                SubscriptionRemoved(connectionName, topicName, subscriptionName);
                 NavigateToNewSubscriptionForm(connectionName, topicName);
             }
             else
@@ -230,6 +231,8 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                     $"Please check the subscription name and try again later.",
                     Severity.Error);
             }
+
+            OnSubscriptionOperation(connectionName, OperationType.Delete, SubscriptionDetails.Info);
         }
     }
 
@@ -259,14 +262,17 @@ public class SubscriptionViewModel : ISubscriptionViewModel
 
         if (dialogResult.Data is SubQueue subQueue)
         {
-            await _jobsViewModel.ScheduleJob(
-                new PurgeMessagesJob(
-                    connectionName,
-                    topicName,
-                    subscriptionName,
-                    subQueue,
-                    GetTotalMessagesCount(subQueue),
-                    _messageService));
+            var job = new PurgeMessagesJob(
+                connectionName,
+                topicName,
+                subscriptionName,
+                subQueue,
+                GetTotalMessagesCount(subQueue),
+                _messageService);
+
+            job.OnCompleted += ReloadData;
+
+            await _jobsViewModel.ScheduleJob(job);
         }
     }
     private long GetTotalMessagesCount(SubQueue subQueue) => subQueue switch
@@ -303,6 +309,14 @@ public class SubscriptionViewModel : ISubscriptionViewModel
                     GetTotalMessagesCount(SubQueue.DeadLetter),
                     _messageService));
         }
+    }
+
+    private async Task ReloadData(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName)
+    {
+        await InitializeFormAsync(connectionName, queueOrTopicName, subscriptionName, default);
     }
 
     private void UpdateFormModel(SubscriptionDetails resultData)

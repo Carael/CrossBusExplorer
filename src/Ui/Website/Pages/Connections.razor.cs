@@ -3,7 +3,6 @@ using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 namespace CrossBusExplorer.Website.Pages;
@@ -18,7 +17,6 @@ public partial class Connections
     private EditForm _editForm;
     private MudDialog _dialog;
     
-
     protected override void OnInitialized()
     {
         Model.PropertyChanged += (_, _) =>
@@ -36,6 +34,10 @@ public partial class Connections
             : new SaveConnectionForm
                 { Name = model.Name, ConnectionString = model.ConnectionString };
         _saveDialogVisible = true;
+        _saveEditConnectionForm.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
     }
 
     private async Task OnValidSaveConnectionSubmit()
