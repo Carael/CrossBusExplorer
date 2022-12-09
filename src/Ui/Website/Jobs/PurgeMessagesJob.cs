@@ -102,7 +102,6 @@ public class PurgeMessagesJob : IJob
 
     public void Cancel()
     {
-        Status = JobStatus.Cancelled;
         _cancellationTokenSource.Cancel();
     }
 }
