@@ -4,17 +4,19 @@
 @inject IUserSettingsService _userSettingsService
 
 
-<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
+<MudThemeProvider Theme="CustomTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <MudAppBar Elevation="0">
+    <MudAppBar Elevation="0" Dense="true" Color="Color.Primary">
         <MudIconButton Icon="@Icons.Material.Filled.Menu"
                        Color="Color.Inherit"
                        Edge="Edge.Start"
                        OnClick="@((e) => DrawerToggle())"/>
         <MudSpacer/>
+        <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
+        <MudSpacer />
         <Jobs/>
         <MudTooltip Text="Change theme">
             <MudMenu Icon="@Icons.Filled.MoreVert">
@@ -23,10 +25,7 @@
             </MudMenu>
         </MudTooltip>
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Width="25%">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">CrossBusExplorer</MudText>
-        </MudDrawerHeader>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" ClipMode="DrawerClipMode.Always" Width="25%">
         <ServiceBusNavMenu/>
     </MudDrawer>
     <MudMainContent>
@@ -47,10 +46,20 @@
 @code {
     private ErrorBoundary? _errorBoundary;
     bool _drawerOpen = true;
-    private MudThemeProvider _mudThemeProvider = null!;
-
     private bool _isOpen;
     private UserSettings _userSettings = new UserSettings();
+
+    private MudTheme CustomTheme = new()
+    {
+        Palette = new Palette
+        {
+            Primary = Colors.Blue.Darken2
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = Colors.Grey.Darken4
+        }
+    };
 
     void DrawerToggle()
     {
