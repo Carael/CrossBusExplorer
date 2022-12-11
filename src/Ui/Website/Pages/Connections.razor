@@ -58,7 +58,8 @@
                 <MudItem xs="12">
                     <MudTextField Lines="4"
                                   @bind-Value="@_saveEditConnectionForm.ConnectionString"
-                                  For="@(() => _saveEditConnectionForm.ConnectionString)"/>
+                                  For="@(() => _saveEditConnectionForm.ConnectionString)"
+                                  Immediate="true" />
                     <MudTextField @bind-Value="@_saveEditConnectionForm.Name"
                                   For="@(() => _saveEditConnectionForm.Name)"/>
                 </MudItem>
