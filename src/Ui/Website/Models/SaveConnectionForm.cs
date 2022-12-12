@@ -45,7 +45,6 @@ public class SaveConnectionForm : INotifyPropertyChanged
     
     private string? _folder;
     [Label("Folder")]
-    [Required]
     public string? Folder
     {
         get => _folder;

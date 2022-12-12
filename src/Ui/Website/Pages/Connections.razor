@@ -16,29 +16,29 @@
             <MudTableSortLabel SortBy="new Func<ServiceBusConnection, object>(x => x.Name)">Name</MudTableSortLabel>
         </MudTh>
         <MudTh>
-            Fully qualified name
-        </MudTh>
-        <MudTh>
-            View connection string
+            <MudTableSortLabel SortBy="new Func<ServiceBusConnection, object>(x => x.Folder)">Folder</MudTableSortLabel>
         </MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Actions">
+            <MudTooltip Text="View service bus connection string">
+                <MudIconButton
+                    Icon="@Icons.Material.Outlined.Preview"
+                    OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
+            </MudTooltip>
             <MudTooltip Text="Edit service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => Model.OpenSaveDialog(context))"/>
+                <MudIconButton
+                    Icon="@Icons.Material.Outlined.Edit"
+                    OnClick="@(() => Model.OpenSaveDialog(context))"/>
             </MudTooltip>
             <MudTooltip Text="Delete service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => Model.OpenDeleteDialog(context))"/>
+                <MudIconButton
+                    Icon="@Icons.Material.Outlined.Delete"
+                    OnClick="@(() => Model.OpenDeleteDialog(context))"/>
             </MudTooltip>
         </MudTd>
         <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
-        <MudTd DataLabel="View connection string">
-            <MudTooltip Text="View service bus connection string">
-                <MudIconButton Icon="@Icons.Material.Outlined.Preview"
-                               OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
-            </MudTooltip>
-        </MudTd>
+        <MudTd DataLabel="Folder">@(context.Folder ?? "-")</MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager PageSizeOptions="new int[]{50, 100}"/>
@@ -48,11 +48,13 @@
 <MudDialog @bind-IsVisible="Model.SaveDialogVisible" Options="_saveDialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/> Save service bus connection
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/>Save service bus connection
         </MudText>
     </TitleContent>
     <DialogContent>
-        <EditForm @ref="_editForm" Model="@Model.SaveConnectionForm" OnValidSubmit="Model.OnValidSaveConnectionSubmit">
+        <EditForm @ref="_editForm"
+                  Model="@Model.SaveConnectionForm"
+                  OnValidSubmit="Model.OnValidSaveConnectionSubmit">
             <DataAnnotationsValidator/>
             <MudGrid>
                 <MudItem xs="12">
@@ -62,15 +64,14 @@
                                   Immediate="true"/>
                     <MudTextField @bind-Value="@Model.SaveConnectionForm.Name"
                                   For="@(() => Model.SaveConnectionForm.Name)"/>
-                    <MudSelect
+                    <MudAutocomplete
                         T="string"
-                        For="@(()=> Model.SaveConnectionForm.Folder)"
-                        @bind-Value="@Model.SaveConnectionForm.Folder">
-                        @foreach (var folder in Model.Folders)
-                        {
-                            <MudSelectItem Value="@folder">@folder</MudSelectItem>
-                        }
-                    </MudSelect>
+                        For="@(() => Model.SaveConnectionForm.Folder)"
+                        @bind-Value="@Model.SaveConnectionForm.Folder"
+                        CoerceValue="true"
+                        CoerceText="true"
+                        Immediate="true"
+                        SearchFunc="@SearchFolder"/>
                 </MudItem>
             </MudGrid>
         </EditForm>
@@ -85,7 +86,7 @@
         <MudButton ButtonType="ButtonType.Submit"
                    Color="Color.Success"
                    Class="px-10"
-                   OnClick="@(()=>Model.SubmitSaveConnectionForm(_editForm))">
+                   OnClick="@(() => Model.SubmitSaveConnectionForm(_editForm))">
             Submit
         </MudButton>
     </DialogActions>
@@ -112,4 +113,14 @@
 
     [Inject]
     private IConnectionsViewModel Model { get; set; }
+
+    private Task<IEnumerable<string>> SearchFolder(string? value)
+    {
+        var folders = Model.Folders
+            .Where(p =>
+                value == null ||
+                p.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+
+        return Task.FromResult(folders);
+    }
 }

@@ -71,19 +71,16 @@
         _errorBoundary?.Recover();
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await _connectionsViewModel.InitializeAsync(default);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            await _connectionsViewModel.InitializeAsync(default);
             _userSettings = await _userSettingsService.GetAsync(default);
             StateHasChanged();
         }
     }
+    
     private async Task ChangeDarkMode(bool isDarkMode)
     {
         _userSettings.IsDarkMode = isDarkMode;

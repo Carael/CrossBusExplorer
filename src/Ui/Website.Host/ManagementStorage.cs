@@ -38,5 +38,4 @@ public class ManagementStorage : IManagementStorage
 
         return new Dictionary<string, ServiceBusConnection>();
     }
-
 }

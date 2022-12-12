@@ -19,7 +19,6 @@ public class DefaultSettingsService : IUserSettingsService
         if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
         {
             return await _localStorageService.GetItemAsync<UserSettings>(key, cancellationToken);
-
         }
 
         return new UserSettings();

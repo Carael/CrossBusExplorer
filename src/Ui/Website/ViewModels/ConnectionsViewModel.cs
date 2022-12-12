@@ -93,7 +93,8 @@ public class ConnectionsViewModel : IConnectionsViewModel
     {
         var serviceBusConnections = await _connectionManagement.GetAsync(default);
         
-        ServiceBusConnections = new ObservableCollection<ServiceBusConnection>();
+        ServiceBusConnections = new ObservableCollection<ServiceBusConnection>(
+            serviceBusConnections);
 
         Folders = new ObservableCollection<string>(serviceBusConnections
             .Where(p => !string.IsNullOrEmpty(p.Folder))
@@ -101,9 +102,12 @@ public class ConnectionsViewModel : IConnectionsViewModel
             .Distinct(StringComparer.InvariantCultureIgnoreCase));
     }
     
-    public void AddFolder(string folder)
+    private void AddOrReplaceFolder(string? folder)
     {
-        Folders.Add(folder);
+        if (!string.IsNullOrEmpty(folder))
+        {
+            Folders.AddOrReplace(p => p.EqualsInvariantIgnoreCase(folder), folder);
+        }
     }
 
     private async Task SaveConnectionAsync(
@@ -119,6 +123,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
                 folder,
                 cancellationToken);
         RemoveOrReplace(newConnection);
+        AddOrReplaceFolder(folder);
     }
     
     
@@ -137,7 +142,11 @@ public class ConnectionsViewModel : IConnectionsViewModel
         _saveConnectionForm = model == null
             ? new SaveConnectionForm()
             : new SaveConnectionForm
-                { Name = model.Name, ConnectionString = model.ConnectionString };
+            {
+                Name = model.Name, 
+                ConnectionString = model.ConnectionString,
+                Folder = model.Folder
+            };
         _saveDialogVisible = true;
         _saveConnectionForm.PropertyChanged += (_, _) =>
         {
