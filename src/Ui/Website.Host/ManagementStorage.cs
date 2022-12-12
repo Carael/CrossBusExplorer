@@ -1,6 +1,8 @@
 using System.Text;
+using System.Text.Json;
 using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
+using CrossBusExplorer.Management.Contracts;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage
@@ -13,18 +15,28 @@ public class ManagementStorage : IManagementStorage
         _localStorageService = localStorageService;
     }
 
-    public async Task StoreAsync(string content, CancellationToken cancellationToken)
+    public async Task StoreAsync(
+        IDictionary<string, ServiceBusConnection> connections,
+        CancellationToken cancellationToken)
     {
-        await _localStorageService.SetItemAsStringAsync(key, content, cancellationToken);
+        await _localStorageService.SetItemAsStringAsync(
+            key,
+            JsonSerializer.Serialize(connections),
+            cancellationToken);
     }
-    public async Task<string?> ReadAsync(CancellationToken cancellationToken)
+    public async Task<IDictionary<string, ServiceBusConnection>> ReadAsync(
+        CancellationToken cancellationToken)
     {
         if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
         {
-            return await _localStorageService.GetItemAsStringAsync(key, cancellationToken);
+            var serializedData =
+                await _localStorageService.GetItemAsStringAsync(key, cancellationToken);
+            
+            return JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
+                serializedData) ?? new Dictionary<string, ServiceBusConnection>();
         }
 
-        return null;
+        return new Dictionary<string, ServiceBusConnection>();
     }
 
 }

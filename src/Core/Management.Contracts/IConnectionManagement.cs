@@ -7,6 +7,7 @@ public interface IConnectionManagement
     Task<ServiceBusConnection> SaveAsync(
         string name, 
         string connectionString,
+        string folder,
         CancellationToken cancellationToken);
     Task DeleteAsync(string name, CancellationToken cancellationToken);
 }

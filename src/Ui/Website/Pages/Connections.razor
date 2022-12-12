@@ -5,7 +5,7 @@
 <PageTitle>Connections</PageTitle>
 
 <MudTooltip Text="Add service bus connection">
-    <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => OpenSaveDialog())"/>
+    <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => Model.OpenSaveDialog())"/>
 </MudTooltip>
 <MudTable Items="Model.ServiceBusConnections" Hover="true" SortLabel="Sort By" Elevation="0">
     <HeaderContent>
@@ -25,18 +25,18 @@
     <RowTemplate>
         <MudTd DataLabel="Actions">
             <MudTooltip Text="Edit service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenSaveDialog(context))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => Model.OpenSaveDialog(context))"/>
             </MudTooltip>
             <MudTooltip Text="Delete service bus connection">
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => OpenDeleteDialog(context))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => Model.OpenDeleteDialog(context))"/>
             </MudTooltip>
         </MudTd>
         <MudTd DataLabel="Name">@context.Name</MudTd>
         <MudTd DataLabel="Fully qualified name">@context.FullyQualifiedName</MudTd>
         <MudTd DataLabel="View connection string">
             <MudTooltip Text="View service bus connection string">
-                <MudIconButton Icon="@Icons.Material.Outlined.Preview" 
-                               OnClick="@(() => ViewConnectionString(context.ConnectionString))"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Preview"
+                               OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
             </MudTooltip>
         </MudTd>
     </RowTemplate>
@@ -45,48 +45,71 @@
     </PagerContent>
 </MudTable>
 
-<MudDialog @ref="_dialog" @bind-IsVisible="_saveDialogVisible" Options="_saveDialogOptions">
+<MudDialog @bind-IsVisible="Model.SaveDialogVisible" Options="_saveDialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3"/> Save service bus connection
         </MudText>
     </TitleContent>
     <DialogContent>
-        <EditForm @ref="_editForm" Model="@_saveEditConnectionForm" OnValidSubmit="OnValidSaveConnectionSubmit">
+        <EditForm @ref="_editForm" Model="@Model.SaveConnectionForm" OnValidSubmit="Model.OnValidSaveConnectionSubmit">
             <DataAnnotationsValidator/>
             <MudGrid>
                 <MudItem xs="12">
                     <MudTextField Lines="4"
-                                  @bind-Value="@_saveEditConnectionForm.ConnectionString"
-                                  For="@(() => _saveEditConnectionForm.ConnectionString)"
-                                  Immediate="true" />
-                    <MudTextField @bind-Value="@_saveEditConnectionForm.Name"
-                                  For="@(() => _saveEditConnectionForm.Name)"/>
+                                  @bind-Value="@Model.SaveConnectionForm.ConnectionString"
+                                  For="@(() => Model.SaveConnectionForm.ConnectionString)"
+                                  Immediate="true"/>
+                    <MudTextField @bind-Value="@Model.SaveConnectionForm.Name"
+                                  For="@(() => Model.SaveConnectionForm.Name)"/>
+                    <MudSelect
+                        T="string"
+                        For="@(()=> Model.SaveConnectionForm.Folder)"
+                        @bind-Value="@Model.SaveConnectionForm.Folder">
+                        @foreach (var folder in Model.Folders)
+                        {
+                            <MudSelectItem Value="@folder">@folder</MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
             </MudGrid>
         </EditForm>
     </DialogContent>
     <DialogActions>
-        <MudButton ButtonType="ButtonType.Reset" 
-                   Color="Color.Default" 
+        <MudButton ButtonType="ButtonType.Reset"
+                   Color="Color.Default"
                    Class="px-10"
-                   OnClick="@(() =>{_saveDialogVisible = false;})">
+                   OnClick="@(() =>{Model.SaveDialogVisible = false;})">
             Close
         </MudButton>
         <MudButton ButtonType="ButtonType.Submit"
                    Color="Color.Success"
                    Class="px-10"
-                   OnClick="@(Submit)">
+                   OnClick="@(()=>Model.SubmitSaveConnectionForm(_editForm))">
             Submit
         </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code{
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = null!;
-    [Inject]
-    private IDialogService DialogService { get; set; } = null!;
+    private EditForm _editForm;
+    private readonly DialogOptions _saveDialogOptions =
+        new DialogOptions
+        {
+            FullWidth = true,
+            CloseOnEscapeKey = true
+        };
+
+    protected override void OnInitialized()
+    {
+        Model.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
+
+        base.OnInitialized();
+    }
+
     [Inject]
     private IConnectionsViewModel Model { get; set; }
 }

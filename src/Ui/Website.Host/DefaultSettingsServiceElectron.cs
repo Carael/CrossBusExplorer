@@ -13,17 +13,17 @@ public class DefaultSettingsServiceElectron : IUserSettingsService
     public async Task<UserSettings> GetAsync(CancellationToken cancellationToken)
     {
         var filePath = await FilePath(cancellationToken);
-        
+
         if (File.Exists(filePath))
         {
             var fileContent = await File.ReadAllTextAsync(filePath, cancellationToken);
 
-            return JsonSerializer.Deserialize<UserSettings>(fileContent);
+            return JsonSerializer.Deserialize<UserSettings>(fileContent) ?? new UserSettings();
         }
 
         return new UserSettings();
     }
-    
+
     public async Task SaveAsync(UserSettings userSettings, CancellationToken cancellationToken)
     {
         await File.WriteAllTextAsync(
@@ -31,11 +31,11 @@ public class DefaultSettingsServiceElectron : IUserSettingsService
             JsonSerializer.Serialize(userSettings),
             cancellationToken);
     }
-    
+
     private async Task<string> FilePath(CancellationToken cancellationToken)
     {
         return Path.Combine(
             await Electron.App.GetPathAsync(PathName.UserData, cancellationToken),
             FileName);
-    }  
+    }
 }
