@@ -1,42 +1,30 @@
 using System.Text;
+using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage
 {
-    private const string ServiceBusConnectionsFileName = "cross_bus_explorer_connections.json";
+    private readonly ILocalStorageService _localStorageService;
+    private const string key = "service_bus_connection";
+
+    public ManagementStorage(ILocalStorageService localStorageService)
+    {
+        _localStorageService = localStorageService;
+    }
 
     public async Task StoreAsync(string content, CancellationToken cancellationToken)
     {
-        await File.WriteAllTextAsync(
-            await FilePath(cancellationToken),
-            content,
-            Encoding.UTF8,
-            cancellationToken);
+        await _localStorageService.SetItemAsStringAsync(key, content, cancellationToken);
     }
-    
     public async Task<string?> ReadAsync(CancellationToken cancellationToken)
     {
-        var path = await FilePath(cancellationToken);
-        
-        if (File.Exists(Path.Combine(path)))
+        if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
         {
-            return await File.ReadAllTextAsync(path, cancellationToken);
+            return await _localStorageService.GetItemAsStringAsync(key, cancellationToken);
         }
 
         return null;
     }
 
-    private async Task<string> FilePath(CancellationToken cancellationToken)
-    {
-        var path = HybridSupport.IsElectronActive
-            ? await Electron.App.GetPathAsync(PathName.UserData, cancellationToken) :
-            Directory.GetCurrentDirectory();
-        
-        return Path.Combine(
-            path,
-            ServiceBusConnectionsFileName);
-    }  
 }

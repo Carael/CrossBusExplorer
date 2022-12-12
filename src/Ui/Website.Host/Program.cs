@@ -16,8 +16,17 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddWebsiteServices();
 builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
-builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
-builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
+
+if (HybridSupport.IsElectronActive)
+{
+    builder.Services.AddScoped<IManagementStorage, ManagementStorageElectron>();
+    builder.Services.AddScoped<IUserSettingsService, DefaultSettingsServiceElectron>();
+}
+else
+{
+    builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
+    builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
+}
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddElectron();
@@ -32,23 +41,27 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-Task.Run(async () =>
+if (HybridSupport.IsElectronActive)
 {
-    Electron.ReadAuth();
-    await Task.Delay(500);
-     
-    var browserWindow = await Electron.WindowManager.CreateWindowAsync(
-        new BrowserWindowOptions
-        {
-            ZoomToPageWidth = true,
-            WebPreferences = new WebPreferences
+    Task.Run(async () =>
+    {
+        Electron.ReadAuth();
+        await Task.Delay(500);
+
+        var browserWindow = await Electron.WindowManager.CreateWindowAsync(
+            new BrowserWindowOptions
             {
-                ZoomFactor = 1
-            },
-            Icon = "../../../icon512x512.png"
-        });
-    
-    browserWindow.OnClose += () => app.StopAsync();
-    browserWindow.OnReadyToShow += () => browserWindow.Show(); });
+                ZoomToPageWidth = true,
+                WebPreferences = new WebPreferences
+                {
+                    ZoomFactor = 1
+                },
+                Icon = "../../../icon512x512.png"
+            });
+
+        browserWindow.OnClose += () => app.StopAsync();
+        browserWindow.OnReadyToShow += () => browserWindow.Show();
+    });
+}
 
 app.Run();
