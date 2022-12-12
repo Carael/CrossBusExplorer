@@ -4,11 +4,13 @@ namespace CrossBusExplorer.Website.Models;
 
 public class ConnectionMenuItem
 {
-    public ConnectionMenuItem(string connectionName)
+    public ConnectionMenuItem(string connectionName, string folder)
     {
         ConnectionName = connectionName;
+        Folder = folder;
     }
     public string ConnectionName { get; }
+    public string Folder { get; }
     public IList<QueueInfo> Queues { get; } = new List<QueueInfo>();
     public IList<TopicSubscriptionsModel> Topics { get; } = new List<TopicSubscriptionsModel>();
     public bool QueuesLoaded { get; set; }

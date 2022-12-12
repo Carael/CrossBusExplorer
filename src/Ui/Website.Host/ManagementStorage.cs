@@ -1,41 +1,46 @@
 using System.Text;
 using System.Text.Json;
-using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage
 {
-    private readonly ILocalStorageService _localStorageService;
-    private const string key = "service_bus_connection";
-
-    public ManagementStorage(ILocalStorageService localStorageService)
-    {
-        _localStorageService = localStorageService;
-    }
+    private const string ServiceBusConnectionsFileName = "cross_bus_explorer_connections.json";
 
     public async Task StoreAsync(
         IDictionary<string, ServiceBusConnection> connections,
         CancellationToken cancellationToken)
     {
-        await _localStorageService.SetItemAsStringAsync(
-            key,
+        await File.WriteAllTextAsync(
+            await FilePath(cancellationToken),
             JsonSerializer.Serialize(connections),
+            Encoding.UTF8,
             cancellationToken);
     }
+    
     public async Task<IDictionary<string, ServiceBusConnection>> ReadAsync(
         CancellationToken cancellationToken)
     {
-        if (await _localStorageService.ContainKeyAsync(key, cancellationToken))
+        var path = await FilePath(cancellationToken);
+
+        if (File.Exists(Path.Combine(path)))
         {
-            var serializedData =
-                await _localStorageService.GetItemAsStringAsync(key, cancellationToken);
-            
+            var serializedData = await File.ReadAllTextAsync(path, cancellationToken);
+
             return JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
                 serializedData) ?? new Dictionary<string, ServiceBusConnection>();
         }
 
         return new Dictionary<string, ServiceBusConnection>();
+    }
+
+    private async Task<string> FilePath(CancellationToken cancellationToken)
+    {
+        var path = Directory.GetCurrentDirectory();
+
+        return Path.Combine(
+            path,
+            ServiceBusConnectionsFileName);
     }
 }

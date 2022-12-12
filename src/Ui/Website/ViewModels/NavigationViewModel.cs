@@ -60,7 +60,9 @@ public class NavigationViewModel : INavigationViewModel
         {
             MenuItems.AddOrReplace(
                 p => p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name),
-                new ConnectionMenuItem(serviceBusConnection.Name));
+                new ConnectionMenuItem(
+                    serviceBusConnection.Name,
+                    serviceBusConnection.Folder));
         }
     }
 

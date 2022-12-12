@@ -31,10 +31,7 @@ public class ManagementStorageElectron : IManagementStorage
             var serializedData = await File.ReadAllTextAsync(path, cancellationToken);
 
             return JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
-                serializedData, new JsonSerializerOptions
-                {
-                    
-                }) ?? new Dictionary<string, ServiceBusConnection>();
+                serializedData) ?? new Dictionary<string, ServiceBusConnection>();
         }
 
         return new Dictionary<string, ServiceBusConnection>();

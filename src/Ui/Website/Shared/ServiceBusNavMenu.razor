@@ -12,69 +12,25 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (ConnectionMenuItem menuItem in Model.MenuItems)
+    @foreach (var folder in Model.MenuItems.GroupBy(p => p.Folder))
     {
-        <MudNavGroup Title=@menuItem.ConnectionName
-                     Icon="@Icons.Material.Filled.Link">
-
-            <MudNavGroup Icon="@Icons.Filled.Folder"
-                         Title="Queues"
-                         @onclick="@(() => OnQueuesExpanded(menuItem))">
-                @if (menuItem.LoadingQueues)
+        if (string.IsNullOrEmpty(folder.Key))
+        {
+            foreach (var menuItem in folder)
+            {
+                <MenuItem Value="@menuItem"></MenuItem>
+            }
+        }
+        else
+        {
+            <MudNavGroup Title=@(folder.Key)
+                         Icon="@Icons.Material.Filled.FolderSpecial">
+                @foreach (var menuItem in folder)
                 {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
-                }
-                else
-                {
-                    <MudNavLink Match="NavLinkMatch.All"
-                                Href=@($"new-queue/{menuItem.ConnectionName}")
-                                Icon="@Icons.Filled.Add">
-                        Create new queue
-                    </MudNavLink>
-                }
-
-                @foreach (var queue in menuItem.Queues)
-                {
-
-                    <MudNavLink Match="NavLinkMatch.All"
-                                Href=@($"queue/{menuItem.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
-                                Icon="@Icons.Filled.Queue">
-                        <MudTooltip Placement="Placement.Right" Text="@($"{queue.Name} (Active messages: {queue.ActiveMessagesCount}, " + 
-                                            $"Dead letters: {queue.DeadLetterMessagesCount}, " + 
-                                            $"Transfer messages: {queue.InTransferMessagesCount}, " + 
-                                            $"Scheduled messages count: {queue.ScheduledMessagesCount})")">
-                            @queue.Name
-                            (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount,
-                            @queue.ScheduledMessagesCount)
-                        </MudTooltip>
-                    </MudNavLink>
-
+                    <MenuItem Value="@menuItem"></MenuItem>
                 }
             </MudNavGroup>
-
-            <MudNavGroup Icon="@Icons.Filled.Folder"
-                         Title="Topics"
-
-                         @onclick="@(() => OnTopicsExpanded(menuItem))">
-
-                @if (menuItem.LoadingTopics)
-                {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
-                }
-                else
-                {
-                    <MudNavLink Match="NavLinkMatch.All"
-                                Href=@($"new-topic/{menuItem.ConnectionName}")
-                                Icon="@Icons.Filled.Add">
-                        Create new topic
-                    </MudNavLink>
-                }
-                @foreach (var topic in menuItem.Topics)
-                {
-                    <TopicNestedMenuItem TopicSubscriptionsModel=@topic ConnectionName=@menuItem.ConnectionName/>
-                }
-            </MudNavGroup>
-        </MudNavGroup>
+        }
     }
 </MudNavMenu>
 
@@ -82,29 +38,11 @@
     [Inject]
     private INavigationViewModel Model { get; set; }
 
-    private bool _shouldRender;
-
     protected override async Task OnInitializedAsync()
     {
         Model.PropertyChanged += (_, _) =>
         {
             StateHasChanged();
         };
-
-        _shouldRender = true;
-    }
-
-    private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
-    {
-        _shouldRender = false;
-        await Model.LoadQueues(menuItem, default);
-        _shouldRender = true;
-    }
-
-    private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
-    {
-        _shouldRender = false;
-        Model.LoadTopics(menuItem, default);
-        _shouldRender = true;
     }
 }

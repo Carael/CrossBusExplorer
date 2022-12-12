@@ -1,0 +1,91 @@
+@using System.Web
+@using CrossBusExplorer.Website.Models
+<MudNavGroup Title=@Value.ConnectionName
+             Icon="@Icons.Material.Filled.Link">
+
+    <MudNavGroup Icon="@Icons.Filled.Queue"
+                 Title="Queues"
+                 @onclick="@(() => OnQueuesExpanded(Value))">
+        @if (Value.LoadingQueues)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+        }
+        else
+        {
+            <MudNavLink Match="NavLinkMatch.All"
+                        Href=@($"new-queue/{Value.ConnectionName}")
+                        Icon="@Icons.Filled.Add">
+                Create new queue
+            </MudNavLink>
+        }
+
+        @foreach (var queue in Value.Queues)
+        {
+            <MudNavLink Match="NavLinkMatch.All"
+                        Href=@($"queue/{Value.ConnectionName}/{HttpUtility.UrlEncode(queue.Name)}")
+                        Icon="@Icons.Filled.Queue">
+                <MudTooltip Placement="Placement.Right" Text="@($"{queue.Name} (Active messages: {queue.ActiveMessagesCount}, " + $"Dead letters: {queue.DeadLetterMessagesCount}, " + $"Transfer messages: {queue.InTransferMessagesCount}, " + $"Scheduled messages count: {queue.ScheduledMessagesCount})")">
+                    @queue.Name
+                    (@queue.ActiveMessagesCount, @queue.DeadLetterMessagesCount, @queue.InTransferMessagesCount,
+                    @queue.ScheduledMessagesCount)
+                </MudTooltip>
+            </MudNavLink>
+
+        }
+    </MudNavGroup>
+
+    <MudNavGroup Icon="@Icons.Filled.Folder"
+                 Title="Topics"
+                 @onclick="@(() => OnTopicsExpanded(Value))">
+
+        @if (Value.LoadingTopics)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+        }
+        else
+        {
+            <MudNavLink Match="NavLinkMatch.All"
+                        Href=@($"new-topic/{Value.ConnectionName}")
+                        Icon="@Icons.Filled.Add">
+                Create new topic
+            </MudNavLink>
+        }
+        @foreach (var topic in Value.Topics)
+        {
+            <TopicNestedMenuItem TopicSubscriptionsModel=@topic ConnectionName=@Value.ConnectionName/>
+        }
+    </MudNavGroup>
+</MudNavGroup>
+
+@code {
+    [Parameter]
+    public ConnectionMenuItem Value { get; set; }
+    [Inject]
+    private INavigationViewModel Model { get; set; }
+
+    private bool _shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
+
+        _shouldRender = true;
+    }
+
+    private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
+    {
+        _shouldRender = false;
+        await Model.LoadQueues(menuItem, default);
+        _shouldRender = true;
+    }
+
+    private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
+    {
+        _shouldRender = false;
+        Model.LoadTopics(menuItem, default);
+        _shouldRender = true;
+    }
+}

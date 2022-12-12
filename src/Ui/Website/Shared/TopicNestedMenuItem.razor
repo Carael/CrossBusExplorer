@@ -35,7 +35,7 @@ else
             @if (TopicSubscriptionsModel.Loaded)
             {
                 <MudNavLink Match="NavLinkMatch.All"
-                            Href=@($"new-subscription/{ConnectionName}/{TopicSubscriptionsModel.Topic.FullName}")
+                            Href=@($"new-subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
                             Icon="@Icons.Filled.Add">
                     Create new subscription
                 </MudNavLink>
