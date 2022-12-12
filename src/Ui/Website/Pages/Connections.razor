@@ -69,8 +69,11 @@
                         For="@(() => Model.SaveConnectionForm.Folder)"
                         @bind-Value="@Model.SaveConnectionForm.Folder"
                         CoerceValue="true"
-                        CoerceText="true"
+                        CoerceText="true" 
+                        SelectValueOnTab="true"
+                        Dense="true"
                         Immediate="true"
+                        ResetValueOnEmptyText="true"
                         SearchFunc="@SearchFolder"/>
                 </MudItem>
             </MudGrid>
@@ -119,7 +122,7 @@
         var folders = Model.Folders
             .Where(p =>
                 value == null ||
-                p.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+                p.StartsWith(value, StringComparison.InvariantCulture));
 
         return Task.FromResult(folders);
     }
