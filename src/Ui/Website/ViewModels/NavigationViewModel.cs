@@ -147,6 +147,26 @@ public class NavigationViewModel : INavigationViewModel
             this.Notify(PropertyChanged);
         }
     }
+    public async Task ReloadTopics(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
+    {
+        menuItem.Topics.Clear();
+        menuItem.TopicsLoaded = false;
+        await LoadTopics(menuItem, cancellationToken);
+    }
+    
+    public async Task ReloadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
+    {
+        menuItem.Queues.Clear();
+        menuItem.QueuesLoaded = false;
+        await LoadQueues(menuItem, cancellationToken);
+    }
+    
+    public async Task ReloadSubscriptions(string connectionName, TopicSubscriptionsModel model)
+    {
+        model.Subscriptions.Clear();
+        model.Loaded = false;
+        await LoadSubscriptionsAsync(connectionName, model);
+    }
 
     private void OnQueueOperation(string connectionName, OperationType operationType,
         QueueInfo queueInfo)

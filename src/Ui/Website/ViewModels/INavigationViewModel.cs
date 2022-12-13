@@ -12,4 +12,7 @@ public interface INavigationViewModel : INotifyPropertyChanged
     public Task LoadTopics(ConnectionMenuItem menuItem,  CancellationToken cancellationToken);
     public Task LoadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken);
     Task LoadSubscriptionsAsync(string connectionName, TopicSubscriptionsModel model);
+    public Task ReloadTopics(ConnectionMenuItem menuItem, CancellationToken cancellationToken);
+    public Task ReloadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken);
+    public Task ReloadSubscriptions(string connectionName, TopicSubscriptionsModel model);
 }

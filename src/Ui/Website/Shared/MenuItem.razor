@@ -17,6 +17,11 @@
                         Icon="@Icons.Filled.Add">
                 Create new queue
             </MudNavLink>
+            
+            @* <MudIconButton *@
+            @*     Icon="@Icons.Filled.Refresh" *@
+            @*     OnClick="@(() => ReloadQueues(Value))"> *@
+            @* </MudIconButton> *@
         }
 
         @foreach (var queue in Value.Queues)
@@ -49,6 +54,10 @@
                         Icon="@Icons.Filled.Add">
                 Create new topic
             </MudNavLink>
+            @* <MudIconButton *@
+            @*     Icon="@Icons.Filled.Refresh" *@
+            @*     OnClick="@(() => ReloadTopics(Value))"> *@
+            @* </MudIconButton> *@
         }
         @foreach (var topic in Value.Topics)
         {
@@ -85,7 +94,24 @@
     private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
     {
         _shouldRender = false;
-        Model.LoadTopics(menuItem, default);
+        await Model.LoadTopics(menuItem, default);
         _shouldRender = true;
+    }
+
+    private async Task Reload(ConnectionMenuItem menuItem)
+    {
+        _shouldRender = false;
+        await Model.LoadTopics(menuItem, default);
+        _shouldRender = true;
+    }
+    
+    private async Task ReloadQueues(ConnectionMenuItem menuItem)
+    {
+        await Model.ReloadQueues(menuItem, default);
+    }
+    
+    private async Task ReloadTopics(ConnectionMenuItem menuItem)
+    {
+        await Model.ReloadTopics(menuItem, default);
     }
 }
