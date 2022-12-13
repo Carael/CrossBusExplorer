@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Blazored.LocalStorage;
 using CrossBusExplorer.Website;
 using CrossBusExplorer.Website.Models;
 using ElectronNET.API;
@@ -9,8 +8,6 @@ namespace Website.Host;
 public class DefaultSettingsService : IUserSettingsService
 {
     private const string FileName = "user_settings.json";
-    private readonly ILocalStorageService _localStorageService;
-
 
     public async Task<UserSettings> GetAsync(CancellationToken cancellationToken)
     {
@@ -36,8 +33,10 @@ public class DefaultSettingsService : IUserSettingsService
 
     private async Task<string> FilePath(CancellationToken cancellationToken)
     {
-        var path = Directory.GetCurrentDirectory();
-
+        var path = HybridSupport.IsElectronActive
+            ? await Electron.App.GetPathAsync(PathName.UserData, cancellationToken) :
+            Directory.GetCurrentDirectory();
+        
         return Path.Combine(
             path,
             FileName);

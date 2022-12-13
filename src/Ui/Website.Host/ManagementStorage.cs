@@ -2,6 +2,8 @@ using System.Text;
 using System.Text.Json;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
+using ElectronNET.API;
+using ElectronNET.API.Entities;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage
@@ -37,8 +39,10 @@ public class ManagementStorage : IManagementStorage
 
     private async Task<string> FilePath(CancellationToken cancellationToken)
     {
-        var path = Directory.GetCurrentDirectory();
-
+        var path = HybridSupport.IsElectronActive
+            ? await Electron.App.GetPathAsync(PathName.UserData, cancellationToken) :
+            Directory.GetCurrentDirectory();
+        
         return Path.Combine(
             path,
             ServiceBusConnectionsFileName);
