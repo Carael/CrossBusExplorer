@@ -12,20 +12,20 @@
         Manage connections
     </MudNavLink>
 
-    @foreach (var folder in Model.MenuItems.GroupBy(p => p.Folder))
+    @foreach (var folder in Model.Folders)
     {
-        if (string.IsNullOrEmpty(folder.Key))
+        if (string.IsNullOrEmpty(folder.Name))
         {
-            foreach (var menuItem in folder)
+            foreach (var menuItem in folder.MenuItems)
             {
                 <MenuItem Value="@menuItem"></MenuItem>
             }
         }
         else
         {
-            <MudNavGroup Title=@(folder.Key)
+            <MudNavGroup Title=@(folder.Name)
                          Icon="@Icons.Material.Filled.FolderShared">
-                @foreach (var menuItem in folder)
+                @foreach (var menuItem in folder.MenuItems)
                 {
                     <MenuItem Value="@menuItem"></MenuItem>
                 }

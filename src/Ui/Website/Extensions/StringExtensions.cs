@@ -5,8 +5,21 @@ namespace CrossBusExplorer.Website.Extensions;
 
 public static class StringExtensions
 {
-    public static bool EqualsInvariantIgnoreCase(this string value, string value2) =>
-        value.Equals(value2, StringComparison.InvariantCultureIgnoreCase);
+    public static bool EqualsInvariantIgnoreCase(this string? value, string value2)
+    {
+        if (value == null && value2 == null)
+        {
+            return true;
+        }
+
+        if (value == null && value2 != null)
+        {
+            return false;
+        }
+        
+        return value.Equals(value2, StringComparison.InvariantCultureIgnoreCase);
+    }
+        
 
     public static TimeSpan? ToTimeSpan(this string? value)
     {
