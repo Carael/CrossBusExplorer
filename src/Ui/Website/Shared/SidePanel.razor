@@ -74,8 +74,8 @@
 
     private string GetSidebarOpenStyle(bool isDarkMode)
     {
-        return $"padding-left: 50px; width: 35%; overflow: auto; visibility: visible; flex: none; " +
-               $"border-right-color: #e0e0e0; " +
+        return $"padding-left: 50px; width: 30%; overflow: auto; visibility: visible; flex: none; " +
+               $"border-right-color: {(isDarkMode ? Colors.Grey.Darken3 : "#e0e0e0")}; " +
                $"border-right-width: 1px; " +
                $"background-color: {(isDarkMode ? Colors.Grey.Darken4 : "#e0e0e047")}";
     }
