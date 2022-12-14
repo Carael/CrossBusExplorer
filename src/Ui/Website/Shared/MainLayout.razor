@@ -3,14 +3,13 @@
 @inject IConnectionsViewModel _connectionsViewModel
 @inject IUserSettingsService _userSettingsService
 
-
-<MudThemeProvider Theme="CustomTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode" />
+<MudThemeProvider Theme="_customTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <MudMainContent Style="padding-top: 0; position: fixed; height: 100%; width: 100%; z-index: 0" Class="d-flex flex-grow-1">
-        <SidePanel ChangeDarkMode="@((value) => ChangeDarkMode(value))">
+        <SidePanel DarkMode="@_userSettings.IsDarkMode" ChangeDarkMode="@((value) => ChangeDarkMode(value))">
             <ServiceBusNavMenu/>
         </SidePanel>
         <MudContainer Class="flex-shrink-1" Style="padding-top: 24px">
@@ -32,17 +31,8 @@
     private bool _isOpen;
     private UserSettings _userSettings = new UserSettings();
     
-    private MudTheme CustomTheme = new()
-        {
-            Palette = new Palette
-            {
-                Primary = Colors.Blue.Darken2
-            },
-            PaletteDark = new PaletteDark
-            {
-                Primary = Colors.Grey.Darken4
-            }
-        };
+    [Inject]
+    private MudTheme _customTheme { get; set; }
 
     protected override void OnParametersSet()
     {

@@ -144,13 +144,19 @@ public class NavigationViewModel : INavigationViewModel
                 menuItem.TopicsExpanded = false;
             }
         }
-        
+
         this.Notify(PropertyChanged);
     }
-    public bool IsLoading()
+    public bool IsLoading
     {
-        return Folders.SelectMany(p => p.MenuItems).Any(p => p.LoadingQueues || p.LoadingTopics);
+        get
+        {
+            return Folders
+                .SelectMany(p => p.MenuItems)
+                .Any(p => p.LoadingQueues || p.LoadingTopics);
+        }
     }
+
 
     private void OnQueueOperation(string connectionName, OperationType operationType,
         QueueInfo queueInfo)

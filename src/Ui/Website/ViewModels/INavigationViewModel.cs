@@ -12,5 +12,5 @@ public interface INavigationViewModel : INotifyPropertyChanged
     public Task LoadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken);
     Task LoadSubscriptionsAsync(string connectionName, TopicSubscriptionsModel model);
     Task ReloadMenu();
-    bool IsLoading();
+    bool IsLoading { get; }
 }

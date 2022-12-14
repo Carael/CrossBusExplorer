@@ -1,13 +1,24 @@
-﻿<MudPaper Square="true" Height="100%" Width="50px" Style="flex-direction: column; position: fixed; background-color: #1976D2; color: white; z-index: 1">
+﻿<MudPaper Square="true" Height="100%" Width="50px" Style=@($"flex-direction: column; position: fixed; background-color: {(DarkMode ? _customTheme.PaletteDark.Secondary : _customTheme.Palette.Secondary)}; color: white; z-index: 1")>
     <MudToolBar Style="display: block; height: 100%; padding: 0; color: inherit">
-        <MudIconButton Icon="@Icons.Material.Outlined.EditNote" Color="Color.Inherit" Href="connections" />
-        <MudIconButton Icon="@Icons.Material.Outlined.AccountTree" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
-        <MudTooltip Text="Change theme">
+        <MudTooltip Placement="Placement.Right" Text="Connections">
+            <MudIconButton Icon="@Icons.Material.Outlined.EditNote" Color="Color.Inherit" Href="connections"/>
+        </MudTooltip>
+        <MudTooltip Placement="Placement.Right" Text="Toggle side menu">
+            <MudIconButton Icon="@Icons.Material.Outlined.AccountTree" Color="Color.Inherit" OnClick="@((_) => DrawerToggle())"/>
+        </MudTooltip>
+        <MudTooltip Placement="Placement.Right" Text="Reload menu">
+            <MudIconButton Icon="@Icons.Material.Outlined.Cached"
+                           Color="Color.Inherit"
+                           Disabled="@_navigationViewModel.IsLoading"
+                           OnClick="@((_) => _navigationViewModel.ReloadMenu())"/>
+        </MudTooltip>
+        <MudTooltip Placement="Placement.Right" Text="Change theme">
             <MudMenu Icon="@Icons.Filled.MoreVert" Color="Color.Inherit">
                 <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(false))">Normal</MudMenuItem>
                 <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(true))">Dark</MudMenuItem>
             </MudMenu>
         </MudTooltip>
+        <Jobs></Jobs>
     </MudToolBar>
 </MudPaper>
 
@@ -20,31 +31,52 @@
     public RenderFragment ChildContent { get; set; }
 
     [Parameter]
+    public bool DarkMode { get; set; }
+
+    [Parameter]
     public Func<bool, Task> ChangeDarkMode { get; set; }
+
+    [Inject]
+    private MudTheme _customTheme { get; set; }
+    [Inject]
+    private INavigationViewModel _navigationViewModel { get; set; }
 
     bool _drawerOpen = true;
 
     private MudElement _sidePanel;
-    private string _sidePanelOpenStyle = $"padding-left: 50px; width: 400px; visibility: visible; flex: none; border-right-color: #e0e0e0; border-right-width: 1px; background-color: #e0e0e047";
-    private string _sidePanelCloseStyle = $"width: 0; visibility: collapse";
+    private string _sidePanelCloseStyle = $"padding-left: 50px; width: 0; visibility: collapse";
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
-        _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+        _sidePanel.Style = _drawerOpen ? GetSidebarOpenStyle(DarkMode) : _sidePanelCloseStyle;
+    }
+
+    protected override void OnInitialized()
+    {
+        _navigationViewModel.PropertyChanged += (_, _) => this.StateHasChanged();
     }
 
     protected override void OnParametersSet()
     {
         if (_sidePanel != null)
         {
-            _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+            _sidePanel.Style = _drawerOpen ? GetSidebarOpenStyle(DarkMode) : _sidePanelCloseStyle;
         }
     }
 
     private async Task ChangeDarkModeInternal(bool isDarkMode)
     {
-        _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+        DarkMode = isDarkMode;
+        _sidePanel.Style = _drawerOpen ? GetSidebarOpenStyle(isDarkMode) : _sidePanelCloseStyle;
         await ChangeDarkMode(isDarkMode);
+    }
+
+    private string GetSidebarOpenStyle(bool isDarkMode)
+    {
+        return $"padding-left: 50px; width: 30%; overflow: auto; visibility: visible; flex: none; " +
+               $"border-right-color: {(isDarkMode ? Colors.Grey.Darken3 : "#e0e0e0")}; " +
+               $"border-right-width: 1px; " +
+               $"background-color: {(isDarkMode ? Colors.Grey.Darken4 : "#e0e0e047")}";
     }
 }
