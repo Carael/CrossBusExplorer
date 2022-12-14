@@ -6,6 +6,12 @@
         <MudTooltip Placement="Placement.Right" Text="Toggle side menu">
             <MudIconButton Icon="@Icons.Material.Outlined.AccountTree" Color="Color.Inherit" OnClick="@((_) => DrawerToggle())"/>
         </MudTooltip>
+        <MudTooltip Placement="Placement.Right" Text="Reload menu">
+            <MudIconButton Icon="@Icons.Material.Outlined.Cached"
+                           Color="Color.Inherit"
+                           Disabled="@_navigationViewModel.IsLoading"
+                           OnClick="@((_) => _navigationViewModel.ReloadMenu())"/>
+        </MudTooltip>
         <MudTooltip Placement="Placement.Right" Text="Change theme">
             <MudMenu Icon="@Icons.Filled.MoreVert" Color="Color.Inherit">
                 <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(false))">Normal</MudMenuItem>
@@ -32,6 +38,8 @@
 
     [Inject]
     private MudTheme _customTheme { get; set; }
+    [Inject]
+    private INavigationViewModel _navigationViewModel { get; set; }
 
     bool _drawerOpen = true;
 
@@ -42,6 +50,11 @@
     {
         _drawerOpen = !_drawerOpen;
         _sidePanel.Style = _drawerOpen ? GetSidebarOpenStyle(DarkMode) : _sidePanelCloseStyle;
+    }
+
+    protected override void OnInitialized()
+    {
+        _navigationViewModel.PropertyChanged += (_, _) => this.StateHasChanged();
     }
 
     protected override void OnParametersSet()
