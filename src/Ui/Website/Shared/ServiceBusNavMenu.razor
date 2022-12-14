@@ -5,8 +5,8 @@
 @using System.Security.Cryptography
 @using System.Net
 @using System.Web
-<MudNavMenu>
 
+<MudNavMenu>
     @foreach (var folder in Model.Folders)
     {
         if (string.IsNullOrEmpty(folder.Name))

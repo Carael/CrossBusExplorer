@@ -1,22 +1,24 @@
 @using CrossBusExplorer.Website.ViewModels
+@using MudBlazor.Utilities
 
 @foreach (var job in Model.Jobs)
 {
-    <MudTooltip Text="@($"{job.Name} {job.Progress}%")">
-        <MudButton OnClick="@(() => job.ViewDetails = !job.ViewDetails)">
-            <MudProgressCircular Size="Size.Medium" Indeterminate="true"/>
-        </MudButton>
+    <MudTooltip Placement="Placement.Right" Text="@($"{job.Name} {job.Progress}%")">
+        <MudIconButton OnClick="@(() => job.ViewDetails = !job.ViewDetails)">
+            <MudProgressCircular Style="height:30px;width:30px; color: white;" Indeterminate="true"/>
+        </MudIconButton>
         <MudPopover Open="@job.ViewDetails"
-                    OverflowBehavior="@OverflowBehavior.FlipNever"
-                    AnchorOrigin="@Origin.BottomCenter"
-                    TransformOrigin="@Origin.TopCenter"
+                    AnchorOrigin="@Origin.BottomRight"
+                    TransformOrigin="@Origin.TopLeft"
                     Class="pa-4">
             <div class="d-flex">
                 <MudText>@($"{job.Name} {job.Progress}%")</MudText>
                 <MudTooltip Text="Cancel">
-                    <MudIconButton Icon="@Icons.Filled.Cancel" 
+                    <MudIconButton Icon="@Icons.Filled.Cancel"
+                                   Color="Color.Primary"
                                    Size="Size.Small"
-                                   OnClick="@(() => Model.CancelJob(job))"></MudIconButton>
+                                   OnClick="@(() => Model.CancelJob(job))">
+                    </MudIconButton>
                 </MudTooltip>
             </div>
         </MudPopover>

@@ -16,7 +16,8 @@ public static class ServiceCollectionExtensions
         collection.AddScoped<ITopicViewModel, TopicViewModel>();
         collection.AddScoped<ISubscriptionViewModel, SubscriptionViewModel>();
         collection.AddScoped<IRulesViewModel, RulesViewModel>();
-        
+        collection.AddCustomTheme();
+
         return collection.AddMudServices(config =>
         {
             config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
@@ -29,5 +30,22 @@ public static class ServiceCollectionExtensions
             config.SnackbarConfiguration.ShowTransitionDuration = 500;
             config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
         });
+    }
+
+    private static IServiceCollection AddCustomTheme(this IServiceCollection collection)
+    {
+        collection.AddSingleton(new MudTheme()
+        {
+            Palette = new Palette
+            {
+                Secondary = Colors.Blue.Darken2
+            },
+            PaletteDark = new PaletteDark
+            {
+                Secondary = Colors.Grey.Darken4
+            }
+        });
+
+        return collection;
     }
 }
