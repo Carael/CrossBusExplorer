@@ -11,6 +11,9 @@
                 Icon="@Icons.Material.Filled.EditNote">
         Manage connections
     </MudNavLink>
+    <MudNavLink Disabled="@Model.IsLoading()" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => Model.ReloadMenu())">
+        Reload menu
+    </MudNavLink>
 
     @foreach (var folder in Model.Folders)
     {

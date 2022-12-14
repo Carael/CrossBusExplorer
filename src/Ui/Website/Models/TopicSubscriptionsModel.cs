@@ -18,6 +18,8 @@ public class TopicSubscriptionsModel
 
     public bool Loaded { get; set; }
     public bool IsLoading { get; set; }
+    public bool TopicExpanded { get; set; }
+    public bool ShouldRender { get; set; }
 
     public void AddSubscription(SubscriptionInfo subscriptionInfo)
     {

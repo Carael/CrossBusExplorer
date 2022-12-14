@@ -128,25 +128,28 @@ public class NavigationViewModel : INavigationViewModel
             this.Notify(PropertyChanged);
         }
     }
-    public async Task ReloadTopics(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
+    public async Task ReloadMenu()
     {
-        menuItem.Topics.Clear();
-        menuItem.TopicsLoaded = false;
-        await LoadTopics(menuItem, cancellationToken);
+        foreach (ConnectionFolder folder in Folders)
+        {
+            foreach (var menuItem in folder.MenuItems)
+            {
+                menuItem.Queues.Clear();
+                menuItem.Topics.Clear();
+                menuItem.QueuesLoaded = false;
+                menuItem.TopicsLoaded = false;
+                menuItem.LoadingTopics = false;
+                menuItem.LoadingQueues = false;
+                menuItem.QueuesExpanded = false;
+                menuItem.TopicsExpanded = false;
+            }
+        }
+        
+        this.Notify(PropertyChanged);
     }
-
-    public async Task ReloadQueues(ConnectionMenuItem menuItem, CancellationToken cancellationToken)
+    public bool IsLoading()
     {
-        menuItem.Queues.Clear();
-        menuItem.QueuesLoaded = false;
-        await LoadQueues(menuItem, cancellationToken);
-    }
-
-    public async Task ReloadSubscriptions(string connectionName, TopicSubscriptionsModel model)
-    {
-        model.Subscriptions.Clear();
-        model.Loaded = false;
-        await LoadSubscriptionsAsync(connectionName, model);
+        return Folders.SelectMany(p => p.MenuItems).Any(p => p.LoadingQueues || p.LoadingTopics);
     }
 
     private void OnQueueOperation(string connectionName, OperationType operationType,

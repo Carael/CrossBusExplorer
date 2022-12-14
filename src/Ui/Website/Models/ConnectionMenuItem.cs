@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
 namespace CrossBusExplorer.Website.Models;
@@ -52,4 +50,6 @@ public class ConnectionMenuItem : INotifyPropertyChanged
     public bool TopicsLoaded { get; set; }
     public bool LoadingQueues { get; set; }
     public bool LoadingTopics { get; set; }
+    public bool QueuesExpanded { get; set; }
+    public bool TopicsExpanded { get; set; }
 }

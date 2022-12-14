@@ -5,7 +5,8 @@
 
     <MudNavGroup Icon="@Icons.Filled.Queue"
                  Title="Queues"
-                 @onclick="@(() => OnQueuesExpanded(Value))">
+                 @bind-Expanded=@Value.QueuesExpanded
+                 onclick="@(() => OnQueuesExpandChange())">
         @if (Value.LoadingQueues)
         {
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
@@ -17,11 +18,6 @@
                         Icon="@Icons.Filled.Add">
                 Create new queue
             </MudNavLink>
-            
-            @* <MudIconButton *@
-            @*     Icon="@Icons.Filled.Refresh" *@
-            @*     OnClick="@(() => ReloadQueues(Value))"> *@
-            @* </MudIconButton> *@
         }
 
         @foreach (var queue in Value.Queues)
@@ -41,7 +37,8 @@
 
     <MudNavGroup Icon="@Icons.Filled.Folder"
                  Title="Topics"
-                 @onclick="@(() => OnTopicsExpanded(Value))">
+                 @bind-Expanded=@Value.TopicsExpanded
+                 @onclick="@(() => OnTopicsExpanded())">
 
         @if (Value.LoadingTopics)
         {
@@ -54,10 +51,6 @@
                         Icon="@Icons.Filled.Add">
                 Create new topic
             </MudNavLink>
-            @* <MudIconButton *@
-            @*     Icon="@Icons.Filled.Refresh" *@
-            @*     OnClick="@(() => ReloadTopics(Value))"> *@
-            @* </MudIconButton> *@
         }
         @foreach (var topic in Value.Topics)
         {
@@ -72,8 +65,6 @@
     [Inject]
     private INavigationViewModel Model { get; set; }
 
-    private bool _shouldRender;
-
     protected override async Task OnInitializedAsync()
     {
         Model.PropertyChanged += (_, _) =>
@@ -81,37 +72,21 @@
             StateHasChanged();
         };
 
-        _shouldRender = true;
+        Value.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
     }
 
-    private async Task OnQueuesExpanded(ConnectionMenuItem menuItem)
+    private async Task OnQueuesExpandChange()
     {
-        _shouldRender = false;
-        await Model.LoadQueues(menuItem, default);
-        _shouldRender = true;
+    // Value.QueuesExpanded = !Value.QueuesExpanded;
+        await Model.LoadQueues(Value, default);
     }
 
-    private async Task OnTopicsExpanded(ConnectionMenuItem menuItem)
+    private async Task OnTopicsExpanded()
     {
-        _shouldRender = false;
-        await Model.LoadTopics(menuItem, default);
-        _shouldRender = true;
-    }
-
-    private async Task Reload(ConnectionMenuItem menuItem)
-    {
-        _shouldRender = false;
-        await Model.LoadTopics(menuItem, default);
-        _shouldRender = true;
-    }
-    
-    private async Task ReloadQueues(ConnectionMenuItem menuItem)
-    {
-        await Model.ReloadQueues(menuItem, default);
-    }
-    
-    private async Task ReloadTopics(ConnectionMenuItem menuItem)
-    {
-        await Model.ReloadTopics(menuItem, default);
+    // Value.TopicsExpanded = !Value.TopicsExpanded;
+        await Model.LoadTopics(Value, default);
     }
 }
