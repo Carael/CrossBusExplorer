@@ -121,14 +121,16 @@
                     </MudRadioGroup>
                 </MudField>
 
-                <MudField Variant="Variant.Outlined" Label="Message count">
+                <MudField Variant="Variant.Outlined" Label="Receive type">
                     <MudRadioGroup @bind-SelectedOption="_formModel.Type"
                                    For="@(() => _formModel.Type)">
-                        <MudRadio Dense="true"
-                                  Size="Size.Small"
-                                  Option="ReceiveType.All">
-                            @ReceiveType.All
-                        </MudRadio>
+                        
+                        @* TODO: fix all receive option
+                            <MudRadio Dense="true" *@
+                        @*           Size="Size.Small" *@
+                        @*           Option="ReceiveType.All"> *@
+                        @*     @ReceiveType.All *@
+                        @* </MudRadio> *@
                         <MudRadio Dense="true"
                                   Size="Size.Small"
                                   Option="ReceiveType.ByCount">

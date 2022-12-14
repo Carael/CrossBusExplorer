@@ -1,4 +1,3 @@
-using Blazored.LocalStorage;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
@@ -16,9 +15,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddWebsiteServices();
 builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
+
 builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
 builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
-builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddElectron();
 builder.WebHost.UseElectron(args);
@@ -36,7 +35,7 @@ Task.Run(async () =>
 {
     Electron.ReadAuth();
     await Task.Delay(500);
-     
+
     var browserWindow = await Electron.WindowManager.CreateWindowAsync(
         new BrowserWindowOptions
         {
@@ -47,8 +46,9 @@ Task.Run(async () =>
             },
             Icon = "../../../icon512x512.png"
         });
-    
+
     browserWindow.OnClose += () => app.StopAsync();
-    browserWindow.OnReadyToShow += () => browserWindow.Show(); });
+    browserWindow.OnReadyToShow += () => browserWindow.Show();
+});
 
 app.Run();

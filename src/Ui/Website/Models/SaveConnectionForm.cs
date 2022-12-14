@@ -42,6 +42,16 @@ public class SaveConnectionForm : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-
-
+    
+    private string? _folder;
+    [Label("Folder")]
+    public string? Folder
+    {
+        get => _folder;
+        set
+        {
+            _folder = value;
+            this.Notify(PropertyChanged);
+        }
+    }
 }

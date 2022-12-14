@@ -4,17 +4,24 @@ namespace CrossBusExplorer.Management;
 
 public static class ServiceBusConnectionStringHelper
 {
-    public static string TryGetNameFromConnectionString(string connectionString)
+    public static string? TryGetNameFromConnectionString(string connectionString)
     {
-        var connectionStringProperties =
-            ServiceBusConnectionStringProperties.Parse(connectionString);
-
-        if (connectionStringProperties.FullyQualifiedNamespace.IndexOf('.') != -1)
+        try
         {
-            return connectionStringProperties.FullyQualifiedNamespace.Split('.')[0];
-        }
+            var connectionStringProperties =
+                ServiceBusConnectionStringProperties.Parse(connectionString);
 
-        return connectionStringProperties.FullyQualifiedNamespace;
+            if (connectionStringProperties.FullyQualifiedNamespace.IndexOf('.') != -1)
+            {
+                return connectionStringProperties.FullyQualifiedNamespace.Split('.')[0];
+            }
+
+            return connectionStringProperties.FullyQualifiedNamespace;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public static bool IsValid(string? connectionString)
@@ -30,7 +37,10 @@ public static class ServiceBusConnectionStringHelper
             return false;
         }
     }
-    public static ServiceBusConnection GetServiceBusConnection(string name, string connectionString)
+    public static ServiceBusConnection GetServiceBusConnection(
+        string name,
+        string connectionString,
+        string folder)
     {
         var properties =
             ServiceBusConnectionStringProperties.Parse(connectionString);
@@ -38,6 +48,7 @@ public static class ServiceBusConnectionStringHelper
         return new ServiceBusConnection(
             name,
             connectionString,
+            folder,
             properties.Endpoint,
             properties.FullyQualifiedNamespace,
             properties.EntityPath,

@@ -75,7 +75,7 @@
 
     <ItemGroup>
         <!--        <PackageReference Include="Microsoft.UI.Xaml" Version="2.8.1" />-->
-        <PackageReference Include="MudBlazor" Version="6.1.4"/>
+        <PackageReference Include="MudBlazor" Version="6.1.5"/>
     </ItemGroup>
 
     <!--    <ItemGroup>-->

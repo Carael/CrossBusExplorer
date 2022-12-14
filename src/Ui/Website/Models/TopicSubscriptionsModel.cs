@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using CrossBusExplorer.Website.Extensions;
 namespace CrossBusExplorer.Website.Models;
 
 public class TopicSubscriptionsModel
@@ -17,14 +18,13 @@ public class TopicSubscriptionsModel
 
     public bool Loaded { get; set; }
     public bool IsLoading { get; set; }
+    public bool TopicExpanded { get; set; }
+    public bool ShouldRender { get; set; }
 
     public void AddSubscription(SubscriptionInfo subscriptionInfo)
     {
-        Subscriptions.Add(subscriptionInfo);
-    }
-
-    public void AddChild(TopicSubscriptionsModel model)
-    {
-        ChildrenModels.Add(model);
+        Subscriptions.AddOrReplace(
+            p=>p.SubscriptionName.EqualsInvariantIgnoreCase(subscriptionInfo.SubscriptionName), 
+            subscriptionInfo);
     }
 }
