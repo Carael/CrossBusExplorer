@@ -1,0 +1,50 @@
+﻿<MudPaper Square="true" Height="100%" Width="50px" Style="flex-direction: column; position: fixed; background-color: #1976D2; color: white; z-index: 1">
+    <MudToolBar Style="display: block; height: 100%; padding: 0; color: inherit">
+        <MudIconButton Icon="@Icons.Material.Outlined.EditNote" Color="Color.Inherit" Href="connections" />
+        <MudIconButton Icon="@Icons.Material.Outlined.AccountTree" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
+        <MudTooltip Text="Change theme">
+            <MudMenu Icon="@Icons.Filled.MoreVert" Color="Color.Inherit">
+                <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(false))">Normal</MudMenuItem>
+                <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(true))">Dark</MudMenuItem>
+            </MudMenu>
+        </MudTooltip>
+    </MudToolBar>
+</MudPaper>
+
+<MudElement @ref="_sidePanel">
+    @ChildContent
+</MudElement>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public Func<bool, Task> ChangeDarkMode { get; set; }
+
+    bool _drawerOpen = true;
+
+    private MudElement _sidePanel;
+    private string _sidePanelOpenStyle = $"padding-left: 50px; width: 400px; visibility: visible; flex: none; border-right-color: #e0e0e0; border-right-width: 1px; background-color: #e0e0e047";
+    private string _sidePanelCloseStyle = $"width: 0; visibility: collapse";
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+        _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_sidePanel != null)
+        {
+            _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+        }
+    }
+
+    private async Task ChangeDarkModeInternal(bool isDarkMode)
+    {
+        _sidePanel.Style = _drawerOpen ? _sidePanelOpenStyle : _sidePanelCloseStyle;
+        await ChangeDarkMode(isDarkMode);
+    }
+}

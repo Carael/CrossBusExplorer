@@ -6,11 +6,6 @@
 @using System.Net
 @using System.Web
 <MudNavMenu>
-    <MudNavLink Match="NavLinkMatch.All"
-                Href="connections"
-                Icon="@Icons.Material.Filled.EditNote">
-        Manage connections
-    </MudNavLink>
 
     @foreach (ConnectionMenuItem menuItem in Model.MenuItems)
     {
