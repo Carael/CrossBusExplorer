@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Management;
 
@@ -10,20 +8,21 @@ public class ConnectionManagement : IConnectionManagement
     public ConnectionManagement(IManagementStorage managementStorage)
     {
         _managementStorage = managementStorage;
-
     }
 
     public async Task<IList<ServiceBusConnection>> GetAsync(
         CancellationToken cancellationToken)
     {
-        return (await GetData(cancellationToken)).Select(p => p.Value).ToList();
+        return (await _managementStorage.ReadAsync(cancellationToken))
+            .Select(p => p.Value)
+            .ToList();
     }
 
     public async Task<ServiceBusConnection> GetAsync(
         string name,
         CancellationToken cancellationToken)
     {
-        var connections = await GetData(cancellationToken);
+        var connections = await _managementStorage.ReadAsync(cancellationToken);
 
         if (connections.ContainsKey(name))
         {
@@ -36,13 +35,14 @@ public class ConnectionManagement : IConnectionManagement
     public async Task<ServiceBusConnection> SaveAsync(
         string name,
         string connectionString,
+        string folder,
         CancellationToken cancellationToken)
     {
         IDictionary<string, ServiceBusConnection> connections =
-            await GetData(cancellationToken);
+            await _managementStorage.ReadAsync(cancellationToken);
 
         var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
-            name, connectionString);
+            name, connectionString, folder);
 
         if (connections.ContainsKey(name))
         {
@@ -61,63 +61,28 @@ public class ConnectionManagement : IConnectionManagement
             connections.Add(name, connection);
         }
 
-        await SaveAsync(connections, cancellationToken);
+        await _managementStorage.StoreAsync(
+            connections,
+            cancellationToken);
 
         return connection;
     }
 
     public async Task DeleteAsync(string name, CancellationToken cancellationToken)
     {
-        var connections = await GetData(cancellationToken);
+        var connections = await _managementStorage.ReadAsync(cancellationToken);
 
         if (connections.ContainsKey(name))
         {
             connections.Remove(name);
 
-            await SaveAsync(connections, cancellationToken);
+            await _managementStorage.StoreAsync(
+                connections,
+                cancellationToken);
         }
         else
         {
             throw new ServiceBusConnectionDoesntExist(name);
-        }
-    }
-
-    private async Task<IDictionary<string, ServiceBusConnection>> GetData(
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var data = await _managementStorage.ReadAsync(cancellationToken);
-
-            if (data == null)
-            {
-                return new Dictionary<string, ServiceBusConnection>();
-            }
-
-            return JsonSerializer.Deserialize<IDictionary<string, ServiceBusConnection>>(
-                data) ?? new Dictionary<string, ServiceBusConnection>();
-        }
-        catch (Exception ex)
-        {
-            //TODO: log
-            
-            return new Dictionary<string, ServiceBusConnection>();
-        }
-    }
-
-    private async Task SaveAsync(
-        IDictionary<string, ServiceBusConnection> connections,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            await _managementStorage.StoreAsync(
-                JsonSerializer.Serialize(connections),
-                cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            //TODO: log
         }
     }
 }

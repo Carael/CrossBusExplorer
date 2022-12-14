@@ -15,11 +15,11 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public class NavigationViewModel : INavigationViewModel
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     private readonly IQueueService _queueService;
     private readonly ITopicService _topicService;
     private readonly ISubscriptionService _subscriptionService;
-
-    private ObservableCollection<ConnectionMenuItem> _connectionMenuItems;
 
     public NavigationViewModel(
         IConnectionsViewModel connectionsViewModel,
@@ -33,8 +33,8 @@ public class NavigationViewModel : INavigationViewModel
         _queueService = queueService;
         _topicService = topicService;
         _subscriptionService = subscriptionService;
-        _connectionMenuItems = new ObservableCollection<ConnectionMenuItem>();
-        _connectionMenuItems.CollectionChanged += (_, _) => { this.Notify(PropertyChanged); };
+        _folders = new ObservableCollection<ConnectionFolder>();
+        _folders.CollectionChanged += (_, _) => this.Notify(PropertyChanged);
         connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
         queueViewModel.OnQueueOperation += this.OnQueueOperation;
         topicViewModel.TopicAdded += this.OnTopicAdded;
@@ -42,37 +42,16 @@ public class NavigationViewModel : INavigationViewModel
         subscriptionViewModel.OnSubscriptionOperation += this.OnSubscriptionOperation;
     }
 
-    private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    private ObservableCollection<ConnectionFolder> _folders;
+
+
+    public ObservableCollection<ConnectionFolder> Folders
     {
-        if (sender is IConnectionsViewModel connectionsViewModel)
-        {
-            RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
-        }
-    }
-
-    private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
-    {
-        MenuItems.RemoveNonExisting(menuItem =>
-            !serviceBusConnections.Any(
-                p => p.Name.EqualsInvariantIgnoreCase(menuItem.ConnectionName)));
-
-        foreach (ServiceBusConnection serviceBusConnection in serviceBusConnections)
-        {
-            MenuItems.AddOrReplace(
-                p => p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name),
-                new ConnectionMenuItem(serviceBusConnection.Name));
-        }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public ObservableCollection<ConnectionMenuItem> MenuItems
-    {
-        get => _connectionMenuItems;
+        get => _folders;
         private set
         {
-            _connectionMenuItems = value;
-            _connectionMenuItems.CollectionChanged += (_, _) =>
+            _folders = value;
+            _folders.CollectionChanged += (_, _) =>
             {
                 this.Notify(PropertyChanged);
             };
@@ -90,7 +69,8 @@ public class NavigationViewModel : INavigationViewModel
                 menuItem.ConnectionName,
                 cancellationToken))
             {
-                menuItem.Topics.Add(
+                menuItem.Topics.AddOrReplace(
+                    p => p.Topic.Name.EqualsInvariantIgnoreCase(topic.Name),
                     new TopicSubscriptionsModel(topic));
 
                 this.Notify(PropertyChanged);
@@ -113,14 +93,17 @@ public class NavigationViewModel : INavigationViewModel
                 menuItem.ConnectionName,
                 cancellationToken))
             {
-                menuItem.Queues.Add(queue);
+                menuItem.Queues.AddOrReplace(
+                    p => p.Name.EqualsInvariantIgnoreCase(queue.Name),
+                    queue);
                 this.Notify(PropertyChanged);
             }
 
             menuItem.LoadingQueues = false;
             menuItem.QueuesLoaded = true;
-            this.Notify(PropertyChanged);
         }
+
+        this.Notify(PropertyChanged);
     }
 
     public async Task LoadSubscriptionsAsync(
@@ -145,27 +128,57 @@ public class NavigationViewModel : INavigationViewModel
             this.Notify(PropertyChanged);
         }
     }
+    public async Task ReloadMenu()
+    {
+        foreach (ConnectionFolder folder in Folders)
+        {
+            foreach (var menuItem in folder.MenuItems)
+            {
+                menuItem.Queues.Clear();
+                menuItem.Topics.Clear();
+                menuItem.QueuesLoaded = false;
+                menuItem.TopicsLoaded = false;
+                menuItem.LoadingTopics = false;
+                menuItem.LoadingQueues = false;
+                menuItem.QueuesExpanded = false;
+                menuItem.TopicsExpanded = false;
+            }
+        }
+        
+        this.Notify(PropertyChanged);
+    }
+    public bool IsLoading()
+    {
+        return Folders.SelectMany(p => p.MenuItems).Any(p => p.LoadingQueues || p.LoadingTopics);
+    }
 
     private void OnQueueOperation(string connectionName, OperationType operationType,
         QueueInfo queueInfo)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        switch (operationType)
+        foreach (var folder in Folders)
         {
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-            case OperationType.Create:
-                AddQueue(menuItem, queueInfo);
-                break;
-            case OperationType.Update:
-                UpdateQueue(menuItem, queueInfo);
-                break;
-            case OperationType.Delete:
-                DeleteQueue(menuItem, queueInfo);
-                break;
-            default:
-                throw new NotSupportedException($"Operation {operationType} is not supported.");
+            if (menuItem == null)
+            {
+                continue;
+            }
+
+            switch (operationType)
+            {
+                case OperationType.Create:
+                case OperationType.Update:
+                    UpdateQueue(menuItem, queueInfo);
+                    break;
+                case OperationType.Delete:
+                    DeleteQueue(menuItem, queueInfo);
+                    break;
+                default:
+                    throw new NotSupportedException($"Operation {operationType} is not supported.");
+            }
+
+            break;
         }
     }
 
@@ -173,13 +186,6 @@ public class NavigationViewModel : INavigationViewModel
     {
         menuItem.Queues.AddOrReplace(p => p.Name.EqualsInvariantIgnoreCase(queueInfo.Name),
             queueInfo);
-
-        this.Notify(PropertyChanged);
-    }
-
-    private void AddQueue(ConnectionMenuItem menuItem, QueueInfo queueInfo)
-    {
-        menuItem.Queues.Add(queueInfo);
 
         this.Notify(PropertyChanged);
     }
@@ -193,30 +199,38 @@ public class NavigationViewModel : INavigationViewModel
 
     private void OnTopicRemoved(string connectionName, string topicName)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        for (int i = 0; i < menuItem.Topics.Count; i++)
+        foreach (var folder in _folders)
         {
-            var current = menuItem.Topics[i];
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-            if (current.Topic.FullName != null &&
-                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            if (menuItem == null)
             {
-                menuItem.Topics.Remove(current);
-                break;
+                continue;
             }
 
-            var isNested = TryGetTopicSubscriptionModel(current, topicName);
-
-            if (isNested)
+            for (int i = 0; i < menuItem.Topics.Count; i++)
             {
-                menuItem.Topics.Remove(current);
-                break;
+                var current = menuItem.Topics[i];
+
+                if (current.Topic.FullName != null &&
+                    current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+                {
+                    menuItem.Topics.Remove(current);
+                    break;
+                }
+
+                var isNested = TryGetTopicSubscriptionModel(current, topicName);
+
+                if (isNested)
+                {
+                    menuItem.Topics.Remove(current);
+                    break;
+                }
             }
+
+            this.Notify(PropertyChanged);
         }
-
-        this.Notify(PropertyChanged);
     }
 
     private bool TryGetTopicSubscriptionModel(
@@ -270,18 +284,26 @@ public class NavigationViewModel : INavigationViewModel
 
     private void OnTopicAdded(string connectionName, TopicInfo topicInfo)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
+        foreach (var folder in _folders)
+        {
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-        menuItem.Topics.Add(
-            new TopicSubscriptionsModel(
-                new TopicStructure(
-                    topicInfo.Name,
-                    false,
-                    topicInfo.Name,
-                    new List<TopicStructure>())));
+            if (menuItem == null)
+            {
+                continue;
+            }
 
-        this.Notify(PropertyChanged);
+            menuItem.Topics.Add(
+                new TopicSubscriptionsModel(
+                    new TopicStructure(
+                        topicInfo.Name,
+                        false,
+                        topicInfo.Name,
+                        new List<TopicStructure>())));
+
+            this.Notify(PropertyChanged);
+        }
     }
 
     private void OnSubscriptionOperation(
@@ -289,26 +311,32 @@ public class NavigationViewModel : INavigationViewModel
         OperationType operationType,
         SubscriptionInfo subscription)
     {
-        ConnectionMenuItem menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        switch (operationType)
+        foreach (var folder in _folders)
         {
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-            case OperationType.Create:
-            case OperationType.Update:
-                AddOrReplaceSubscription(menuItem, subscription);
-                break;
-            case OperationType.Delete:
-                RemoveSubscription(
-                    connectionName,
-                    subscription.TopicName,
-                    subscription.SubscriptionName);
-                break;
-            default:
-                throw new NotSupportedException($"Operation {operationType} is not supported.");
+            if (menuItem == null)
+            {
+                continue;
+            }
+            switch (operationType)
+            {
+
+                case OperationType.Create:
+                case OperationType.Update:
+                    AddOrReplaceSubscription(menuItem, subscription);
+                    break;
+                case OperationType.Delete:
+                    RemoveSubscription(
+                        connectionName,
+                        subscription.TopicName,
+                        subscription.SubscriptionName);
+                    break;
+                default:
+                    throw new NotSupportedException($"Operation {operationType} is not supported.");
+            }
         }
-
     }
 
     private void AddOrReplaceSubscription(ConnectionMenuItem menuItem,
@@ -340,29 +368,38 @@ public class NavigationViewModel : INavigationViewModel
         string topicName,
         string subscriptionName)
     {
-        var menuItem =
-            MenuItems.First(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
-
-        for (int i = 0; i < menuItem.Topics.Count; i++)
+        foreach (var folder in _folders)
         {
-            var current = menuItem.Topics[i];
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p => p.ConnectionName.EqualsInvariantIgnoreCase(connectionName));
 
-            if (current.Topic.FullName != null &&
-                current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+            if (menuItem == null)
             {
-                var subscription =
-                    current.Subscriptions
-                        .FirstOrDefault(p => p.SubscriptionName
-                            .Equals(subscriptionName, StringComparison.InvariantCultureIgnoreCase));
-
-                current.Subscriptions.Remove(subscription);
-                break;
+                continue;
             }
 
-            TryRemoveSubscription(current, topicName, subscriptionName);
-        }
+            for (int i = 0; i < menuItem.Topics.Count; i++)
+            {
+                var current = menuItem.Topics[i];
 
-        this.Notify(PropertyChanged);
+                if (current.Topic.FullName != null &&
+                    current.Topic.FullName.EqualsInvariantIgnoreCase(topicName))
+                {
+                    var subscription =
+                        current.Subscriptions
+                            .FirstOrDefault(p => p.SubscriptionName
+                                .Equals(subscriptionName,
+                                    StringComparison.InvariantCultureIgnoreCase));
+
+                    current.Subscriptions.Remove(subscription);
+                    break;
+                }
+
+                TryRemoveSubscription(current, topicName, subscriptionName);
+            }
+
+            this.Notify(PropertyChanged);
+        }
     }
 
     private void TryAddSubscription(
@@ -385,6 +422,58 @@ public class NavigationViewModel : INavigationViewModel
             }
 
             TryAddSubscription(current, subscription);
+        }
+    }
+
+    private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is IConnectionsViewModel connectionsViewModel)
+        {
+            RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
+        }
+    }
+
+    private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
+    {
+        var folders = serviceBusConnections.GroupBy(p => p.Folder).Select(p => p.Key).ToList();
+
+        Folders.RemoveNonExisting(
+            folder => !folders.Any(
+                p => p.EqualsInvariantIgnoreCase(folder.Name)));
+
+        foreach (ConnectionFolder folder in Folders)
+        {
+            var menuItems =
+                serviceBusConnections.Where(p => p.Folder.EqualsInvariantIgnoreCase(folder.Name));
+            folder.MenuItems.RemoveNonExisting(
+                menuItem =>
+                    !menuItems.Any(p => p.Name.EqualsInvariantIgnoreCase(menuItem.ConnectionName)));
+        }
+
+        foreach (ServiceBusConnection serviceBusConnection in serviceBusConnections)
+        {
+            var folder = Folders.FirstOrDefault(p =>
+                p.Name.EqualsInvariantIgnoreCase(serviceBusConnection.Folder));
+
+            if (folder == null)
+            {
+                folder = new ConnectionFolder(serviceBusConnection.Folder);
+                folder.PropertyChanged += (_, _) => this.Notify(PropertyChanged);
+                Folders.Add(folder);
+            }
+
+            var menuItem = folder.MenuItems
+                .FirstOrDefault(p =>
+                    p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name));
+
+            if (menuItem == null)
+            {
+                menuItem = new ConnectionMenuItem(serviceBusConnection.Name);
+                menuItem.PropertyChanged += (_, _) => this.Notify(PropertyChanged);
+                folder.MenuItems.AddOrReplace(
+                    p => p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name),
+                    menuItem);
+            }
         }
     }
 }

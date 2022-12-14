@@ -1,7 +1,10 @@
+using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Management;
 
 public interface IManagementStorage
 {
-    Task StoreAsync(string content, CancellationToken cancellationToken);
-    Task<string?> ReadAsync(CancellationToken cancellationToken);
+    Task StoreAsync(
+        IDictionary<string, ServiceBusConnection> connections,
+        CancellationToken cancellationToken);
+    Task<IDictionary<string, ServiceBusConnection>> ReadAsync(CancellationToken cancellationToken);
 }
