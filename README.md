@@ -11,7 +11,7 @@ Cross Bus Explorer is a Cross Platform Service Bus Explorer (Windows, McOS and L
 - Send messages
 - Resend edited messages
 
-![image](https://user-images.githubusercontent.com/6861396/204493783-9a98340f-5d00-4c67-848f-25b7c6df5c69.png)
+![chrome_SbCnkRVg9b](https://user-images.githubusercontent.com/13761704/207661917-7f1ea66f-3878-4e88-a771-def3b5c52088.gif)
 
 ## Known issues
 ### Linux snap installer
