@@ -1,7 +1,6 @@
 ﻿@page "/"
 @page "/connections"
 @using CrossBusExplorer.Management.Contracts
-@using CrossBusExplorer.Website.Models
 
 <PageTitle>Connections</PageTitle>
 
@@ -11,56 +10,83 @@
 
 <MudContainer>
     <MudDropContainer T="ServiceBusConnection"
-                      Items="Model.ServiceBusConnections"
-                  ItemsSelector="@((item, dropzone) => item.Folder.EqualsInvariantIgnoreCase(dropzone))"
+                      Items="Model.ServiceBusConnections"a
+                      ItemsSelector="@((item, dropzone) => item.Folder.EqualsInvariantIgnoreCase(dropzone))"
                       ItemDropped="OnServiceBusConnectionFolderDropped"
                       drag
-                  Class="d-flex flex-wrap flex-grow-1">
-    <ChildContent>
-        @foreach (var folder in Model.Folders)
-        {
-            <MudSimpleTable>
-                <thead>
-                <tr>
-                    <th>Actions</th>
-                    <th>Name</th>
-                </tr>
-                </thead>
-                <tbody>
-                <MudDropZone sele T="ServiceBusConnection" Identifier="@folder" Class="flex-grow-1" AllowReorder="true"/>
-                </tbody>
-            </MudSimpleTable>
-            <MudDivider/>
-        }
-    </ChildContent>
-    <ItemRenderer>
-        <tr>
-            <td>
-                <MudTooltip Text="View service bus connection string">
-                    <MudIconButton
-                        DisableRipple="true"
-                        Icon="@Icons.Material.Outlined.Preview"
-                        OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
-                </MudTooltip>
-                <MudTooltip Text="Edit service bus connection">
-                    <MudIconButton
-                        DisableRipple="true"
-                        Icon="@Icons.Material.Outlined.Edit"
-                        OnClick="@(() => Model.OpenSaveDialog(context))"/>
-                </MudTooltip>
-                <MudTooltip Text="Delete service bus connection">
-                    <MudIconButton
-                        DisableRipple="true"
-                        Icon="@Icons.Material.Outlined.Delete"
-                        OnClick="@(() => Model.OpenDeleteDialog(context))"/>
-                </MudTooltip>
-            </td>
-            <td>
-                @context.Name
-            </td>
-        </tr>
-    </ItemRenderer>
-</MudDropContainer>
+                      Class="d-flex flex-wrap flex-grow-1">
+        <ChildContent>
+            <MudGrid>
+                @foreach (var folder in Model.Folders)
+                {
+                    
+                    <MudItem xs="12">
+
+                        @* <MudPaper Class="ma-4 flex-grow-1"> *@
+                        @*     <MudList Clickable="true" Class="d-flex flex-column mud-height-full"> *@
+                        @*         <MudListSubheader>Drop Zone @folder</MudListSubheader> *@
+                        <MudDropZone T="ServiceBusConnection" Identifier="@folder" Style="min-height: 50px;" Class="flex-grow-1" AllowReorder="true"/>
+                        @*     </MudList> *@
+                        @* </MudPaper> *@
+                    </MudItem>
+                }
+            </MudGrid>
+        </ChildContent>
+        <ItemRenderer>
+            <MudListItem>
+                <MudGrid>
+                    <MudItem xs="4">
+                        <MudTooltip Text="View service bus connection string">
+                            <MudIconButton
+                                DisableRipple="true"
+                                Icon="@Icons.Material.Outlined.Preview"
+                                OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Edit service bus connection">
+                            <MudIconButton
+                                DisableRipple="true"
+                                Icon="@Icons.Material.Outlined.Edit"
+                                OnClick="@(() => Model.OpenSaveDialog(context))"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Delete service bus connection">
+                            <MudIconButton
+                                DisableRipple="true"
+                                Icon="@Icons.Material.Outlined.Delete"
+                                OnClick="@(() => Model.OpenDeleteDialog(context))"/>
+                        </MudTooltip>
+                    </MudItem>
+                    <MudItem xs="8">
+                        <MudField>@context.Name</MudField>
+                    </MudItem>
+                </MudGrid>
+            </MudListItem>
+            @* <tr> *@
+            @*     <td> *@
+            @*         <MudTooltip Text="View service bus connection string"> *@
+            @*             <MudIconButton *@
+            @*                 DisableRipple="true" *@
+            @*                 Icon="@Icons.Material.Outlined.Preview" *@
+            @*                 OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/> *@
+            @*         </MudTooltip> *@
+            @*         <MudTooltip Text="Edit service bus connection"> *@
+            @*             <MudIconButton *@
+            @*                 DisableRipple="true" *@
+            @*                 Icon="@Icons.Material.Outlined.Edit" *@
+            @*                 OnClick="@(() => Model.OpenSaveDialog(context))"/> *@
+            @*         </MudTooltip> *@
+            @*         <MudTooltip Text="Delete service bus connection"> *@
+            @*             <MudIconButton *@
+            @*                 DisableRipple="true" *@
+            @*                 Icon="@Icons.Material.Outlined.Delete" *@
+            @*                 OnClick="@(() => Model.OpenDeleteDialog(context))"/> *@
+            @*         </MudTooltip> *@
+            @*     </td> *@
+            @*     <td> *@
+            @*         @context.Name *@
+            @*     </td> *@
+            @* </tr> *@
+        </ItemRenderer>
+    </MudDropContainer>
 </MudContainer>
 
 <MudDialog @bind-IsVisible="Model.SaveDialogVisible" Options="_saveDialogOptions">
