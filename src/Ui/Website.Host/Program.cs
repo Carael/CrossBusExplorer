@@ -34,19 +34,22 @@ app.MapFallbackToPage("/_Host");
 Task.Run(async () =>
 {
     Electron.ReadAuth();
-    await Task.Delay(500);
 
     var browserWindow = await Electron.WindowManager.CreateWindowAsync(
         new BrowserWindowOptions
         {
-            ZoomToPageWidth = true,
+            UseContentSize = true,
+            Title = "Cross Bus Explorer",
             WebPreferences = new WebPreferences
             {
-                ZoomFactor = 1
+                ZoomFactor = 1,
+                ScrollBounce = true
             },
-            Icon = "../../../icon512x512.png"
+            Icon = "../../../icon512x512.png",
+            Center = true,
+            FullscreenWindowTitle = false
         });
-
+    
     browserWindow.OnClose += () => app.StopAsync();
     browserWindow.OnReadyToShow += () => browserWindow.Show();
 });

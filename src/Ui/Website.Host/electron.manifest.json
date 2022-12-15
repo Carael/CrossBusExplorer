@@ -13,7 +13,7 @@
     "productName": "Cross Bus Explorer",
     "copyright": "Copyright © 2022",
     "buildVersion": "0.2.6",
-    "compression": "maximum",
+    "compression": "normal",
     "directories": {
       "output": "../../../bin/Desktop"
     },
