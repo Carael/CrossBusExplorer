@@ -1,4 +1,7 @@
-﻿<MudPaper Square="true" Height="100%" Width="50px" Style=@($"flex-direction: column; position: fixed; background-color: {(DarkMode ? _customTheme.PaletteDark.Secondary : _customTheme.Palette.Secondary)}; color: white; z-index: 1")>
+﻿<MudPaper Square="true"
+          Height="100%"
+          Width="50px"
+          Style=@($"flex-direction: column; position: fixed; background-color: {(DarkMode ? _customTheme.PaletteDark.Secondary : _customTheme.Palette.Secondary)}; color: white; z-index: 1")>
     <MudToolBar Style="display: block; height: 100%; padding: 0; color: inherit">
         <MudTooltip Placement="Placement.Right" Text="Connections">
             <MudIconButton Icon="@Icons.Material.Outlined.EditNote" Color="Color.Inherit" Href="connections"/>
@@ -18,7 +21,7 @@
                 <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(true))">Dark</MudMenuItem>
             </MudMenu>
         </MudTooltip>
-        <Jobs></Jobs>
+        <Jobs/>
     </MudToolBar>
 </MudPaper>
 
