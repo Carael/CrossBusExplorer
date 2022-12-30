@@ -54,6 +54,7 @@ public static class ServiceBusConnectionStringHelper
             properties.EntityPath,
             properties.SharedAccessKey,
             properties.SharedAccessSignature,
-            properties.SharedAccessKeyName);
+            properties.SharedAccessKeyName,
+            1000);
     }
 }

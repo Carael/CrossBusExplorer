@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -33,7 +34,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
     private ObservableCollection<ServiceBusConnection> _serviceBusConnections =
         new ObservableCollection<ServiceBusConnection>();
-    
+
     public ObservableCollection<ServiceBusConnection> ServiceBusConnections
     {
         get => _serviceBusConnections;
@@ -47,11 +48,11 @@ public class ConnectionsViewModel : IConnectionsViewModel
             this.Notify(PropertyChanged);
         }
     }
-    
-    private ObservableCollection<string> _folders =
-        new ObservableCollection<string>();
-    
-    public ObservableCollection<string> Folders
+
+    private ObservableCollection<FolderSetting> _folders =
+        new ObservableCollection<FolderSetting>();
+
+    public ObservableCollection<FolderSetting> Folders
     {
         get => _folders;
         private set
@@ -92,22 +93,22 @@ public class ConnectionsViewModel : IConnectionsViewModel
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var serviceBusConnections = await _connectionManagement.GetAsync(default);
-        
+
         ServiceBusConnections = new ObservableCollection<ServiceBusConnection>(
             serviceBusConnections);
 
-        Folders = new ObservableCollection<string>(serviceBusConnections
+        Folders = new ObservableCollection<FolderSetting>(serviceBusConnections
             .Where(p => !string.IsNullOrEmpty(p.Folder))
             .Select(p => p.Folder)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase));
+            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+            .Select(p => new FolderSetting(p, 0)));
     }
-    
+
     private void AddOrReplaceFolder(string? folder)
     {
-        if (!string.IsNullOrEmpty(folder))
-        {
-            Folders.AddOrReplace(p => p.EqualsInvariantIgnoreCase(folder), folder);
-        }
+        folder ??= "";
+
+        Folders.AddOrReplace(p => p.EqualsInvariantIgnoreCase(folder), folder);
     }
 
     private async Task SaveConnectionAsync(
@@ -125,8 +126,8 @@ public class ConnectionsViewModel : IConnectionsViewModel
         RemoveOrReplace(newConnection);
         AddOrReplaceFolder(folder);
     }
-    
-    
+
+
 
     private async Task RemoveConnectionAsync(
         ServiceBusConnection serviceBusConnection,
@@ -143,7 +144,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             ? new SaveConnectionForm()
             : new SaveConnectionForm
             {
-                Name = model.Name, 
+                Name = model.Name,
                 ConnectionString = model.ConnectionString,
                 Folder = model.Folder
             };

@@ -11,7 +11,8 @@ public class ServiceBusConnection
         string? entityPath,
         string sharedAccessKey,
         string sharedAccessSignature,
-        string sharedAccessKeyName)
+        string sharedAccessKeyName,
+        int index)
     {
         Name = name;
         ConnectionString = connectionString;
@@ -22,6 +23,7 @@ public class ServiceBusConnection
         SharedAccessKey = sharedAccessKey;
         SharedAccessSignature = sharedAccessSignature;
         SharedAccessKeyName = sharedAccessKeyName;
+        Index = index;
     }
     public string Name { get; }
     public string ConnectionString { get; }
@@ -32,9 +34,15 @@ public class ServiceBusConnection
     public string SharedAccessKey { get; }
     public string SharedAccessSignature { get; }
     public string SharedAccessKeyName { get; }
+    public int Index { get; set; }
 
     public void UpdateFolder(string folder)
     {
         Folder = folder;
+    }
+
+    public void UpdateIndex(int index)
+    {
+        Index = index;
     }
 }

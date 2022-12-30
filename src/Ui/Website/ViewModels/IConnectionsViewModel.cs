@@ -11,7 +11,7 @@ public interface IConnectionsViewModel : INotifyPropertyChanged
 {
     public SaveConnectionForm? SaveConnectionForm { get; }
     bool SaveDialogVisible { get; set; }
-    ObservableCollection<string> Folders { get; }
+    ObservableCollection<FolderSetting> Folders { get; }
     ObservableCollection<ServiceBusConnection> ServiceBusConnections { get; }
     Task InitializeAsync(CancellationToken cancellationToken);
     void OpenSaveDialog(ServiceBusConnection? model = null);
