@@ -42,7 +42,9 @@ public class ConnectionManagement : IConnectionManagement
             await _managementStorage.ReadAsync(cancellationToken);
 
         var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
-            name, connectionString, folder);
+            name, connectionString);
+        
+        //TODO: add to folder
 
         if (connections.ContainsKey(name))
         {

@@ -39,8 +39,7 @@ public static class ServiceBusConnectionStringHelper
     }
     public static ServiceBusConnection GetServiceBusConnection(
         string name,
-        string connectionString,
-        string folder)
+        string connectionString)
     {
         var properties =
             ServiceBusConnectionStringProperties.Parse(connectionString);
@@ -48,7 +47,6 @@ public static class ServiceBusConnectionStringHelper
         return new ServiceBusConnection(
             name,
             connectionString,
-            folder,
             properties.Endpoint,
             properties.FullyQualifiedNamespace,
             properties.EntityPath,

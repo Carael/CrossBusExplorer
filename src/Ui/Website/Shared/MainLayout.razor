@@ -1,7 +1,7 @@
 ﻿@using CrossBusExplorer.Website.Models
 @inherits LayoutComponentBase
 @inject IConnectionsViewModel _connectionsViewModel
-@inject IUserSettingsService _userSettingsService
+@inject ISettingsService SettingsService
 
 <MudThemeProvider Theme="_customTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode" />
 <MudDialogProvider />
@@ -48,7 +48,7 @@
     {
         if (firstRender)
         {
-            _userSettings = await _userSettingsService.GetAsync(default);
+            _userSettings = await SettingsService.GetAsync(default);
             StateHasChanged();
         }
     }
@@ -58,6 +58,6 @@
         _userSettings.IsDarkMode = isDarkMode;
         StateHasChanged();
 
-        await _userSettingsService.SaveAsync(_userSettings, default);
+        await SettingsService.SaveAsync(_userSettings, default);
     }
 }

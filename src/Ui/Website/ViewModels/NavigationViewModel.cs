@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
@@ -435,50 +434,34 @@ public class NavigationViewModel : INavigationViewModel
     {
         if (sender is IConnectionsViewModel connectionsViewModel)
         {
-            RebuildMenuItems(connectionsViewModel.ServiceBusConnections);
+            RebuildMenuItems(connectionsViewModel.Folders);
         }
     }
 
-    private void RebuildMenuItems(ObservableCollection<ServiceBusConnection> serviceBusConnections)
+    private void RebuildMenuItems(
+        ObservableCollection<FolderSettings> folderSettings)
     {
-        var folders = serviceBusConnections.GroupBy(p => p.Folder).Select(p => p.Key).ToList();
-
-        Folders.RemoveNonExisting(
-            folder => !folders.Any(
-                p => p.EqualsInvariantIgnoreCase(folder.Name)));
-
         foreach (ConnectionFolder folder in Folders)
         {
-            var menuItems =
-                serviceBusConnections.Where(p => p.Folder.EqualsInvariantIgnoreCase(folder.Name));
-            folder.MenuItems.RemoveNonExisting(
-                menuItem =>
-                    !menuItems.Any(p => p.Name.EqualsInvariantIgnoreCase(menuItem.ConnectionName)));
+            Folders.Remove(folder);
         }
 
-        foreach (ServiceBusConnection serviceBusConnection in serviceBusConnections)
+        foreach (FolderSettings folderSetting in folderSettings.OrderBy(p => p.Index))
         {
-            var folder = Folders.FirstOrDefault(p =>
-                p.Name.EqualsInvariantIgnoreCase(serviceBusConnection.Folder));
+            var folder = new ConnectionFolder(folderSetting.Name);
 
-            if (folder == null)
+            foreach (var serviceBusConnectionSetting in
+                folderSetting.ServiceBusConnectionSettings.OrderBy(p => p.Index))
             {
-                folder = new ConnectionFolder(serviceBusConnection.Folder);
+                var connectionMenuItem = new ConnectionMenuItem(serviceBusConnectionSetting.Name);
                 folder.PropertyChanged += (_, _) => this.Notify(PropertyChanged);
-                Folders.Add(folder);
+
+                folder.MenuItems.Add(connectionMenuItem);
             }
 
-            var menuItem = folder.MenuItems
-                .FirstOrDefault(p =>
-                    p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name));
-
-            if (menuItem == null)
+            if (folder.MenuItems.Any())
             {
-                menuItem = new ConnectionMenuItem(serviceBusConnection.Name);
-                menuItem.PropertyChanged += (_, _) => this.Notify(PropertyChanged);
-                folder.MenuItems.AddOrReplace(
-                    p => p.ConnectionName.EqualsInvariantIgnoreCase(serviceBusConnection.Name),
-                    menuItem);
+                Folders.Add(folder);
             }
         }
     }
