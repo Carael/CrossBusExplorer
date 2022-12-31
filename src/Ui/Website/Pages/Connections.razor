@@ -16,44 +16,40 @@
                       ItemDropped="@(async (item) => await OnServiceBusConnectionFolderDroppedAsync(item))"
                       Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
-
             @foreach (var folder in Model.Folders.OrderBy(p => p.Index))
             {
-                <MudGrid>
-                    <MudItem xs="1">
-                        <MudTooltip Text="Move up">
-                            <MudIconButton
-                                Title="Move up"
-                                Disabled="@(Model.Folders.MinBy(p => p.Index).Index == folder.Index)"
-                                OnClick="@(async () => await OnFolderMoveUpAsync(folder))"
-                                Icon="@Icons.Filled.ArrowUpward">
-                            </MudIconButton>
-                        </MudTooltip>
-                        <MudTooltip Text="Move down">
-                            <MudIconButton
-                                Title="Move down"
-                                Disabled="@(Model.Folders.MaxBy(p => p.Index).Index == folder.Index)"
-                                OnClick="@(async () => await OnFolderMoveDownAsync(folder))"
-                                Icon="@Icons.Filled.ArrowDownward">
-                            </MudIconButton>
-                        </MudTooltip>
-                    </MudItem>
-                    <MudItem xs="11">
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudText Typo="Typo.h6">Folder: @(string.IsNullOrEmpty(folder.Name) ? "Default" : folder.Name)</MudText>
-                            </MudItem>
-                            <MudItem xs="12">
-                                @* <MudPaper Class="ma-4 flex-grow-1"> *@
-                                @*     <MudList Clickable="true" Class="d-flex flex-column mud-height-full"> *@
-                                @*         <MudListSubheader>Drop Zone @folder</MudListSubheader> *@
-                                <MudDropZone T="ServiceBusConnectionWithFolder" Identifier="@folder.Name" Style="min-height: 50px;" Class="flex-grow-1" AllowReorder="true"/>
-                                @*     </MudList> *@
-                                @* </MudPaper> *@
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
-                </MudGrid>
+                <MudPaper Class="ma-4 flex-grow-1 d-flex flex-column mud-height-full mud-width-full">
+                    <MudGrid>
+                        <MudItem xs="1">
+                            <MudTooltip Text="Move up">
+                                <MudIconButton
+                                    Title="Move up"
+                                    Disabled="@(Model.Folders.MinBy(p => p.Index).Index == folder.Index)"
+                                    OnClick="@(async () => await OnFolderMoveUpAsync(folder))"
+                                    Icon="@Icons.Filled.ArrowUpward">
+                                </MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Move down">
+                                <MudIconButton
+                                    Title="Move down"
+                                    Disabled="@(Model.Folders.MaxBy(p => p.Index).Index == folder.Index)"
+                                    OnClick="@(async () => await OnFolderMoveDownAsync(folder))"
+                                    Icon="@Icons.Filled.ArrowDownward">
+                                </MudIconButton>
+                            </MudTooltip>
+                        </MudItem>
+                        <MudItem xs="11">
+                            <MudGrid>
+                                <MudItem xs="12">
+                                    <MudText Typo="Typo.h6">Folder: @(string.IsNullOrEmpty(folder.Name) ? "Default" : folder.Name)</MudText>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudDropZone T="ServiceBusConnectionWithFolder" Identifier="@folder.Name" Style="min-height: 50px;" Class="flex-grow-1" AllowReorder="true"/>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
             }
         </ChildContent>
         <ItemRenderer>
