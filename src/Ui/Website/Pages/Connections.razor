@@ -10,7 +10,7 @@
 
 <MudContainer>
     <MudDropContainer T="ServiceBusConnectionWithFolder"
-                      
+                      @ref="_connectionsDropContainer"
                       Items="@Model.ServiceBusConnections"
                       ItemsSelector="@((item, dropzone) => item.Folder.EqualsInvariantIgnoreCase(dropzone))"
                       ItemDropped="@(async (item) => await OnServiceBusConnectionFolderDroppedAsync(item))"
@@ -63,7 +63,7 @@
                         <MudIconButton
                             DisableRipple="true"
                             Icon="@Icons.Material.Outlined.Preview"
-                            OnClick="@(() => Model.ViewConnectionString(context.ServiceBusConnection.ConnectionString))"/>
+                            OnClick="@(() => Model.ViewConnectionString(context.ConnectionString))"/>
                     </MudTooltip>
                     <MudTooltip Text="Edit service bus connection">
                         <MudIconButton
@@ -79,10 +79,10 @@
                     </MudTooltip>
                 </MudItem>
                 <MudItem xs="3">
-                    @context.ServiceBusConnection.Name
+                    @context.Name
                 </MudItem>
                 <MudItem xs="6">
-                    @context.ServiceBusConnection.FullyQualifiedName
+                    @context.FullyQualifiedName
                 </MudItem>
             </MudGrid>
             <MudDivider/>
@@ -142,6 +142,7 @@
 
 @code{
     private EditForm _editForm;
+    private MudDropContainer<ServiceBusConnectionWithFolder> _connectionsDropContainer;
     private readonly DialogOptions _saveDialogOptions =
         new DialogOptions
         {
@@ -153,6 +154,7 @@
     {
         Model.PropertyChanged += (_, _) =>
         {
+            _connectionsDropContainer.Refresh();
             StateHasChanged();
         };
 

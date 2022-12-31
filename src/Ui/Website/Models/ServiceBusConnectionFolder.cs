@@ -1,20 +1,17 @@
+using System;
 using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Website.Models;
 
-public class ServiceBusConnectionWithFolder
+public class ServiceBusConnectionWithFolder : ServiceBusConnection
 {
-    public ServiceBusConnectionWithFolder(
-        ServiceBusConnection serviceBusConnection,
-        string folder)
-    {
-        ServiceBusConnection = serviceBusConnection;
-        Folder = folder;
-    }
-    
-    public ServiceBusConnection ServiceBusConnection { get; }
     public string Folder { get; private set; }
 
     public void UpdateFolder(string folder)
+    {
+        Folder = folder;
+    }
+    
+    public ServiceBusConnectionWithFolder(ServiceBusConnection serviceBusConnection, string folder) : base(serviceBusConnection.Name, serviceBusConnection.ConnectionString, serviceBusConnection.Endpoint, serviceBusConnection.FullyQualifiedName, serviceBusConnection.EntityPath, serviceBusConnection.SharedAccessKey, serviceBusConnection.SharedAccessSignature, serviceBusConnection.SharedAccessKeyName)
     {
         Folder = folder;
     }
