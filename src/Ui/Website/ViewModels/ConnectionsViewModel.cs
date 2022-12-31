@@ -18,6 +18,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 public class ConnectionsViewModel : IConnectionsViewModel
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event SettingsChangedEventHandler? OnSettingsChanged;
 
     private readonly ISnackbar _snackbar;
     private readonly IDialogService _dialogService;
@@ -103,8 +104,9 @@ public class ConnectionsViewModel : IConnectionsViewModel
             GetServiceBusConnectionsWithFolder(serviceBusConnections, folderSettings));
 
         Folders = new ObservableCollection<FolderSettings>(folderSettings);
+        OnSettingsChanged(Folders);
     }
-    
+
     private IEnumerable<ServiceBusConnectionWithFolder> GetServiceBusConnectionsWithFolder(
         IEnumerable<ServiceBusConnection> serviceBusConnections,
         IEnumerable<FolderSettings> foldersSettings)
@@ -112,14 +114,17 @@ public class ConnectionsViewModel : IConnectionsViewModel
         foreach (var folderSetting in foldersSettings.OrderBy(p => p.Index))
         {
             foreach (ServiceBusConnectionSettings serviceBusConnectionSetting in
-                folderSetting.ServiceBusConnectionSettings)
+                folderSetting.ServiceBusConnectionSettings.OrderBy(p => p.Index))
             {
-                var serviceBusConnection = serviceBusConnections.First(p =>
+                var serviceBusConnection = serviceBusConnections.FirstOrDefault(p =>
                     p.Name.EqualsInvariantIgnoreCase(serviceBusConnectionSetting.Name));
 
-                yield return new ServiceBusConnectionWithFolder(
-                    serviceBusConnection,
-                    folderSetting.Name);
+                if (serviceBusConnection != null)
+                {
+                    yield return new ServiceBusConnectionWithFolder(
+                        serviceBusConnection,
+                        folderSetting.Name);
+                }
             }
         }
     }
@@ -167,14 +172,20 @@ public class ConnectionsViewModel : IConnectionsViewModel
         return foldersSettings;
     }
 
-    private void AddOrReplaceFolder(string? folder)
+    private void AddOrReplaceFolder(string? folderName)
     {
-        folder ??= "";
+        folderName ??= "";
 
-        var order = Folders.Select(p => p.Index).MaxBy(p => p) + 1;
+        FolderSettings? folder = 
+            Folders.FirstOrDefault(p => p.Name.EqualsInvariantIgnoreCase(folderName));
 
-        Folders.AddOrReplace(p => p.Name.EqualsInvariantIgnoreCase(folder),
-            new FolderSettings(folder, order, new List<ServiceBusConnectionSettings>()));
+        if (folder == null)
+        {
+            folder = new FolderSettings(folderName, Folders.MaxBy(p => p.Index)?.Index ?? 0,
+                new List<ServiceBusConnectionSettings>());
+        }
+
+        Folders.AddOrReplace(p => p.Name.EqualsInvariantIgnoreCase(folderName), folder);
     }
 
     private async Task SaveConnectionAsync(
@@ -193,29 +204,39 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
         RemoveOrReplace(new ServiceBusConnectionWithFolder(newConnection, folder));
         AddOrReplaceFolder(folder);
+        OnSettingsChanged(Folders);
     }
 
     private async Task RemoveConnectionAsync(
-        ServiceBusConnection serviceBusConnection,
+        ServiceBusConnectionWithFolder item,
         CancellationToken cancellationToken)
     {
         await _connectionManagement.DeleteAsync(
-            serviceBusConnection.Name,
+            item.ServiceBusConnection.Name,
             cancellationToken);
 
-        _serviceBusConnections.Remove(ServiceBusConnections.First(p =>
-            p.ServiceBusConnection.Name.EqualsInvariantIgnoreCase(serviceBusConnection.Name)));
+        ServiceBusConnections.Remove(item);
+
+        var folderSettings = TryGetFolderSettings(Folders, item.ServiceBusConnection.Name);
+        folderSettings.ServiceBusConnectionSettings
+            .Remove(folderSettings.ServiceBusConnectionSettings
+                .First(p => p.Name.EqualsInvariantIgnoreCase(item.ServiceBusConnection.Name)));
+
+        OnSettingsChanged(Folders);
+
+        await SaveFoldersSettingsAsync(cancellationToken);
+        this.Notify(PropertyChanged);
     }
 
-    public void OpenSaveDialog(ServiceBusConnection? model = null)
+    public void OpenSaveDialog(ServiceBusConnectionWithFolder? model = null)
     {
         _saveConnectionForm = model == null
             ? new SaveConnectionForm()
             : new SaveConnectionForm
             {
-                Name = model.Name,
-                ConnectionString = model.ConnectionString,
-                Folder = TryGetFolderSettings(Folders, model?.Name)?.Name
+                Name = model.ServiceBusConnection.Name,
+                ConnectionString = model.ServiceBusConnection.ConnectionString,
+                Folder = TryGetFolderSettings(Folders, model.ServiceBusConnection?.Name)?.Name
             };
         _saveDialogVisible = true;
         _saveConnectionForm.PropertyChanged += (_, _) =>
@@ -266,7 +287,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             ServiceBusConnectionStringHelper.TryGetNameFromConnectionString(
                 _saveConnectionForm.ConnectionString!),
             _saveConnectionForm.ConnectionString!,
-            _saveConnectionForm.Folder!,
+            _saveConnectionForm.Folder ?? "",
             default);
 
         _saveDialogVisible = false;
@@ -290,12 +311,12 @@ public class ConnectionsViewModel : IConnectionsViewModel
             });
     }
 
-    public async Task OpenDeleteDialog(ServiceBusConnection serviceBusConnection)
+    public async Task OpenDeleteDialog(ServiceBusConnectionWithFolder item)
     {
         var parameters = new DialogParameters();
         parameters.Add(
             "ContentText",
-            $"Are you sure you want to remove {serviceBusConnection.Name} connection?");
+            $"Are you sure you want to remove {item.ServiceBusConnection.Name} connection?");
 
         var dialog = _dialogService.Show<ConfirmDialog>(
             "Confirm",
@@ -306,10 +327,10 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
         if (result.Data is true)
         {
-            await RemoveConnectionAsync(serviceBusConnection, default);
+            await RemoveConnectionAsync(item, default);
 
             _snackbar.Add(
-                $"Connection {serviceBusConnection.Name} successfully deleted.",
+                $"Connection {item.ServiceBusConnection.Name} successfully deleted.",
                 Severity.Success);
         }
     }
@@ -348,6 +369,8 @@ public class ConnectionsViewModel : IConnectionsViewModel
             newFolderSettings.ServiceBusConnectionSettings.AddOrReplace(p =>
                 p.Name.EqualsInvariantIgnoreCase(
                     serviceBusConnectionSettings.Name), serviceBusConnectionSettings);
+
+            serviceBusConnection.UpdateFolder(newFolder);
         }
 
         //update index
@@ -358,18 +381,8 @@ public class ConnectionsViewModel : IConnectionsViewModel
             serviceBusConnection.ServiceBusConnection.Name,
             index);
 
-        UpdateServiceBusConnections();
-        this.Notify(PropertyChanged);
         await SaveFoldersSettingsAsync(cancellationToken);
-    }
-    
-    private void UpdateServiceBusConnections()
-    {
-        ServiceBusConnections = new ObservableCollection<ServiceBusConnectionWithFolder>(
-            GetServiceBusConnectionsWithFolder(
-                ServiceBusConnections.Select(p => p.ServiceBusConnection),
-                Folders.ToList()));
-        ServiceBusConnections.CollectionChanged += (_, _) => this.Notify(PropertyChanged);
+        OnSettingsChanged(Folders);
     }
 
     public async Task UpdateFolderPositionAsync(
@@ -393,8 +406,9 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
             newItem.UpdateIndex(newIndex);
             oldItem.UpdateIndex(currentIndex);
-            
+
             await SaveFoldersSettingsAsync(cancellationToken);
+            OnSettingsChanged(Folders);
         }
     }
 
@@ -419,9 +433,9 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
         if (current != null)
         {
-            _serviceBusConnections.Remove(current);
+            ServiceBusConnections.Remove(current);
         }
 
-        _serviceBusConnections.Add(newConnection);
+        ServiceBusConnections.Add(newConnection);
     }
 }

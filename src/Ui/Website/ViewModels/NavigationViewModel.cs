@@ -34,7 +34,7 @@ public class NavigationViewModel : INavigationViewModel
         _subscriptionService = subscriptionService;
         _folders = new ObservableCollection<ConnectionFolder>();
         _folders.CollectionChanged += (_, _) => this.Notify(PropertyChanged);
-        connectionsViewModel.PropertyChanged += ConnectionsViewModelChanged;
+        connectionsViewModel.OnSettingsChanged += ConnectionsViewModelChanged;
         queueViewModel.OnQueueOperation += this.OnQueueOperation;
         topicViewModel.TopicAdded += this.OnTopicAdded;
         topicViewModel.TopicRemoved += this.OnTopicRemoved;
@@ -430,23 +430,19 @@ public class NavigationViewModel : INavigationViewModel
         }
     }
 
-    private void ConnectionsViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    private void ConnectionsViewModelChanged(IEnumerable<FolderSettings> folderSettings)
     {
-        if (sender is IConnectionsViewModel connectionsViewModel)
-        {
-            RebuildMenuItems(connectionsViewModel.Folders);
-        }
+        RebuildMenuItems(folderSettings);
     }
 
-    private void RebuildMenuItems(
-        ObservableCollection<FolderSettings> folderSettings)
+    private void RebuildMenuItems(IEnumerable<FolderSettings> folderSettings)
     {
-        foreach (ConnectionFolder folder in Folders)
+        foreach (ConnectionFolder folder in Folders.ToList())
         {
             Folders.Remove(folder);
         }
 
-        foreach (FolderSettings folderSetting in folderSettings.OrderBy(p => p.Index))
+        foreach (FolderSettings folderSetting in folderSettings.OrderBy(p => p.Index).ToList())
         {
             var folder = new ConnectionFolder(folderSetting.Name);
 

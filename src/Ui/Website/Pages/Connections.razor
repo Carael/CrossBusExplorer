@@ -10,7 +10,8 @@
 
 <MudContainer>
     <MudDropContainer T="ServiceBusConnectionWithFolder"
-                      Items="Model.ServiceBusConnections"
+                      
+                      Items="@Model.ServiceBusConnections"
                       ItemsSelector="@((item, dropzone) => item.Folder.EqualsInvariantIgnoreCase(dropzone))"
                       ItemDropped="@(async (item) => await OnServiceBusConnectionFolderDroppedAsync(item))"
                       Class="d-flex flex-wrap flex-grow-1">
@@ -68,13 +69,13 @@
                         <MudIconButton
                             DisableRipple="true"
                             Icon="@Icons.Material.Outlined.Edit"
-                            OnClick="@(() => Model.OpenSaveDialog(context.ServiceBusConnection))"/>
+                            OnClick="@(() => Model.OpenSaveDialog(context))"/>
                     </MudTooltip>
                     <MudTooltip Text="Delete service bus connection">
                         <MudIconButton
                             DisableRipple="true"
                             Icon="@Icons.Material.Outlined.Delete"
-                            OnClick="@(() => Model.OpenDeleteDialog(context.ServiceBusConnection))"/>
+                            OnClick="@(() => Model.OpenDeleteDialog(context))"/>
                     </MudTooltip>
                 </MudItem>
                 <MudItem xs="3">
@@ -180,19 +181,15 @@
             droppedItem.IndexInZone,
             droppedItem.DropzoneIdentifier,
             default);
-        
-        StateHasChanged();
     }
 
     private async Task OnFolderMoveUpAsync(FolderSettings folder)
     {
         await Model.UpdateFolderPositionAsync(folder, DirectionChange.Up, default);
-        StateHasChanged();
     }
 
     private async Task OnFolderMoveDownAsync(FolderSettings folder)
     {
         await Model.UpdateFolderPositionAsync(folder, DirectionChange.Down, default);
-        StateHasChanged();
     }
 }

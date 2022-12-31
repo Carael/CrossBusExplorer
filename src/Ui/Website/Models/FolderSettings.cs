@@ -36,22 +36,20 @@ public class FolderSettings
                 serviceBusConnection.Name,
                 index + 1));
     }
+    
     public void UpdateServiceBusConnectionsIndexes(string serviceBusConnectionName, int index)
     {
-        bool up = false;
-        foreach (ServiceBusConnectionSettings settings in
-            ServiceBusConnectionSettings.OrderBy(p => p.Index))
+        var connectionByName = ServiceBusConnectionSettings
+            .First(p => p.Name.EqualsInvariantIgnoreCase(serviceBusConnectionName));
+
+        connectionByName.UpdateIndex(index);
+
+        foreach (ServiceBusConnectionSettings connection in ServiceBusConnectionSettings
+            .Where(p => !p.Name.EqualsInvariantIgnoreCase(serviceBusConnectionName) &&
+                        p.Index >= index)
+            .OrderBy(p=>p.Index))
         {
-            if (up)
-            {
-                settings.UpdateIndex(settings.Index + 1);
-            }
-            
-            if (settings.Name.EqualsInvariantIgnoreCase(serviceBusConnectionName))
-            {
-                settings.UpdateIndex(index);
-                up = true;
-            }
+            connection.UpdateIndex(connection.Index + 1);
         }
     }
 }
