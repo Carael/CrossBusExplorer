@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
-using CrossBusExplorer.Website.Exceptions;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
@@ -218,8 +217,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
                 connectionString,
                 folder,
                 cancellationToken);
-
-
+        
         RemoveOrReplace(new ServiceBusConnectionWithFolder(newConnection, folder));
         AddOrReplaceFolder(folder, name);
         OnSettingsChanged(Folders);
@@ -264,20 +262,6 @@ public class ConnectionsViewModel : IConnectionsViewModel
         {
             this.Notify(PropertyChanged);
         };
-    }
-
-    private FolderSettings GetFolderSettings(
-        IEnumerable<FolderSettings> folderSettings,
-        string connectionName)
-    {
-        var folder = TryGetFolderSettings(folderSettings, connectionName);
-
-        if (folder == null)
-        {
-            throw new FolderSettingsForConnectionNotFoundException(connectionName);
-        }
-
-        return folder;
     }
 
     private FolderSettings? TryGetFolderSettings(
@@ -363,6 +347,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             await OnValidSaveConnectionSubmit();
         }
     }
+    
     public async Task UpdateConnectionPosition(
         ServiceBusConnectionWithFolder serviceBusConnection,
         int index,
