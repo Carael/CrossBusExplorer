@@ -1,0 +1,44 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @FolderDialogName
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField T="string" @bind-Value="FolderName" @bind-Text="FolderName" MaxLength="260" Label="Name" Required="true" RequiredError="Name is required!"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Default" OnClick="@(CloseDialog)">Close</MudButton>
+        <MudButton Color="Color.Success" OnClick="@(Submit)">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string FolderDialogName { get; set; }
+
+    [Parameter]
+    public string? FolderName { get; set; }
+
+    MudForm form;
+
+    async Task Submit()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(FolderName));
+        }
+
+    }
+    private void CloseDialog()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+    }
+}

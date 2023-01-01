@@ -10,6 +10,7 @@ using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
+using CrossBusExplorer.Website.Shared.Connections;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 namespace CrossBusExplorer.Website.ViewModels;
@@ -194,7 +195,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
         {
             connectionSettings = new ServiceBusConnectionSettings(
                 connectionName,
-                folder.ServiceBusConnectionSettings.MaxBy(p => p.Index).Index + 1);
+                folder.ServiceBusConnectionSettings.MaxBy(p => p.Index)?.Index ?? 0 + 1);
 
             folder.ServiceBusConnectionSettings
                 .AddOrReplace(
@@ -217,7 +218,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
                 connectionString,
                 folder,
                 cancellationToken);
-        
+
         RemoveOrReplace(new ServiceBusConnectionWithFolder(newConnection, folder));
         AddOrReplaceFolder(folder, name);
         OnSettingsChanged(Folders);
@@ -347,7 +348,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             await OnValidSaveConnectionSubmit();
         }
     }
-    
+
     public async Task UpdateConnectionPosition(
         ServiceBusConnectionWithFolder serviceBusConnection,
         int index,
@@ -415,6 +416,122 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
             await SaveFoldersSettingsAsync(cancellationToken);
             OnSettingsChanged(Folders);
+        }
+    }
+    public async Task OpenNewFolderDialogAsync(CancellationToken cancellationToken)
+    {
+        var parameters = new DialogParameters();
+
+        parameters.Add(nameof(FolderDialog.FolderName), null);
+        parameters.Add(nameof(FolderDialog.FolderDialogName), "Add folder");
+
+        var dialog = _dialogService.Show<FolderDialog>(
+            "Add folder",
+            parameters,
+            new DialogOptions
+            {
+                FullWidth = true,
+                CloseOnEscapeKey = true
+            });
+
+        var dialogResult = await dialog.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data is string folderName)
+        {
+            if (Folders.Any(p => p.Name.EqualsInvariantIgnoreCase(folderName)))
+            {
+                _snackbar.Add($"Folder {folderName} already exist.", Severity.Warning);
+            }
+            else
+            {
+                Folders.AddOrReplace(
+                    p => p.Name.EqualsInvariantIgnoreCase(folderName),
+                    new FolderSettings(folderName, Folders.MaxBy(p => p.Index)?.Index ?? 0 + 1,
+                        new List<ServiceBusConnectionSettings>()));
+                await SaveFoldersSettingsAsync(cancellationToken);
+            }
+        }
+    }
+
+    public async Task OpenEditFolderDialogAsync(
+        FolderSettings folderSettings,
+        Action successCallback,
+        CancellationToken cancellationToken)
+    {
+        var oldFolderName = folderSettings.Name;
+
+        var parameters = new DialogParameters();
+
+        parameters.Add(nameof(FolderDialog.FolderName), folderSettings.Name);
+        parameters.Add(nameof(FolderDialog.FolderDialogName), "Edit folder");
+
+        var dialog = _dialogService.Show<FolderDialog>(
+            $"Edit folder {folderSettings.Name}",
+            parameters,
+            new DialogOptions
+            {
+                FullWidth = true,
+                CloseOnEscapeKey = true
+            });
+
+        var dialogResult = await dialog.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data is string newFolderName)
+        {
+            if (Folders.Any(p => p.Name.EqualsInvariantIgnoreCase(newFolderName) &&
+                                 !newFolderName.EqualsInvariantIgnoreCase(folderSettings.Name)))
+            {
+                _snackbar.Add($"Folder {newFolderName} already exist.", Severity.Warning);
+            }
+            else
+            {
+                folderSettings.UpdateName(newFolderName);
+
+                foreach (var serviceBusConnection in ServiceBusConnections.Where(p =>
+                    p.Folder.EqualsInvariantIgnoreCase(oldFolderName)))
+                {
+                    serviceBusConnection.UpdateFolder(newFolderName);
+                }
+
+                successCallback();
+                OnSettingsChanged(Folders);
+                await SaveFoldersSettingsAsync(cancellationToken);
+            }
+        }
+    }
+
+    public async Task OpenDeleteFolderDialogAsync(
+        FolderSettings folderSettings,
+        Action successCallback,
+        CancellationToken cancellationToken)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(
+            "ContentText",
+            $"Are you sure you want to remove {folderSettings.Name} folder?");
+
+        var dialog = await _dialogService.ShowAsync<ConfirmDialog>(
+            "Confirm",
+            parameters,
+            new DialogOptions { CloseOnEscapeKey = true });
+
+        var result = await dialog.Result;
+
+        if (result.Data is true)
+        {
+            if (folderSettings.ServiceBusConnectionSettings.Any())
+            {
+                _snackbar.Add(
+                    "Cannot remove. Please clear all connections from folder and then try again.",
+                    Severity.Warning);
+            }
+            else
+            {
+                Folders.Remove(folderSettings);
+                successCallback();
+                OnSettingsChanged(Folders);
+                await SaveFoldersSettingsAsync(cancellationToken);
+            }
         }
     }
 

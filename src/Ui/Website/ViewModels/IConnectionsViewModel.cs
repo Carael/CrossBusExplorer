@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
@@ -26,5 +27,14 @@ public interface IConnectionsViewModel : INotifyPropertyChanged
     Task UpdateFolderPositionAsync(
         FolderSettings folder, 
         DirectionChange up,
+        CancellationToken cancellationToken);
+    Task OpenNewFolderDialogAsync(CancellationToken cancellationToken);
+    Task OpenEditFolderDialogAsync(
+        FolderSettings folderSettings,
+        Action successCallback,
+        CancellationToken cancellationToken);
+    Task OpenDeleteFolderDialogAsync(
+        FolderSettings folderSettings,
+        Action successCallback,
         CancellationToken cancellationToken);
 }

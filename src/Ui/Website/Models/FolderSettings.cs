@@ -17,9 +17,14 @@ public class FolderSettings
             serviceBusConnectionSettings ?? new List<ServiceBusConnectionSettings>();
     }
 
-    public string Name { get; }
+    public string Name { get; private set; }
     public int Index { get; private set; }
-    public List<ServiceBusConnectionSettings> ServiceBusConnectionSettings { get; }
+    public List<ServiceBusConnectionSettings> ServiceBusConnectionSettings { get;}
+    
+    public void UpdateName(string newName)
+    {
+        Name = newName;
+    }
 
     public void UpdateIndex(int newIndex)
     {
@@ -52,4 +57,5 @@ public class FolderSettings
             connection.UpdateIndex(connection.Index + 1);
         }
     }
+    public bool IsDefault() => string.IsNullOrEmpty(Name);
 }
