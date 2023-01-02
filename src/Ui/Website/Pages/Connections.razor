@@ -22,7 +22,7 @@
             {
                 <MudContainer>
                     <MudPaper Class="ma-1 pb-1 flex-grow-1 d-flex flex-column mud-height-full mud-width-full">
-                        <MudGrid>
+                        <MudGrid Spacing="0">
                             <MudItem xs="1">
                                 <MudTooltip Text="Move up">
                                     <MudIconButton
@@ -42,9 +42,9 @@
                                 </MudTooltip>
                             </MudItem>
                             <MudItem xs="11">
-                                <MudGrid>
+                                <MudGrid Spacing="0">
                                     <MudItem xs="12">
-                                        <MudGrid>
+                                        <MudGrid Spacing="0"> 
                                             <MudItem xs="11">
                                                 <MudText Class="pa-1" Typo="Typo.h6">Folder: @(string.IsNullOrEmpty(folder.Name) ? "Default" : folder.Name)</MudText>
                                             </MudItem>
