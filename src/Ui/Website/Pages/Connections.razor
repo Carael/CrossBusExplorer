@@ -4,13 +4,14 @@
 
 <PageTitle>Connections</PageTitle>
 
-<MudContainer>
-    <MudTooltip Text="Add service bus connection">
-        <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => Model.OpenSaveDialog())"/>
-    </MudTooltip>
-    <MudTooltip Text="Add new folder">
-        <MudIconButton Icon="@Icons.Material.Outlined.CreateNewFolder" OnClick="@(() => Model.OpenNewFolderDialogAsync(default))"/>
-    </MudTooltip>
+<MudTooltip Text="Add service bus connection">
+    <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="@(() => Model.OpenSaveDialog())"/>
+</MudTooltip>
+<MudTooltip Text="Add new folder">
+    <MudIconButton Icon="@Icons.Material.Outlined.CreateNewFolder" OnClick="@(() => Model.OpenNewFolderDialogAsync(default))"/>
+</MudTooltip>
+
+<MudContainer Style="height: 772px; overflow-y: auto !important;">
     <MudDropContainer T="ServiceBusConnectionWithFolder"
                       @ref="_connectionsDropContainer"
                       Items="@Model.ServiceBusConnections"
@@ -19,56 +20,58 @@
         <ChildContent>
             @foreach (var folder in Model.Folders.OrderBy(p => p.Index))
             {
-                <MudPaper Class="ma-1 pb-1 flex-grow-1 d-flex flex-column mud-height-full mud-width-full">
-                    <MudGrid>
-                        <MudItem xs="1">
-                            <MudTooltip Text="Move up">
-                                <MudIconButton
-                                    Title="Move up"
-                                    Disabled="@(Model.Folders.MinBy(p => p.Index).Index == folder.Index)"
-                                    OnClick="@(async () => await OnFolderMoveUpAsync(folder))"
-                                    Icon="@Icons.Filled.ArrowUpward">
-                                </MudIconButton>
-                            </MudTooltip>
-                            <MudTooltip Text="Move down">
-                                <MudIconButton
-                                    Title="Move down"
-                                    Disabled="@(Model.Folders.MaxBy(p => p.Index).Index == folder.Index)"
-                                    OnClick="@(async () => await OnFolderMoveDownAsync(folder))"
-                                    Icon="@Icons.Filled.ArrowDownward">
-                                </MudIconButton>
-                            </MudTooltip>
-                        </MudItem>
-                        <MudItem xs="11">
-                            <MudGrid>
-                                <MudItem xs="12">
-                                    <MudGrid>
-                                        <MudItem xs="10">
-                                            <MudText Class="pa-1" Typo="Typo.h6">Folder: @(string.IsNullOrEmpty(folder.Name) ? "Default" : folder.Name)</MudText>
-                                        </MudItem>
-                                        <MudItem xs="2">
-                                            @if (!folder.IsDefault())
-                                            {
-                                                <MudTooltip Text="Edit folder">
-                                                    <MudIconButton Icon="@Icons.Material.Outlined.DriveFileRenameOutline" OnClick="@(() => Model.OpenEditFolderDialogAsync(folder, () =>{_connectionsDropContainer.Refresh();}, default))"/>
-                                                </MudTooltip>
-                                                @if (!folder.ServiceBusConnectionSettings.Any())
+                <MudContainer>
+                    <MudPaper Class="ma-1 pb-1 flex-grow-1 d-flex flex-column mud-height-full mud-width-full">
+                        <MudGrid>
+                            <MudItem xs="1">
+                                <MudTooltip Text="Move up">
+                                    <MudIconButton
+                                        Title="Move up"
+                                        Disabled="@(Model.Folders.MinBy(p => p.Index).Index == folder.Index)"
+                                        OnClick="@(async () => await OnFolderMoveUpAsync(folder))"
+                                        Icon="@Icons.Filled.ArrowUpward">
+                                    </MudIconButton>
+                                </MudTooltip>
+                                <MudTooltip Text="Move down">
+                                    <MudIconButton
+                                        Title="Move down"
+                                        Disabled="@(Model.Folders.MaxBy(p => p.Index).Index == folder.Index)"
+                                        OnClick="@(async () => await OnFolderMoveDownAsync(folder))"
+                                        Icon="@Icons.Filled.ArrowDownward">
+                                    </MudIconButton>
+                                </MudTooltip>
+                            </MudItem>
+                            <MudItem xs="11">
+                                <MudGrid>
+                                    <MudItem xs="12">
+                                        <MudGrid>
+                                            <MudItem xs="11">
+                                                <MudText Class="pa-1" Typo="Typo.h6">Folder: @(string.IsNullOrEmpty(folder.Name) ? "Default" : folder.Name)</MudText>
+                                            </MudItem>
+                                            <MudItem xs="1">
+                                                @if (!folder.IsDefault())
                                                 {
-                                                    <MudTooltip Text="Delete folder">
-                                                        <MudIconButton Icon="@Icons.Material.Outlined.FolderDelete" OnClick="@(() => Model.OpenDeleteFolderDialogAsync(folder, () =>{_connectionsDropContainer.Refresh();}, default))"/>
+                                                    <MudTooltip Text="Edit folder">
+                                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DriveFileRenameOutline" OnClick="@(() => Model.OpenEditFolderDialogAsync(folder, () =>{_connectionsDropContainer.Refresh();}, default))"/>
                                                     </MudTooltip>
+                                                    @if (!folder.ServiceBusConnectionSettings.Any())
+                                                    {
+                                                        <MudTooltip Text="Delete folder">
+                                                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="@(() => Model.OpenDeleteFolderDialogAsync(folder, () =>{_connectionsDropContainer.Refresh();}, default))"/>
+                                                        </MudTooltip>
+                                                    }
                                                 }
-                                            }
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudItem>
-                                <MudItem xs="12">
-                                    <MudDropZone T="ServiceBusConnectionWithFolder" Identifier="@folder.Name" Style="min-height: 50px;" Class="flex-grow-1" AllowReorder="true"/>
-                                </MudItem>
-                            </MudGrid>
-                        </MudItem>
-                    </MudGrid>
-                </MudPaper>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudDropZone T="ServiceBusConnectionWithFolder" Identifier="@folder.Name" Style="min-height: 10px;" Class="flex-grow-1" AllowReorder="true"/>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudContainer>
             }
         </ChildContent>
         <ItemRenderer>
