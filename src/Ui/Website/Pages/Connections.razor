@@ -11,7 +11,7 @@
     <MudIconButton Icon="@Icons.Material.Outlined.CreateNewFolder" OnClick="@(() => Model.OpenNewFolderDialogAsync(default))"/>
 </MudTooltip>
 
-<MudContainer Style="height: 772px; overflow-y: auto !important;">
+<MudContainer Style="height: 100%; overflow-y: auto !important;">
     <MudDropContainer T="ServiceBusConnectionWithFolder"
                       @ref="_connectionsDropContainer"
                       Items="@Model.ServiceBusConnections"
