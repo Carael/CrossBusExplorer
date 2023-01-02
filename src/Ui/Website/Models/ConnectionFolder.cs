@@ -3,7 +3,7 @@ using System.ComponentModel;
 using CrossBusExplorer.Website.Extensions;
 namespace CrossBusExplorer.Website.Models;
 
-public class ConnectionFolder : INotifyPropertyChanged
+public class ConnectionFolder : INotifyPropertyChanged  
 {
     public ConnectionFolder(string name)
     {

@@ -5,16 +5,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="h5.ElectronNET.API" Version="21.3.1.34294"/>
-        <PackageReference Include="MudBlazor" Version="6.1.5"/>
+        <PackageReference Include="h5.ElectronNET.API" Version="22.0.0.34751" />
+        <PackageReference Include="MudBlazor" Version="6.1.6" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj"/>
-        <ProjectReference Include="..\Website\Website.csproj"/>
+        <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
+        <ProjectReference Include="..\Website\Website.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <ContentIncludedByDefault Remove="wwwroot\css\custom.css"/>
+        <ContentIncludedByDefault Remove="wwwroot\css\custom.css" />
     </ItemGroup>
     <ItemGroup>
         <Content Update="electron.manifest.json">

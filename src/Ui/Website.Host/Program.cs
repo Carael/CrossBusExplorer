@@ -17,7 +17,7 @@ builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
 
 builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
-builder.Services.AddScoped<IUserSettingsService, DefaultSettingsService>();
+builder.Services.AddScoped<ISettingsService, DefaultSettingsService>();
 
 builder.Services.AddElectron();
 builder.WebHost.UseElectron(args);

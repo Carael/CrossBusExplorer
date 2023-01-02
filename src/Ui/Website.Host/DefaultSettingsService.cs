@@ -5,9 +5,9 @@ using ElectronNET.API;
 using ElectronNET.API.Entities;
 namespace Website.Host;
 
-public class DefaultSettingsService : IUserSettingsService
+public class DefaultSettingsService : ISettingsService
 {
-    private const string FileName = "user_settings.json";
+    private const string FileName = "settings.json";
 
     public async Task<UserSettings> GetAsync(CancellationToken cancellationToken)
     {
