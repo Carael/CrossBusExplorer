@@ -3,7 +3,7 @@ name: Build Maui project
 on:
   push:
     tags:
-    - 'maui/*'
+    - '*'
     paths:
       - 'src/**/*'
       - '.github/workflows/dotnet-maui.yml' 
@@ -17,7 +17,7 @@ jobs:
 # >>>>>>> Windows Build <<<<<<< #
 # ***************************** #
   publish-windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -72,20 +72,20 @@ jobs:
     - name: Upload Windows Artifact x64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-          name: crossbusexplorer-win-x64
+          name: crossbusexplorer-maui-win-x64
           path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
 
     - name: Upload Windows Artifact arm64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-          name: crossbusexplorer-win-arm64
+          name: crossbusexplorer-maui-win-arm64
           path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
 
 # ********************************* #
 # >>>>>>> MacCatalyst Build <<<<<<< #
 # ********************************* #
   publish-macos:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -126,7 +126,7 @@ jobs:
     - name: Upload MacCatalyst Artifact
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-          name: crossbusexplorer-macos-x64
+          name: crossbusexplorer-maui-macos-x64
           path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
 
 # ********************************* #
@@ -141,26 +141,26 @@ jobs:
     - name: Download macos-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
-        name: crossbusexplorer-macos-x64
-        path: downloads/crossbusexplorer-macos-x64
+        name: crossbusexplorer-maui-macos-x64
+        path: downloads/crossbusexplorer-maui-macos-x64
     - name: Zip macos-x64
-      run: (cd downloads/crossbusexplorer-macos-x64 ; zip -r crossbusexplorer-macos-x64 *)
+      run: (cd downloads/crossbusexplorer-maui-macos-x64 ; zip -r crossbusexplorer-maui-macos-x64 *)
 
     - name: Download windows-x64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
-        name: crossbusexplorer-win-x64
-        path: downloads/crossbusexplorer-win-x64
+        name: crossbusexplorer-maui-win-x64
+        path: downloads/crossbusexplorer-maui-win-x64
     - name: Zip win-x64
-      run: (cd downloads/crossbusexplorer-win-x64 ; zip -r crossbusexplorer-win-x64 *)
+      run: (cd downloads/crossbusexplorer-maui-win-x64 ; zip -r crossbusexplorer-maui-win-x64 *)
 
     - name: Download windows-arm64 build artifact
       uses: actions/download-artifact@v3.0.1
       with:
-        name: crossbusexplorer-win-arm64
-        path: downloads/crossbusexplorer-win-arm64
+        name: crossbusexplorer-maui-win-arm64
+        path: downloads/crossbusexplorer-maui-win-arm64
     - name: Zip win-arm64
-      run: (cd downloads/crossbusexplorer-win-arm64 ; zip -r crossbusexplorer-win-arm64 *)
+      run: (cd downloads/crossbusexplorer-maui-win-arm64 ; zip -r crossbusexplorer-maui-win-arm64 *)
 
     - name: Create Release
       id: create_release
@@ -178,8 +178,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-macos-x64/crossbusexplorer-macos-x64.zip
-        asset_name: crossbusexplorer-macos-x64.zip
+        asset_path: downloads/crossbusexplorer-maui-macos-x64/crossbusexplorer-maui-macos-x64.zip
+        asset_name: crossbusexplorer-maui-macos-x64.zip
         asset_content_type: application/zip
     - name: Upload win-x64
       uses: actions/upload-release-asset@v1
@@ -187,8 +187,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-win-x64/crossbusexplorer-win-x64.zip
-        asset_name: crossbusexplorer-win-x64.zip
+        asset_path: downloads/crossbusexplorer-maui-win-x64/crossbusexplorer-maui-win-x64.zip
+        asset_name: crossbusexplorer-maui-win-x64.zip
         asset_content_type: application/zip
     - name: Upload win-arm64
       uses: actions/upload-release-asset@v1
@@ -196,6 +196,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-win-arm64/crossbusexplorer-win-arm64.zip
-        asset_name: crossbusexplorer-win-arm64.zip
+        asset_path: downloads/crossbusexplorer-maui-win-arm64/crossbusexplorer-maui-win-arm64.zip
+        asset_name: crossbusexplorer-maui-win-arm64.zip
         asset_content_type: application/zip
