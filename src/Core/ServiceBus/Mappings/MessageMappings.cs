@@ -1,6 +1,8 @@
 using System.Text;
+using Azure.Core.Amqp;
 using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+
 namespace CrossBusExplorer.ServiceBus.Mappings;
 
 public static class MessageMappings
@@ -10,7 +12,7 @@ public static class MessageMappings
         return new Message(
             receivedMessage.MessageId,
             receivedMessage.Subject,
-            Encoding.UTF8.GetString(receivedMessage.Body),
+            ReadBody(receivedMessage),
             new MessageSystemProperties(
                 receivedMessage.ContentType,
                 receivedMessage.CorrelationId,
@@ -36,6 +38,40 @@ public static class MessageMappings
             ),
             receivedMessage.ApplicationProperties.ToDictionary(p => p.Key,
                 p => p.Value?.ToString()));
+    }
+
+    private static string ReadBody(ServiceBusReceivedMessage receivedMessage)
+    {
+        AmqpAnnotatedMessage amqpMessage = receivedMessage.GetRawAmqpMessage();
+        if (amqpMessage.Body.TryGetValue(out object? value))
+        {
+            return value switch
+            {
+                null => string.Empty,
+                string stringValue => stringValue,
+                _ => throw new NotSupportedException($"Unknown message Body type {value?.GetType().Name}")
+            };
+        }
+
+        if (amqpMessage.Body.TryGetData(out IEnumerable<ReadOnlyMemory<byte>>? data))
+        {
+            if (data is null)
+            {
+                return string.Empty;
+            }
+
+            using var memoryStream = new MemoryStream();
+
+            foreach (var segment in data)
+            {
+                memoryStream.Write(segment.Span);
+            }
+
+            memoryStream.Position = 0;
+            return Encoding.UTF8.GetString(memoryStream.ToArray());
+        }
+
+        throw new NotSupportedException("Cannot read the message Body");
     }
 
     public static ServiceBusMessage ToServiceBusMessage(this SendMessage message)
@@ -100,76 +136,6 @@ public static class MessageMappings
         if (message.TimeToLive != null)
         {
             sbMessage.TimeToLive = message.TimeToLive.Value;
-        }
-
-        return sbMessage;
-    }
-
-    public static ServiceBusMessage MapToServiceBusMessage(
-        this ServiceBusReceivedMessage receivedMessage)
-    {
-        var sbMessage = new ServiceBusMessage(receivedMessage.Body);
-
-        if (!string.IsNullOrEmpty(receivedMessage.Subject))
-        {
-            sbMessage.Subject = receivedMessage.Subject;
-        }
-
-        if (receivedMessage.ApplicationProperties != null)
-        {
-            foreach (var applicationProperty in receivedMessage.ApplicationProperties)
-            {
-                sbMessage.ApplicationProperties.Add(
-                    applicationProperty.Key,
-                    applicationProperty.Value);
-            }
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.To))
-        {
-            sbMessage.To = receivedMessage.To;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.ContentType))
-        {
-            sbMessage.ContentType = receivedMessage.ContentType;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.CorrelationId))
-        {
-            sbMessage.CorrelationId = receivedMessage.CorrelationId;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.MessageId))
-        {
-            sbMessage.MessageId = receivedMessage.MessageId;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.PartitionKey))
-        {
-            sbMessage.PartitionKey = receivedMessage.PartitionKey;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.ReplyTo))
-        {
-            sbMessage.ReplyTo = receivedMessage.ReplyTo;
-        }
-
-        if (!string.IsNullOrEmpty(receivedMessage.SessionId))
-        {
-            sbMessage.SessionId = receivedMessage.SessionId;
-        }
-
-        if (receivedMessage.ScheduledEnqueueTime != null &&
-            receivedMessage.ScheduledEnqueueTime != DateTimeOffset.MinValue)
-        {
-            sbMessage.ScheduledEnqueueTime = receivedMessage.ScheduledEnqueueTime;
-        }
-
-        if (receivedMessage.TimeToLive != null &&
-            receivedMessage.ScheduledEnqueueTime != DateTimeOffset.MinValue)
-        {
-            sbMessage.TimeToLive = receivedMessage.TimeToLive;
         }
 
         return sbMessage;
