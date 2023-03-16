@@ -149,7 +149,7 @@ public class MessageService : IMessageService
 
             await SendMessagesInternalAsync(
                 sender,
-                messages.Select(p => p.MapToServiceBusMessage()).ToList(),
+                messages.Select(m => new ServiceBusMessage(m)).ToList(),
                 cancellationToken);
 
             batchResendCount = messages.Count;
