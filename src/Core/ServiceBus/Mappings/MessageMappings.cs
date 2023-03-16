@@ -45,30 +45,12 @@ public static class MessageMappings
         AmqpAnnotatedMessage amqpMessage = receivedMessage.GetRawAmqpMessage();
         if (amqpMessage.Body.TryGetValue(out object? value))
         {
-            return value switch
-            {
-                null => string.Empty,
-                string stringValue => stringValue,
-                _ => throw new NotSupportedException($"Unknown message Body type {value?.GetType().Name}")
-            };
+            return ReadMessageValue(value);
         }
 
         if (amqpMessage.Body.TryGetData(out IEnumerable<ReadOnlyMemory<byte>>? data))
         {
-            if (data is null)
-            {
-                return string.Empty;
-            }
-
-            using var memoryStream = new MemoryStream();
-
-            foreach (var segment in data)
-            {
-                memoryStream.Write(segment.Span);
-            }
-
-            memoryStream.Position = 0;
-            return Encoding.UTF8.GetString(memoryStream.ToArray());
+            return ReadMessageData(data);
         }
 
         throw new NotSupportedException("Cannot read the message Body");
@@ -139,5 +121,32 @@ public static class MessageMappings
         }
 
         return sbMessage;
+    }
+
+    private static string ReadMessageValue(object? value)
+    {
+        return value switch
+        {
+            null => string.Empty,
+            string stringValue => stringValue,
+            _ => throw new NotSupportedException($"Unknown message Body type {value.GetType().Name}")
+        };
+    }
+
+    private static string ReadMessageData(IEnumerable<ReadOnlyMemory<byte>>? data)
+    {
+        if (data is null)
+        {
+            return string.Empty;
+        }
+
+        using var memoryStream = new MemoryStream();
+        foreach (var segment in data)
+        {
+            memoryStream.Write(segment.Span);
+        }
+
+        memoryStream.Position = 0;
+        return Encoding.UTF8.GetString(memoryStream.ToArray());
     }
 }
