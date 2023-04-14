@@ -1,8 +1,8 @@
 using System.Text.Json;
 using CrossBusExplorer.Website;
 using CrossBusExplorer.Website.Models;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
+using ElectronSharp.API;
+using ElectronSharp.API.Entities;
 namespace Website.Host;
 
 public class DefaultSettingsService : ISettingsService
