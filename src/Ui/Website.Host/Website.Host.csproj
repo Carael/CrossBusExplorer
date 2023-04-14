@@ -6,7 +6,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="h5.ElectronNET.API" Version="22.0.0.34751" />
-        <PackageReference Include="MudBlazor" Version="6.1.6" />
+        <PackageReference Include="MudBlazor" Version="6.2.2" />
     </ItemGroup>
 
     <ItemGroup>
