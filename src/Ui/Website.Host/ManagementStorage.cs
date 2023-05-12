@@ -2,8 +2,8 @@ using System.Text;
 using System.Text.Json;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
+using ElectronSharp.API;
+using ElectronSharp.API.Entities;
 namespace Website.Host;
 
 public class ManagementStorage : IManagementStorage

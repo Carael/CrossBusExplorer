@@ -3,259 +3,255 @@ name: Build Electron
 on:
   push:
     tags:
-    - '*'
+      - "*"
     paths:
-      - 'src/**/*'
-      - '.github/workflows/dotnet-eletron.yml' 
+      - "src/**/*"
+      - ".github/workflows/dotnet-eletron.yml"
 env:
   PROJECT_PATH: "src/Ui/Website.Host/Website.Host.csproj"
   PROJECT_FOLDER: "src/Ui/Website.Host/"
   NUGETCONFIG_PATH: "nuget.config"
   RELEASE_VERSION: ${{ github.ref_name }}
-  
+
 jobs:
   publish-macos-x64:
     runs-on: macos-12
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "7.0.x"
+          include-prerelease: true
 
-    - name: Generate version number using date and run number
-      id: version-creator
-      shell: bash
-      run: |
-        buildDay=`date +%Y.%m%d`
-        echo $buildDay
-        runNum=${{ env.GITHUB_RUN_NUMBER }}
-        ver="${buildDay}.${runNum}.0"
-        echo $ver
-        echo "APP_VERSION=$ver" >> $GITHUB_ENV
+      - name: Generate version number using date and run number
+        id: version-creator
+        shell: bash
+        run: |
+          buildDay=`date +%Y.%m%d`
+          echo $buildDay
+          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          ver="${buildDay}.${runNum}.0"
+          echo $ver
+          echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
-    - name: Install h5.ElectronNET.CLI
-      shell: bash
-      run: dotnet tool install h5.ElectronNET.CLI -g
+      - name: Install ElectronSharp.CLI
+        shell: bash
+        run: dotnet tool install ElectronSharp.CLI -g
 
-    - name: Restore NuGet packages
-      shell: bash
-      run: 
-        dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
+      - name: Restore NuGet packages
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
 
-    - name: Publish Macos x64
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target osx
+      - name: Publish Macos x64
+        shell: bash
+        run: |
+          cd ${{ env.PROJECT_FOLDER }}
+          electron-sharp build /target osx
 
-#     - name: Publish Mac Arm64
-#       shell: bash
-#       run: |
-#         cd ${{ env.PROJECT_FOLDER }}
-#         electronize-h5 build /target osx-arm64
+      #     - name: Publish Mac Arm64
+      #       shell: bash
+      #       run: |
+      #         cd ${{ env.PROJECT_FOLDER }}
+      #         electron-sharp build /target osx-arm64
 
-    - name: Upload publish artifacts
-      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-      with:
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        with:
           name: crossbusexplorer-macos-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
 
   publish-win-x64:
     runs-on: macos-12
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "7.0.x"
+          include-prerelease: true
 
-    - name: Generate version number using date and run number
-      id: version-creator
-      shell: bash
-      run: |
-        buildDay=`date +%Y.%m%d`
-        echo $buildDay
-        runNum=${{ env.GITHUB_RUN_NUMBER }}
-        ver="${buildDay}.${runNum}.0"
-        echo $ver
-        echo "APP_VERSION=$ver" >> $GITHUB_ENV
+      - name: Generate version number using date and run number
+        id: version-creator
+        shell: bash
+        run: |
+          buildDay=`date +%Y.%m%d`
+          echo $buildDay
+          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          ver="${buildDay}.${runNum}.0"
+          echo $ver
+          echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
-    - name: Install h5.ElectronNET.CLI
-      shell: bash
-      run: dotnet tool install h5.ElectronNET.CLI -g
+      - name: Install ElectronSharp.CLI
+        shell: bash
+        run: dotnet tool install ElectronSharp.CLI -g
 
-    - name: Restore NuGet packages
-      shell: bash
-      run: 
-        dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
-         
-    - name: Publish Win x64
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target win
+      - name: Restore NuGet packages
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
 
-    - name: Upload publish artifacts
-      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-      with:
+      - name: Publish Win x64
+        shell: bash
+        run: |
+          cd ${{ env.PROJECT_FOLDER }}
+          electron-sharp build /target win
+
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        with:
           name: crossbusexplorer-win-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
-  
+
   publish-linux-x64:
     runs-on: macos-12
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "7.0.x"
+          include-prerelease: true
 
-    - name: Generate version number using date and run number
-      id: version-creator
-      shell: bash
-      run: |
-        buildDay=`date +%Y.%m%d`
-        echo $buildDay
-        runNum=${{ env.GITHUB_RUN_NUMBER }}
-        ver="${buildDay}.${runNum}.0"
-        echo $ver
-        echo "APP_VERSION=$ver" >> $GITHUB_ENV
+      - name: Generate version number using date and run number
+        id: version-creator
+        shell: bash
+        run: |
+          buildDay=`date +%Y.%m%d`
+          echo $buildDay
+          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          ver="${buildDay}.${runNum}.0"
+          echo $ver
+          echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
-    - name: Install h5.ElectronNET.CLI
-      shell: bash
-      run: dotnet tool install h5.ElectronNET.CLI -g
+      - name: Install ElectronSharp.CLI
+        shell: bash
+        run: dotnet tool install ElectronSharp.CLI -g
 
-    - name: Restore NuGet packages
-      shell: bash
-      run: 
-        dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
-         
-    - name: Publish Linux
-      shell: bash
-      run: |
-        cd ${{ env.PROJECT_FOLDER }}
-        electronize-h5 build /target linux
+      - name: Restore NuGet packages
+        shell: bash
+        run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
 
-    - name: Upload publish artifacts
-      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-      with:
+      - name: Publish Linux
+        shell: bash
+        run: |
+          cd ${{ env.PROJECT_FOLDER }}
+          electron-sharp build /target linux
+
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        with:
           name: crossbusexplorer-linux-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
 
-
-# ********************************* #
-# >>>>>>> Release <<<<<<< #
-# ********************************* #
+  # ********************************* #
+  # >>>>>>> Release <<<<<<< #
+  # ********************************* #
   create-release:
     needs: [publish-macos-x64, publish-win-x64, publish-linux-x64]
     runs-on: macos-12
     steps:
-    - name: Create downloads folder
-      run: mkdir downloads
-    - name: Download artifacts
-      uses: actions/download-artifact@v3.0.1
-      with:
-        name: crossbusexplorer-macos-x64
-        path: downloads/crossbusexplorer-macos-x64
-    - name: Download artifacts
-      uses: actions/download-artifact@v3.0.1
-      with:
-        name: crossbusexplorer-win-x64
-        path: downloads/crossbusexplorer-win-x64
-    - name: Download artifacts
-      uses: actions/download-artifact@v3.0.1
-      with:
-        name: crossbusexplorer-linux-x64
-        path: downloads/crossbusexplorer-linux-x64
+      - name: Create downloads folder
+        run: mkdir downloads
+      - name: Download artifacts
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: crossbusexplorer-macos-x64
+          path: downloads/crossbusexplorer-macos-x64
+      - name: Download artifacts
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: crossbusexplorer-win-x64
+          path: downloads/crossbusexplorer-win-x64
+      - name: Download artifacts
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: crossbusexplorer-linux-x64
+          path: downloads/crossbusexplorer-linux-x64
 
-    - name: Zip win x64
-      run: (cd downloads/crossbusexplorer-win-x64 ; zip -r crossbusexplorer-win-x64 *.exe)
+      - name: Zip win x64
+        run: (cd downloads/crossbusexplorer-win-x64 ; zip -r crossbusexplorer-win-x64 *.exe)
 
-    - name: Zip linux AppImage x64
-      run: (cd downloads/crossbusexplorer-linux-x64 ; zip -r crossbusexplorer-linux-appimage-x64 *.AppImage)
+      - name: Zip linux AppImage x64
+        run: (cd downloads/crossbusexplorer-linux-x64 ; zip -r crossbusexplorer-linux-appimage-x64 *.AppImage)
 
-    - name: Zip linux Snap x64
-      run: (cd downloads/crossbusexplorer-linux-x64 ; zip -r crossbusexplorer-linux-snap-x64 *.snap)
+      - name: Zip linux Snap x64
+        run: (cd downloads/crossbusexplorer-linux-x64 ; zip -r crossbusexplorer-linux-snap-x64 *.snap)
 
-    - name: Zip macos x64
-      run: (cd downloads/crossbusexplorer-macos-x64 ; zip -r crossbusexplorer-macos-x64 *.dmg)
+      - name: Zip macos x64
+        run: (cd downloads/crossbusexplorer-macos-x64 ; zip -r crossbusexplorer-macos-x64 *.dmg)
 
-#     - name: Zip macos arm64
-#       run: (cd downloads/crossbusexplorer-macos-arm64 ; zip -r crossbusexplorer-macos-x64 *.dmg)
+      #     - name: Zip macos arm64
+      #       run: (cd downloads/crossbusexplorer-macos-arm64 ; zip -r crossbusexplorer-macos-x64 *.dmg)
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.RELEASE_VERSION }}
-        release_name: ${{ env.RELEASE_VERSION }}
-        draft: false
-        prerelease: false
-        
-    - name: Upload macos
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-macos-x64/crossbusexplorer-macos-x64.zip
-        asset_name: crossbusexplorer-macos-x64.zip
-        asset_content_type: application/zip
-        
-#     - name: Upload macos-arm64
-#       uses: actions/upload-release-asset@v1
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#       with:
-#         upload_url: ${{ steps.create_release.outputs.upload_url }}
-#         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-macos-arm64.zip
-#         asset_name: crossbusexplorer-macos-arm64.zip
-#         asset_content_type: application/zip
-        
-    - name: Upload win-x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-win-x64/crossbusexplorer-win-x64.zip
-        asset_name: crossbusexplorer-win-x64.zip
-        asset_content_type: application/zip
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          release_name: ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
 
-    - name: Upload linux snap x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-linux-x64/crossbusexplorer-linux-snap-x64.zip
-        asset_name: crossbusexplorer-linux-snap-x64.zip
-        asset_content_type: application/zip
+      - name: Upload macos
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: downloads/crossbusexplorer-macos-x64/crossbusexplorer-macos-x64.zip
+          asset_name: crossbusexplorer-macos-x64.zip
+          asset_content_type: application/zip
 
-    - name: Upload linux appimage x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: downloads/crossbusexplorer-linux-x64/crossbusexplorer-linux-appimage-x64.zip
-        asset_name: crossbusexplorer-linux-appimage-x64.zip
-        asset_content_type: application/zip
+      #     - name: Upload macos-arm64
+      #       uses: actions/upload-release-asset@v1
+      #       env:
+      #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #       with:
+      #         upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #         asset_path: downloads/crossbusexplorer-electron/crossbusexplorer-macos-arm64.zip
+      #         asset_name: crossbusexplorer-macos-arm64.zip
+      #         asset_content_type: application/zip
+
+      - name: Upload win-x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: downloads/crossbusexplorer-win-x64/crossbusexplorer-win-x64.zip
+          asset_name: crossbusexplorer-win-x64.zip
+          asset_content_type: application/zip
+
+      - name: Upload linux snap x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: downloads/crossbusexplorer-linux-x64/crossbusexplorer-linux-snap-x64.zip
+          asset_name: crossbusexplorer-linux-snap-x64.zip
+          asset_content_type: application/zip
+
+      - name: Upload linux appimage x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: downloads/crossbusexplorer-linux-x64/crossbusexplorer-linux-appimage-x64.zip
+          asset_name: crossbusexplorer-linux-appimage-x64.zip
+          asset_content_type: application/zip

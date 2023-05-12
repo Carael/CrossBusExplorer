@@ -1,8 +1,8 @@
 using CrossBusExplorer.Management;
 using CrossBusExplorer.ServiceBus;
 using CrossBusExplorer.Website;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
+using ElectronSharp.API;
+using ElectronSharp.API.Entities;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Website.Host;
 

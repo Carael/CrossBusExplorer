@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "electronsharp.cli": {
+      "version": "24.0.0.37423",
+      "commands": [
+        "electron-sharp"
+      ]
+    }
+  }
+}
