@@ -242,7 +242,7 @@ public class TopicViewModel : ITopicViewModel
             EnableBatchedOperations = true,
             AutoDeleteOnIdle = TimeSpan.FromDays(365),
             DefaultMessageTimeToLive = TimeSpan.FromDays(365),
-            DuplicateDetectionHistoryTimeWindow = TimeSpan.FromMinutes(5),
+            DuplicateDetectionHistoryTimeWindow = TimeSpan.FromMinutes(1),
         };
     }
 }

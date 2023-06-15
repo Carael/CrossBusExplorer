@@ -42,7 +42,7 @@ public static class QueueMappings
                 createQueueOptions.Name);
 
         options.MaxSizeInMegabytes = createQueueOptions.MaxSizeInMegabytes ?? 1024;
-
+        
         if (createQueueOptions.EnablePartitioning.HasValue)
         {
             options.EnablePartitioning = createQueueOptions.EnablePartitioning.Value;
