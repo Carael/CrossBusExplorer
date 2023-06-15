@@ -59,9 +59,9 @@
             <MudTd DataLabel="Message Id">@context.Id</MudTd>
             <MudTd DataLabel="Seq">@context.SystemProperties.SequenceNumber</MudTd>
             <MudTd DataLabel="Subject">@(context.Subject ?? "-")</MudTd>
-            <MudTd DataLabel="Enqueue time">@context.SystemProperties.EnqueuedTime.ToUniversal())</MudTd>
+            <MudTd DataLabel="Enqueue time">@context.SystemProperties.EnqueuedTime.ToUniversal()</MudTd>
             <MudTd DataLabel="Expiration time">@context.SystemProperties.ExpiresAt.ToUniversal()</MudTd>
-            <MudTd DataLabel="Scheduled enqueue time">@(context.SystemProperties.ScheduledEnqueueTime.ToUniversal())</MudTd>
+            <MudTd DataLabel="Scheduled enqueue time">@context.SystemProperties.ScheduledEnqueueTime.ToUniversal()</MudTd>
         </RowTemplate>
         <PagerContent>
             <div class="d-flex">

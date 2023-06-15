@@ -219,8 +219,12 @@ public class TopicService : ITopicService
 
             var queueProperties = getTopicResponse.Value;
 
-            var response = await administrationClient.UpdateTopicAsync(
+            await administrationClient.UpdateTopicAsync(
                 queueProperties.UpdateFromOptions(options),
+                cancellationToken);
+            
+            var response = await administrationClient.GetTopicAsync(
+                options.Name,
                 cancellationToken);
 
             Response<TopicRuntimeProperties> runtimePropertiesResponse =

@@ -18,13 +18,13 @@ public class QueueService : IQueueService
     {
         _connectionManagement = connectionManagement;
     }
-    
+
     public async IAsyncEnumerable<QueueInfo> GetAsync(
         string connectionName,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
-        
+
         ServiceBusAdministrationClient administrationClient =
             new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -43,7 +43,7 @@ public class QueueService : IQueueService
                     await administrationClient.GetQueueRuntimePropertiesAsync(
                         queue.Name,
                         cancellationToken);
-                
+
                 QueueRuntimeProperties queueRuntimeProperties = runtimePropertiesResponse.Value;
 
                 yield return queue.ToQueueInfo(queueRuntimeProperties);
@@ -54,14 +54,14 @@ public class QueueService : IQueueService
             await enumerator.DisposeAsync();
         }
     }
-    
+
     public async Task<QueueDetails> GetAsync(
         string connectionName,
         string name,
         CancellationToken cancellationToken)
     {
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
-        
+
         ServiceBusAdministrationClient administrationClient =
             new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -83,9 +83,9 @@ public class QueueService : IQueueService
     {
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
+
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -107,9 +107,9 @@ public class QueueService : IQueueService
     {
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
+
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -145,9 +145,9 @@ public class QueueService : IQueueService
     {
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
+
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -192,9 +192,9 @@ public class QueueService : IQueueService
     {
         try
         {
-            var connection = 
+            var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
-            
+
             ServiceBusAdministrationClient administrationClient =
                 new ServiceBusAdministrationClient(connection.ConnectionString);
 
@@ -204,8 +204,13 @@ public class QueueService : IQueueService
 
             var queueProperties = getQueueResponse.Value;
 
-            var response = await administrationClient.UpdateQueueAsync(
+            //ignore the response from administration client - some values are incorrect
+            await administrationClient.UpdateQueueAsync(
                 queueProperties.UpdateFromOptions(options),
+                cancellationToken);
+
+            var response = await administrationClient.GetQueueAsync(
+                options.Name,
                 cancellationToken);
 
             Response<QueueRuntimeProperties> runtimePropertiesResponse =

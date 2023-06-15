@@ -156,7 +156,7 @@ public class QueueFormModel : INotifyPropertyChanged
     
     private bool? _deadLetteringOnMessageExpiration;
     
-    [Label("Duplicate detection history time window")]
+    [Label("Dead lettering on message expiration")]
     public bool? DeadLetteringOnMessageExpiration
     {
         get => _deadLetteringOnMessageExpiration;
