@@ -27,19 +27,19 @@
                 Message Id
             </MudTh>
             <MudTh>
-                Seq
+                      <MudTableSortLabel SortBy="new Func<Message, object>(x=>x.SystemProperties.SequenceNumber)">Seq</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 Subject
             </MudTh>
             <MudTh>
-                Enqueue time
+                <MudTableSortLabel SortBy="new Func<Message, object>(x=>x.SystemProperties.EnqueuedTime)">Enqueue time</MudTableSortLabel>
             </MudTh>
             <MudTh>
-                Expiration time
+                 <MudTableSortLabel SortBy="new Func<Message, object>(x=>x.SystemProperties.ExpiresAt)">Expiration time</MudTableSortLabel>
             </MudTh>
             <MudTh>
-                Scheduled enqueue time
+                <MudTableSortLabel SortBy="new Func<Message, object>(x=>x.SystemProperties.ScheduledEnqueueTime)">Scheduled enqueue time</MudTableSortLabel>
             </MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -65,7 +65,7 @@
         </RowTemplate>
         <PagerContent>
             <div class="d-flex">
-                <MudTablePager PageSizeOptions="new int[]{50, 100}"/>
+                <MudTablePager PageSizeOptions="new[]{10}"/>
                 @if (Model.CanPeekMore(_formModel))
                 {
                     <MudButton OnClick="@(() => Model.PeekMore(_formModel, default))" ButtonType="ButtonType.Button">Load more</MudButton>

@@ -8,11 +8,12 @@
   "singleInstance": false,
   "environment": "Production",
   "description": "Cross Bus Explorer",
+  "aspCoreBackendPort": 8010,
   "build": {
     "appId": "com.crossbusexplorer.app",
     "productName": "Cross Bus Explorer",
     "copyright": "Copyright © 2023",
-    "buildVersion": "0.3.4",
+    "buildVersion": "0.3.5",
     "compression": "maximum",
     "directories": {
       "output": "../../../bin/Desktop"

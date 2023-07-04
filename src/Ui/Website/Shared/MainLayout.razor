@@ -3,16 +3,45 @@
 @inject IConnectionsViewModel _connectionsViewModel
 @inject ISettingsService SettingsService
 
-<MudThemeProvider Theme="_customTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider Theme="_customTheme" @bind-IsDarkMode="@_userSettings.IsDarkMode"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudMainContent Style="padding-top: 0; position: fixed; height: 100%; width: 100%; z-index: 0" Class="d-flex flex-grow-1">
-        <SidePanel DarkMode="@_userSettings.IsDarkMode" ChangeDarkMode="@((value) => ChangeDarkMode(value))">
-            <ServiceBusNavMenu/>
-        </SidePanel>
-        <MudContainer Class="flex-shrink-1" Style="padding-top: 24px">
+        <MudDrawerContainer Class="mud-height-full">
+            <MudDrawer Fixed="true" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
+                <MudNavMenu>
+                    <MudTooltip Placement="Placement.Right" Text="Connections">
+                        <MudIconButton Href="connections" Icon="@Icons.Material.Outlined.EditNote"/>
+                    </MudTooltip>
+                    <MudTooltip Placement="Placement.Right" Text="Toggle side menu">
+                        <MudIconButton Icon="@Icons.Material.Outlined.AccountTree" Color="Color.Inherit" OnClick="@((_) => DrawerToggle())"/>
+                    </MudTooltip>
+                    <MudTooltip Placement="Placement.Right" Text="Reload menu">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Cached"
+                                       Color="Color.Inherit"
+                                       Disabled="@_navigationViewModel.IsLoading"
+                                       OnClick="@((_) => _navigationViewModel.ReloadMenu())"/>
+                    </MudTooltip>
+                    <MudTooltip Placement="Placement.Right" Text="Change theme">
+                        <MudMenu Icon="@Icons.Filled.MoreVert" Color="Color.Inherit">
+                            <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(false))">Normal</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => ChangeDarkModeInternal(true))">Dark</MudMenuItem>
+                        </MudMenu>
+                    </MudTooltip>
+                    <Jobs></Jobs>
+                </MudNavMenu>
+            </MudDrawer>
+            @if (_drawerOpen)
+            {
+                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Style="overflow: auto;">
+                    <ServiceBusNavMenu/>
+                </MudContainer>
+            }
+        </MudDrawerContainer>
+
+        <MudContainer>
             <ErrorBoundary @ref="@_errorBoundary">
                 <ChildContent>
                     @Body
@@ -30,7 +59,12 @@
     private ErrorBoundary? _errorBoundary;
     private bool _isOpen;
     private UserSettings _userSettings = new UserSettings();
+    bool _drawerOpen = true;
+    public bool DarkMode { get; set; }
     
+    [Inject]
+    private INavigationViewModel _navigationViewModel { get; set; }
+
     [Inject]
     private MudTheme _customTheme { get; set; }
 
@@ -59,5 +93,27 @@
         StateHasChanged();
 
         await SettingsService.SaveAsync(_userSettings, default);
+    }
+    
+    private async Task ChangeDarkModeInternal(bool isDarkMode)
+    {
+        DarkMode = isDarkMode;
+        // _sidePanel.Style = _drawerOpen ? GetSidebarOpenStyle(isDarkMode) : _sidePanelCloseStyle;
+        await ChangeDarkMode(isDarkMode);
+    }
+    
+    private string _sidePanelCloseStyle = $"padding-left: 50px; width: 0; visibility: collapse";
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private string GetSidebarOpenStyle(bool isDarkMode)
+    {
+        return $"padding-left: 50px; width: 30%; overflow: auto; visibility: visible; flex: none; " +
+               $"border-right-color: {(isDarkMode ? Colors.Grey.Darken3 : "#e0e0e0")}; " +
+               $"border-right-width: 1px; " +
+               $"background-color: {(isDarkMode ? Colors.Grey.Darken4 : "#e0e0e047")}";
     }
 }

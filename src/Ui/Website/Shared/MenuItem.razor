@@ -80,13 +80,11 @@
 
     private async Task OnQueuesExpandChange()
     {
-    // Value.QueuesExpanded = !Value.QueuesExpanded;
         await Model.LoadQueues(Value, default);
     }
 
     private async Task OnTopicsExpanded()
     {
-    // Value.TopicsExpanded = !Value.TopicsExpanded;
         await Model.LoadTopics(Value, default);
     }
 }
