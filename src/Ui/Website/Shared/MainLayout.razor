@@ -9,7 +9,7 @@
 
 <MudLayout>
     <MudMainContent Style="padding-top: 0; position: fixed; height: 100%; width: 100%; z-index: 0" Class="d-flex flex-grow-1">
-        <MudDrawerContainer Class="mud-height-full">
+        <MudDrawerContainer>
             <MudDrawer Fixed="true" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
                 <MudNavMenu>
                     <MudTooltip Placement="Placement.Right" Text="Connections">
@@ -35,7 +35,7 @@
             </MudDrawer>
             @if (_drawerOpen)
             {
-                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Style="overflow: auto;">
+                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mud-height-full overflow-auto">
                     <ServiceBusNavMenu/>
                 </MudContainer>
             }
