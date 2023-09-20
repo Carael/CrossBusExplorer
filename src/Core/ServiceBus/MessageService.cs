@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
@@ -199,7 +198,7 @@ public class MessageService : IMessageService
                 fromSequenceNumber,
                 cancellationToken);
         }
-
+        
         return await receiver.ReceiveMessagesAsync(
             maxMessages ?? maxReceiverMessagesCount,
             null,
