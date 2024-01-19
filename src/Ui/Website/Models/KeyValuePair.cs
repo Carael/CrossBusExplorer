@@ -5,9 +5,9 @@ namespace CrossBusExplorer.Website.Models;
 public class KeyValuePair : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    
+
     public string _key;
-    
+
     public string Key
     {
         get => _key;
@@ -17,10 +17,10 @@ public class KeyValuePair : INotifyPropertyChanged
             this.Notify(PropertyChanged);
         }
     }
-    
-    public string _value;
-    
-    public string Value
+
+    public object _value;
+
+    public object Value
     {
         get => _value;
         set

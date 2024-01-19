@@ -6,4 +6,4 @@ public record Message(
     string? Subject,
     string Body,
     MessageSystemProperties SystemProperties,
-    IReadOnlyDictionary<string, string?>? ApplicationProperties);
+    IReadOnlyDictionary<string, object>? ApplicationProperties);

@@ -12,4 +12,4 @@ public record SendMessage(
     string? SessionId,
     DateTimeOffset? ScheduledEnqueueTime,
     TimeSpan? TimeToLive,
-    Dictionary<string, string?>? ApplicationProperties);
+    Dictionary<string, object?>? ApplicationProperties);
