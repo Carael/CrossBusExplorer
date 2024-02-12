@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -37,7 +38,9 @@ public static class MessageMappings
             PartitionKey = message.SystemProperties.PartitionKey,
             ReplyTo = message.SystemProperties.ReplyTo,
             SessionId = message.SystemProperties.SessionId,
-            ScheduledEnqueueTime = message.SystemProperties.ScheduledEnqueueTime,
+            ScheduledEnqueueTime =
+                message.SystemProperties.ScheduledEnqueueTime == DateTimeOffset.MinValue ? null
+                    : message.SystemProperties.ScheduledEnqueueTime,
             TimeToLive = message.SystemProperties.TimeToLive,
             ApplicationProperties =
                 new ObservableCollection<KeyValueTypePair>(
