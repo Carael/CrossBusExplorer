@@ -29,7 +29,8 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                 _ => throw new ArgumentOutOfRangeException("Unsupported type")
             };
 
-        public static object? GetApplicationPropertyValue(this string value,
+        public static object GetApplicationPropertyValue(
+            this string value,
             ApplicationPropertyType type)
         {
             switch (type)
@@ -37,7 +38,19 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                 case ApplicationPropertyType.String:
                     return value;
                 case ApplicationPropertyType.Bool:
-                    return bool.Parse(value);
+                {
+                    if (value.Equals("1", StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+
+                    if (value.Equals("0", StringComparison.Ordinal))
+                    {
+                        return false;
+                    }
+
+                    return int.Parse(value);
+                }
                 case ApplicationPropertyType.Byte:
                     return byte.Parse(value);
                 case ApplicationPropertyType.Sbyte:

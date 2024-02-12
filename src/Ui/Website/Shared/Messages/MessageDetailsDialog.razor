@@ -338,7 +338,8 @@
                        Margin="Margin.Dense"
                        Required="true"
                        FullWidth="true"
-                       For="@(() => userProperty.Type)">
+                       For="@(() => userProperty.Type)"
+                       @bind-Value="@userProperty.Type">
               @foreach (ApplicationPropertyType type in (ApplicationPropertyType[])Enum.GetValues(typeof(ApplicationPropertyType)))
               {
                 <MudSelectItem Value="type">@type.ToString()</MudSelectItem>
