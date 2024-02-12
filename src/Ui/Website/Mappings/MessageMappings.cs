@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
+using CrossBusExplorer.ServiceBus.Extensions;
 using CrossBusExplorer.Website.Extensions;
 using CrossBusExplorer.Website.Models;
 namespace CrossBusExplorer.Website.Mappings;
@@ -20,7 +22,8 @@ public static class MessageMappings
             message.SessionId,
             message.ScheduledEnqueueTime,
             message.TimeToLive,
-            message.ApplicationProperties?.ToDictionary(p => p.Key, p => p.Value));
+            message.ApplicationProperties
+                .ToDictionary(p => p.Key, p => p.Value.GetApplicationPropertyValue(p.Type)));
 
     public static MessageDetailsModel ToSendMessageModel(this Message message) =>
         new MessageDetailsModel
@@ -37,8 +40,13 @@ public static class MessageMappings
             ScheduledEnqueueTime = message.SystemProperties.ScheduledEnqueueTime,
             TimeToLive = message.SystemProperties.TimeToLive,
             ApplicationProperties =
-                new ObservableCollection<KeyValuePair>(
+                new ObservableCollection<KeyValueTypePair>(
                     message.ApplicationProperties?.Select(p =>
-                        new KeyValuePair { Key = p.Key, Value = p.Value }).ToList())
+                        new KeyValueTypePair
+                        {
+                            Key = p.Key,
+                            Value = p.Value.ToString() ?? string.Empty,
+                            Type = p.Value.GetApplicationPropertyType()
+                        }).ToList() ?? new List<KeyValueTypePair>())
         };
 }

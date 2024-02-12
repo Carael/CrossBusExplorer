@@ -1,7 +1,7 @@
 @using CrossBusExplorer.ServiceBus.Contracts.Types
 @using CrossBusExplorer.Website.Mappings
 @using CrossBusExplorer.Website.Models
-@using KeyValuePair = CrossBusExplorer.Website.Models.KeyValuePair
+@using KeyValuePair = CrossBusExplorer.Website.Models.KeyValueTypePair
 
 <MudDialog>
 <TitleContent>
@@ -333,11 +333,21 @@
         <td>
           @if (EditMode)
           {
-
+            <MudSelect T="ApplicationPropertyType"
+                       Variant="Variant.Text"
+                       Margin="Margin.Dense"
+                       Required="true"
+                       FullWidth="true"
+                       For="@(() => userProperty.Type)">
+              @foreach (ApplicationPropertyType type in (ApplicationPropertyType[])Enum.GetValues(typeof(ApplicationPropertyType)))
+              {
+                <MudSelectItem Value="type">@type.ToString()</MudSelectItem>
+              }
+            </MudSelect>
           }
           else
           {
-            @(userProperty.Value?.GetType().ToString() ?? "-")
+            @userProperty.Type.ToString()
           }
         </td>
         <td>

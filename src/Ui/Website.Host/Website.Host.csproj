@@ -5,8 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="ElectronSharp.API" Version="28.1.3.44599" />
-        <PackageReference Include="MudBlazor" Version="6.12.0" />
+        <PackageReference Include="ElectronSharp.API" Version="28.2.0.44969" />
+        <PackageReference Include="MudBlazor" Version="6.15.0" />
     </ItemGroup>
 
     <ItemGroup>
