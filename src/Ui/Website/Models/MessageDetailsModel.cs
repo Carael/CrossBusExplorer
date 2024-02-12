@@ -12,7 +12,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
 
     public MessageDetailsModel()
     {
-        ApplicationProperties = new ObservableCollection<KeyValuePair>();
+        ApplicationProperties = new ObservableCollection<KeyValueTypePair>();
     }
 
     private string _body;
@@ -147,9 +147,9 @@ public class MessageDetailsModel : INotifyPropertyChanged
         }
     }
 
-    private ObservableCollection<KeyValuePair> _applicationProperties;
+    private ObservableCollection<KeyValueTypePair> _applicationProperties;
 
-    public ObservableCollection<KeyValuePair> ApplicationProperties
+    public ObservableCollection<KeyValueTypePair> ApplicationProperties
     {
         get => _applicationProperties;
         set

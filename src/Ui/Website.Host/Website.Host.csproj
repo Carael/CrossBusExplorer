@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="ElectronSharp.API" Version="26.2.1.42149" />
-        <PackageReference Include="MudBlazor" Version="6.10.0" />
+        <PackageReference Include="ElectronSharp.API" Version="28.2.0.44969" />
+        <PackageReference Include="MudBlazor" Version="6.15.0" />
     </ItemGroup>
 
     <ItemGroup>

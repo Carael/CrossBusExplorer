@@ -124,7 +124,7 @@
                 <MudField Variant="Variant.Outlined" Label="Receive type">
                     <MudRadioGroup @bind-SelectedOption="_formModel.Type"
                                    For="@(() => _formModel.Type)">
-                        
+
                         @* TODO: fix all receive option
                             <MudRadio Dense="true" *@
                         @*           Size="Size.Small" *@
@@ -140,6 +140,7 @@
                     <MudNumericField @bind-Value="_formModel.MessagesCount"
                                      Disabled="@(_formModel.Type == ReceiveType.All)"
                                      For="@(() => _formModel.MessagesCount)"
+                                     T="int?"
                                      Class="px-0 ma-0 pa-0 py-0"
                                      Min="1"
                                      Max="250"
@@ -147,6 +148,7 @@
                                      HelperText="Messages count">
                     </MudNumericField>
                     <MudNumericField @bind-Value="_formModel.FromSequenceNumber"
+                                     T="long?"
                                      For="@(() => _formModel.FromSequenceNumber)"
                                      Disabled="@(_formModel.Type == ReceiveType.All || _formModel.Mode == ReceiveMode.ReceiveAndDelete)"
                                      Class="px-0 ma-0 pa-0 py-0"

@@ -16,17 +16,17 @@ public static class StringExtensions
         {
             return false;
         }
-        
+
         return value.Equals(value2, StringComparison.InvariantCultureIgnoreCase);
     }
-        
+
 
     public static TimeSpan? ToTimeSpan(this string? value)
     {
         return value != null ? TimeSpan.Parse(value) : null;
     }
 
-    public static string TryFormatBody(this string value, string contentType)
+    public static string TryFormatBody(this string value, string? contentType)
     {
         if (contentType != null)
         {
@@ -48,7 +48,7 @@ public static class StringExtensions
 
         return value;
     }
-    
+
     private static string TryFormatJson(string value)
     {
         try

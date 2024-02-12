@@ -22,9 +22,7 @@ internal static class WellKnown
     {
         public static Converter<TimeSpan?> TimeSpanConverter = new Converter<TimeSpan?>
         {
-            SetFunc = value => value != null
-                ? value.Value.ToString(@"dddd\.hh\:mm\:ss")
-                : "0000.00:00:00",
+            SetFunc = value => value?.ToString(@"dddd\.hh\:mm\:ss"),
             GetFunc = text =>
             {
                 if (TimeSpan.TryParse(text, out TimeSpan value))
@@ -39,9 +37,7 @@ internal static class WellKnown
         public static Converter<DateTimeOffset?> DateTimeOffsetConverter =
             new Converter<DateTimeOffset?>
             {
-                SetFunc = value => value != null
-                    ? value.Value.ToString(Format.DateFormat)
-                    : DateTimeOffset.MinValue.ToString(Format.DateFormat),
+                SetFunc = value => value?.ToString(Format.DateFormat),
                 GetFunc = text =>
                 {
                     if (DateTimeOffset.TryParse(text, out DateTimeOffset value))

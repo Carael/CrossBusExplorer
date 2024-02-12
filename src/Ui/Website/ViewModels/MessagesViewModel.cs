@@ -72,7 +72,7 @@ public class MessagesViewModel : IMessagesViewModel
 
         formModel.FromSequenceNumber = lastSequenceNumber + 1;
 
-        var messages = await LoadMessagesAsync(formModel, cancellationToken);
+        List<Message> messages = await LoadMessagesAsync(formModel, cancellationToken);
 
         foreach (Message message in messages)
         {

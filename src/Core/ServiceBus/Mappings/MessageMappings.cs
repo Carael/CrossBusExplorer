@@ -37,7 +37,7 @@ public static class MessageMappings
                 receivedMessage.To
             ),
             receivedMessage.ApplicationProperties.ToDictionary(p => p.Key,
-                p => p.Value?.ToString()));
+                p => p.Value));
     }
 
     private static string ReadBody(ServiceBusReceivedMessage receivedMessage)

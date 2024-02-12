@@ -62,24 +62,24 @@ jobs:
     - name: Publish Maui WinUI project x64
       shell: pwsh
       run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+        dotnet publish ${{ env.PROJECT_PATH }} -f net8.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
 
     - name: Publish Maui WinUI project arm64
       shell: pwsh
       run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+        dotnet publish ${{ env.PROJECT_PATH }} -f net8.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
 
     - name: Upload Windows Artifact x64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-win-x64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
+          path: src/Ui/Host.Ui/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Host.Ui*/Host.Ui*.msix
 
     - name: Upload Windows Artifact arm64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-win-arm64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
+          path: src/Ui/Host.Ui/bin/Release/net8.0-windows10.0.19041.0/win10-arm64/AppPackages/Host.Ui*/Host.Ui*.msix
 
 # ********************************* #
 # >>>>>>> MacCatalyst Build <<<<<<< #
@@ -122,12 +122,12 @@ jobs:
          
     - name: Publish MAUI MacCatalyst project
       shell: bash
-      run: dotnet build ${{ env.PROJECT_PATH }} -f:net7.0-maccatalyst -c:Release /p:CreatePackage=true
+      run: dotnet build ${{ env.PROJECT_PATH }} -f:net8.0-maccatalyst -c:Release /p:CreatePackage=true
     - name: Upload MacCatalyst Artifact
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: crossbusexplorer-macos-x64
-          path: src/Ui/Host.Ui/bin/Release/net7.0-maccatalyst/maccatalyst-x64/*.pkg
+          path: src/Ui/Host.Ui/bin/Release/net8.0-maccatalyst/maccatalyst-x64/*.pkg
 
 # ********************************* #
 # >>>>>>> Release <<<<<<< #
