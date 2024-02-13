@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
+using CrossBusExplorer.Website.Jobs;
 using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
@@ -17,6 +18,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public class MessagesViewModel : IMessagesViewModel
 {
+    private readonly IJobsViewModel _jobsViewModel;
     private readonly IMessageService _messageService;
     private readonly ISnackbar _snackbar;
     private readonly IDialogService _dialogService;
@@ -26,10 +28,12 @@ public class MessagesViewModel : IMessagesViewModel
     private CurrentMessagesEntity? _entity;
 
     public MessagesViewModel(
+        IJobsViewModel jobsViewModel,
         IMessageService messageService,
         ISnackbar snackbar,
         IDialogService dialogService)
     {
+        _jobsViewModel = jobsViewModel;
         _messageService = messageService;
         _snackbar = snackbar;
         _dialogService = dialogService;
@@ -56,10 +60,14 @@ public class MessagesViewModel : IMessagesViewModel
         }
     }
 
+    public bool IsPeekMode(ReceiveMessagesForm formModel)
+    {
+        return formModel.Mode == ReceiveMode.PeekLock;
+    }
+
     public bool CanPeekMore(ReceiveMessagesForm formModel) =>
         Messages.Any() &&
-        formModel.Mode == ReceiveMode.PeekLock &&
-        formModel.Type == ReceiveType.ByCount;
+        formModel is { Mode: ReceiveMode.PeekLock, Type: ReceiveType.ByCount };
 
     public async Task PeekMore(
         ReceiveMessagesForm formModel,
@@ -120,7 +128,7 @@ public class MessagesViewModel : IMessagesViewModel
             }
         };
 
-        var dialogReference = _dialogService.Show<MessageDetailsDialog>(
+        IDialogReference? dialogReference = await _dialogService.ShowAsync<MessageDetailsDialog>(
             "Message details",
             parameters,
             new DialogOptions
@@ -133,11 +141,11 @@ public class MessagesViewModel : IMessagesViewModel
                 Position = DialogPosition.Center
             });
 
-        var dialogResult = await dialogReference.Result;
+        DialogResult? dialogResult = await dialogReference.Result;
 
-        if (!dialogResult.Cancelled && dialogResult.Data is RequeueMessage requeueMessage)
+        if (dialogResult is { Canceled: false, Data: RequeueMessage requeueMessage })
         {
-            Requeue(requeueMessage.QueueOrTopicName, requeueMessage.Message);
+            await Requeue(requeueMessage.QueueOrTopicName, requeueMessage.Message);
         }
     }
 
@@ -145,10 +153,13 @@ public class MessagesViewModel : IMessagesViewModel
     {
         try
         {
-            var sendMessageResult = await _messageService.SendMessagesAsync(
+            Result sendMessageResult = await _messageService.SendMessagesAsync(
                 _entity.ConnectionName,
                 queueOrTopicName,
-                new[] { message.ToSendMessage() },
+                new[]
+                {
+                    message.ToSendMessage()
+                },
                 default);
 
             //TODO: rethink the SendMessageAsync method result
@@ -166,6 +177,60 @@ public class MessagesViewModel : IMessagesViewModel
         catch (Exception ex)
         {
             _snackbar.Add($"Error while sending message. Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    public async Task Delete(Message message, SubQueue subQueue)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add(
+                "ContentText",
+                $"Are you sure you want to remove message with sequence " +
+                $"number {message.SystemProperties.SequenceNumber}?");
+
+            IDialogReference? dialog = await _dialogService.ShowAsync<ConfirmDialog>(
+                "Confirm",
+                parameters,
+                new DialogOptions
+                {
+                    CloseOnEscapeKey = true
+                });
+
+            DialogResult? result = await dialog.Result;
+
+            if (result.Data is false)
+            {
+                return;
+            }
+
+            var job = new DeleteMessageJob(
+                _entity.ConnectionName,
+                _entity.QueueOrTopicName,
+                _entity.SubscriptionName,
+                subQueue,
+                message.SystemProperties.SequenceNumber,
+                _messageService);
+
+            job.OnCompleted += async (_, _, _) =>
+            {
+                if(job.WarningMessage != null)
+                {
+                    _snackbar.Add(job.WarningMessage, Severity.Warning);
+                }
+                else
+                {
+                    _snackbar.Add("Message successfully removed", Severity.Success);
+                    Messages.Remove(message);
+                }
+            };
+
+            await _jobsViewModel.ScheduleJob(job);
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Add($"Error while removing message. Error: {ex.Message}", Severity.Error);
         }
     }
 

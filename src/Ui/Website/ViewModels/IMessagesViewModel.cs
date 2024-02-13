@@ -11,6 +11,7 @@ public interface IMessagesViewModel : INotifyPropertyChanged
 {
     ObservableCollection<Message> Messages { get; }
     bool DialogVisible { get; set; }
+    bool IsPeekMode(ReceiveMessagesForm formModel);
     bool CanPeekMore(ReceiveMessagesForm formModel);
     Task PeekMore(ReceiveMessagesForm formModel, CancellationToken cancellationToken);
     Task OnSubmitReceiveForm(
@@ -20,4 +21,5 @@ public interface IMessagesViewModel : INotifyPropertyChanged
     void Initialize(CurrentMessagesEntity entity);
     Task ViewMessageDetails(Message? message, bool editMode);
     Task Requeue(string queueOrTopicName, MessageDetailsModel message);
+    Task Delete(Message message, SubQueue subQueue);
 }

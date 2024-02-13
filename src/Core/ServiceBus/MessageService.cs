@@ -160,6 +160,46 @@ public class MessageService : IMessageService
         yield return new ResendResult(totalResend);
     }
 
+    public async Task<Result> DeleteMessage(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        long sequenceNumber,
+        CancellationToken cancellationToken)
+    {
+        var connection =
+            await _connectionManagement.GetAsync(connectionName, cancellationToken);
+
+        await using var client = new ServiceBusClient(connection.ConnectionString);
+
+        await using ServiceBusReceiver receiver =
+            GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, ReceiveMode.PeekLock);
+
+        var messageCompleted = false;
+
+        try
+        {
+            await foreach (var message in receiver.ReceiveMessagesAsync(cancellationToken))
+            {
+                if (message.SequenceNumber == sequenceNumber)
+                {
+                    await receiver.CompleteMessageAsync(message, cancellationToken);
+
+                    messageCompleted = true;
+                    break;
+                }
+
+                await receiver.AbandonMessageAsync(message, null, cancellationToken);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+
+        return new Result(messageCompleted ? 1 : 0);
+    }
+
     private ServiceBusReceiver GetReceiver(
         ServiceBusClient client,
         string queueOrTopicName,
@@ -198,10 +238,9 @@ public class MessageService : IMessageService
                 fromSequenceNumber,
                 cancellationToken);
         }
-        
+
         return await receiver.ReceiveMessagesAsync(
             maxMessages ?? maxReceiverMessagesCount,
-            null,
             cancellationToken: cancellationToken);
     }
 
