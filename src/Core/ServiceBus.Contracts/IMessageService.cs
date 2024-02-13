@@ -19,7 +19,7 @@ public interface IMessageService
         string queueOrTopicName,
         IReadOnlyList<SendMessage> messages,
         CancellationToken cancellationToken);
-    
+
     IAsyncEnumerable<PurgeResult> PurgeAsync(
         string connectionName,
         string topicOrQueueName,
@@ -27,12 +27,20 @@ public interface IMessageService
         SubQueue subQueue,
         long totalCount,
         CancellationToken cancellationToken);
-    
+
     IAsyncEnumerable<ResendResult> ResendAsync(string connectionName,
         string topicOrQueueName,
         string? subscriptionName,
         SubQueue subQueue,
         string destinationTopicOrQueueName,
         long totalCount,
+        CancellationToken cancellationToken);
+
+    Task<Result> DeleteMessage(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        long sequenceNumber,
         CancellationToken cancellationToken);
 }
