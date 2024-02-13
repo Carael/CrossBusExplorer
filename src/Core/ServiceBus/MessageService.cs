@@ -176,25 +176,25 @@ public class MessageService : IMessageService
         await using ServiceBusReceiver receiver =
             GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, ReceiveMode.PeekLock);
 
-
-        var messages = await receiver
-            .ReceiveMessagesAsync(maxReceiverMessagesCount, TimeSpan.FromSeconds(60), cancellationToken);
-
         var messageCompleted = false;
 
-        foreach (ServiceBusReceivedMessage message in messages)
+        try
         {
-            if (message.SequenceNumber == sequenceNumber)
+            await foreach (var message in receiver.ReceiveMessagesAsync(cancellationToken))
             {
-                await receiver.CompleteMessageAsync(message, cancellationToken);
+                if (message.SequenceNumber == sequenceNumber)
+                {
+                    await receiver.CompleteMessageAsync(message, cancellationToken);
 
-                messageCompleted = true;
-            }
-            else
-            {
+                    messageCompleted = true;
+                    break;
+                }
+
                 await receiver.AbandonMessageAsync(message, null, cancellationToken);
-
             }
+        }
+        catch (TaskCanceledException)
+        {
         }
 
         return new Result(messageCompleted ? 1 : 0);

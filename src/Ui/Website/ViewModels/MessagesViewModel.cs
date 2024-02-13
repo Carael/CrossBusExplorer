@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.Website.Extensions;
+using CrossBusExplorer.Website.Jobs;
 using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
@@ -17,6 +18,7 @@ namespace CrossBusExplorer.Website.ViewModels;
 
 public class MessagesViewModel : IMessagesViewModel
 {
+    private readonly IJobsViewModel _jobsViewModel;
     private readonly IMessageService _messageService;
     private readonly ISnackbar _snackbar;
     private readonly IDialogService _dialogService;
@@ -26,10 +28,12 @@ public class MessagesViewModel : IMessagesViewModel
     private CurrentMessagesEntity? _entity;
 
     public MessagesViewModel(
+        IJobsViewModel jobsViewModel,
         IMessageService messageService,
         ISnackbar snackbar,
         IDialogService dialogService)
     {
+        _jobsViewModel = jobsViewModel;
         _messageService = messageService;
         _snackbar = snackbar;
         _dialogService = dialogService;
@@ -201,23 +205,28 @@ public class MessagesViewModel : IMessagesViewModel
                 return;
             }
 
-            Result sendMessageResult = await _messageService.DeleteMessage(
+            var job = new DeleteMessageJob(
                 _entity.ConnectionName,
                 _entity.QueueOrTopicName,
                 _entity.SubscriptionName,
                 subQueue,
                 message.SystemProperties.SequenceNumber,
-                CancellationToken.None);
+                _messageService);
 
-            if (sendMessageResult.Count == 1)
+            job.OnCompleted += async (_, _, _) =>
             {
-                _snackbar.Add("Message successfully removed", Severity.Success);
-                Messages.Remove(message);
-            }
-            else
-            {
-                _snackbar.Add("Message was not removed. Please try again.", Severity.Warning);
-            }
+                if(job.WarningMessage != null)
+                {
+                    _snackbar.Add(job.WarningMessage, Severity.Warning);
+                }
+                else
+                {
+                    _snackbar.Add("Message successfully removed", Severity.Success);
+                    Messages.Remove(message);
+                }
+            };
+
+            await _jobsViewModel.ScheduleJob(job);
         }
         catch (Exception ex)
         {
