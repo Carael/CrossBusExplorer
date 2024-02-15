@@ -1,3 +1,4 @@
+using System.Globalization;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 namespace CrossBusExplorer.ServiceBus.Extensions
 {
@@ -39,17 +40,19 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                     return value;
                 case ApplicationPropertyType.Bool:
                 {
-                    if (value.Equals("1", StringComparison.Ordinal))
+                    if (value.Equals("1", StringComparison.Ordinal) ||
+                        value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
                     {
                         return true;
                     }
 
-                    if (value.Equals("0", StringComparison.Ordinal))
+                    if (value.Equals("0", StringComparison.Ordinal) ||
+                        value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                     {
                         return false;
                     }
 
-                    return int.Parse(value);
+                    return int.Parse(value, CultureInfo.InvariantCulture);
                 }
                 case ApplicationPropertyType.Byte:
                     return byte.Parse(value);
