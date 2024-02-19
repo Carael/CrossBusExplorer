@@ -54,7 +54,7 @@
   <ErrorContent>
     <MudLayout>
       <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@context</MudAlert>
-      <MudButton OnClick="() => { _errorBoundary?.Recover(); }">Recover</MudButton>
+      <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => { _errorBoundary?.Recover(); }">Recover</MudButton>
     </MudLayout>
   </ErrorContent>
 </ErrorBoundary>
