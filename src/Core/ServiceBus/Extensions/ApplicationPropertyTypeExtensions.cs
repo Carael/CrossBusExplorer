@@ -27,7 +27,7 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                 Stream _ => ApplicationPropertyType.Stream,
                 Uri _ => ApplicationPropertyType.Uri,
                 TimeSpan _ => ApplicationPropertyType.TimeSpan,
-                _ => throw new ArgumentOutOfRangeException("Unsupported type")
+                _ => throw new ArgumentOutOfRangeException($"Type {value.GetType()} is not supported")
             };
 
         public static object GetApplicationPropertyValue(
