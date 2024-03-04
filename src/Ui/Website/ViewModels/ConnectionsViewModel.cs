@@ -97,27 +97,31 @@ public class ConnectionsViewModel : IConnectionsViewModel
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        var serviceBusConnections = await _connectionManagement.GetAsync(default);
-        var folderSettings = await InitializeFoldersSettingsAsync(serviceBusConnections, default);
+        IList<ServiceBusConnection> serviceBusConnections =
+            await _connectionManagement.GetAsync(default);
+        List<FolderSettings> folderSettings =
+            await InitializeFoldersSettingsAsync(serviceBusConnections, default);
 
         ServiceBusConnections = new ObservableCollection<ServiceBusConnectionWithFolder>(
             GetServiceBusConnectionsWithFolder(serviceBusConnections, folderSettings));
 
         Folders = new ObservableCollection<FolderSettings>(folderSettings);
-        OnSettingsChanged(Folders);
+
+        OnSettingsChanged?.Invoke(Folders);
     }
 
     private IEnumerable<ServiceBusConnectionWithFolder> GetServiceBusConnectionsWithFolder(
-        IEnumerable<ServiceBusConnection> serviceBusConnections,
-        IEnumerable<FolderSettings> foldersSettings)
+        IList<ServiceBusConnection> serviceBusConnections,
+        IList<FolderSettings> foldersSettings)
     {
-        foreach (var folderSetting in foldersSettings.OrderBy(p => p.Index))
+        foreach (FolderSettings folderSetting in foldersSettings.OrderBy(p => p.Index))
         {
             foreach (ServiceBusConnectionSettings serviceBusConnectionSetting in
                 folderSetting.ServiceBusConnectionSettings.OrderBy(p => p.Index))
             {
-                var serviceBusConnection = serviceBusConnections.FirstOrDefault(p =>
-                    p.Name.EqualsInvariantIgnoreCase(serviceBusConnectionSetting.Name));
+                ServiceBusConnection? serviceBusConnection = serviceBusConnections
+                    .FirstOrDefault(p =>
+                        p.Name.EqualsInvariantIgnoreCase(serviceBusConnectionSetting.Name));
 
                 if (serviceBusConnection != null)
                 {
@@ -277,7 +281,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
         foreach (FolderSettings folder in folderSettings)
         {
             if (folder.ServiceBusConnectionSettings.FirstOrDefault(p =>
-                    p.Name.EqualsInvariantIgnoreCase(connectionName)) != null)
+                p.Name.EqualsInvariantIgnoreCase(connectionName)) != null)
             {
                 return folder;
             }
@@ -312,8 +316,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             parameters,
             new DialogOptions
             {
-                FullWidth = true,
-                CloseOnEscapeKey = true
+                FullWidth = true, CloseOnEscapeKey = true
             });
     }
 
@@ -327,7 +330,10 @@ public class ConnectionsViewModel : IConnectionsViewModel
         var dialog = _dialogService.Show<ConfirmDialog>(
             "Confirm",
             parameters,
-            new DialogOptions { CloseOnEscapeKey = true });
+            new DialogOptions
+            {
+                CloseOnEscapeKey = true
+            });
 
         var result = await dialog.Result;
 
@@ -430,8 +436,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             parameters,
             new DialogOptions
             {
-                FullWidth = true,
-                CloseOnEscapeKey = true
+                FullWidth = true, CloseOnEscapeKey = true
             });
 
         var dialogResult = await dialog.Result;
@@ -470,8 +475,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
             parameters,
             new DialogOptions
             {
-                FullWidth = true,
-                CloseOnEscapeKey = true
+                FullWidth = true, CloseOnEscapeKey = true
             });
 
         var dialogResult = await dialog.Result;
@@ -513,7 +517,10 @@ public class ConnectionsViewModel : IConnectionsViewModel
         var dialog = await _dialogService.ShowAsync<ConfirmDialog>(
             "Confirm",
             parameters,
-            new DialogOptions { CloseOnEscapeKey = true });
+            new DialogOptions
+            {
+                CloseOnEscapeKey = true
+            });
 
         var result = await dialog.Result;
 

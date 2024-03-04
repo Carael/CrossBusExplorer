@@ -37,6 +37,7 @@ public static class ServiceBusConnectionStringHelper
             return false;
         }
     }
+
     public static ServiceBusConnection GetServiceBusConnection(
         string name,
         string connectionString)
@@ -46,6 +47,7 @@ public static class ServiceBusConnectionStringHelper
 
         return new ServiceBusConnection(
             name,
+            ServiceBusConnectionType.ConnectionString,
             connectionString,
             properties.Endpoint,
             properties.FullyQualifiedNamespace,

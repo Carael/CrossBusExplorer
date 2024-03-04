@@ -10,8 +10,18 @@ public class ServiceBusConnectionWithFolder : ServiceBusConnection
     {
         Folder = folder;
     }
-    
-    public ServiceBusConnectionWithFolder(ServiceBusConnection serviceBusConnection, string folder) : base(serviceBusConnection.Name, serviceBusConnection.ConnectionString, serviceBusConnection.Endpoint, serviceBusConnection.FullyQualifiedName, serviceBusConnection.EntityPath, serviceBusConnection.SharedAccessKey, serviceBusConnection.SharedAccessSignature, serviceBusConnection.SharedAccessKeyName)
+
+    public ServiceBusConnectionWithFolder(ServiceBusConnection serviceBusConnection, string folder)
+        : base(
+            serviceBusConnection.Name,
+            serviceBusConnection.Type,
+            serviceBusConnection.ConnectionString,
+            serviceBusConnection.Endpoint,
+            serviceBusConnection.FullyQualifiedName,
+            serviceBusConnection.EntityPath,
+            serviceBusConnection.SharedAccessKey,
+            serviceBusConnection.SharedAccessSignature,
+            serviceBusConnection.SharedAccessKeyName)
     {
         Folder = folder;
     }
