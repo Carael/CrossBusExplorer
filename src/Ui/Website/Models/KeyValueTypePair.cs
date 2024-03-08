@@ -19,9 +19,9 @@ public class KeyValueTypePair : INotifyPropertyChanged
         }
     }
 
-    private string _value;
+    private string? _value;
 
-    public string Value
+    public string? Value
     {
         get => _value;
         set

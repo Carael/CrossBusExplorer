@@ -4,9 +4,10 @@ namespace CrossBusExplorer.ServiceBus.Extensions
 {
     public static class ApplicationPropertyTypeExtensions
     {
-        public static ApplicationPropertyType GetApplicationPropertyType(this object value) =>
+        public static ApplicationPropertyType GetApplicationPropertyType(this object? value) =>
             value switch
             {
+                null => ApplicationPropertyType.String,
                 string _ => ApplicationPropertyType.String,
                 bool _ => ApplicationPropertyType.Bool,
                 byte _ => ApplicationPropertyType.Byte,
@@ -24,16 +25,21 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                 Guid _ => ApplicationPropertyType.Guid,
                 DateTime _ => ApplicationPropertyType.DateTime,
                 DateTimeOffset _ => ApplicationPropertyType.DateTimeOffset,
-                Stream _ => ApplicationPropertyType.Stream,
                 Uri _ => ApplicationPropertyType.Uri,
                 TimeSpan _ => ApplicationPropertyType.TimeSpan,
-                _ => throw new ArgumentOutOfRangeException($"Type {value.GetType()} is not supported")
+                _ => throw new ArgumentOutOfRangeException(
+                    $"Type {value?.GetType()} is not supported")
             };
 
-        public static object GetApplicationPropertyValue(
-            this string value,
+        public static object? GetApplicationPropertyValue(
+            this string? value,
             ApplicationPropertyType type)
         {
+            if (value == null)
+            {
+                return value;
+            }
+
             switch (type)
             {
                 case ApplicationPropertyType.String:
@@ -84,8 +90,6 @@ namespace CrossBusExplorer.ServiceBus.Extensions
                     return DateTime.Parse(value);
                 case ApplicationPropertyType.DateTimeOffset:
                     return DateTimeOffset.Parse(value);
-                case ApplicationPropertyType.Stream:
-                    throw new InvalidOperationException("Cannot parse Stream from string.");
                 case ApplicationPropertyType.Uri:
                     return new Uri(value);
                 case ApplicationPropertyType.TimeSpan:
