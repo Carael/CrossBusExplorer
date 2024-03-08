@@ -48,7 +48,7 @@ public static class MessageMappings
                         new KeyValueTypePair
                         {
                             Key = p.Key,
-                            Value = p.Value.ToString() ?? string.Empty,
+                            Value = p.Value?.ToString() ?? null,
                             Type = p.Value.GetApplicationPropertyType()
                         }).ToList() ?? new List<KeyValueTypePair>())
         };
