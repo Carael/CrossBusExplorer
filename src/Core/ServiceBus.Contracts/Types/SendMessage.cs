@@ -12,4 +12,8 @@ public record SendMessage(
     string? SessionId,
     DateTimeOffset? ScheduledEnqueueTime,
     TimeSpan? TimeToLive,
-    Dictionary<string, object?>? ApplicationProperties);
+    Dictionary<string, object?>? ApplicationProperties)
+{
+    public static SendMessage CreateFromBody(string body) =>
+        new SendMessage(body, null, null, null, null, null, null, null, null, null, null, null);
+}
