@@ -1,0 +1,93 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using System.IO
+@using CrossBusExplorer.Website.Models
+<MudDialog>
+  <TitleContent>
+    <MudText Typo="Typo.h6">
+      Upload messages from file
+    </MudText>
+    <MudText>Max 1000 at once</MudText>
+  </TitleContent>
+  <DialogContent>
+    <MudPaper Elevation="3">
+      <MudField Variant="Variant.Outlined" Label="File type">
+        <MudRadioGroup @bind-SelectedOption="_uploadFileType"
+                       For="@(() => _uploadFileType)">
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="UploadFileType.Body">
+            Body only
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Disabled="true"
+                    Option="UploadFileType.BodyWithApplicationProperties">
+            Body with ApplicationProperties (not yet supported)
+          </MudRadio>
+        </MudRadioGroup>
+      </MudField>
+    </MudPaper>
+    <MudPaper Elevation="3">
+      <MudField Variant="Variant.Outlined" Label="Select files">
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesAsync" MaximumFileCount="1000">
+          <ButtonTemplate>
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       for="@context.Id">
+              Select multiple files
+            </MudButton>
+          </ButtonTemplate>
+        </MudFileUpload>
+      </MudField>
+    </MudPaper>
+  </DialogContent>
+  <DialogActions>
+    <MudButton ButtonType="ButtonType.Reset"
+               Color="Color.Default"
+               OnClick="@(CloseDialog)"
+               Class="px-10">
+      Close
+    </MudButton>
+    <MudButton ButtonType="ButtonType.Button"
+               Color="Color.Success"
+               OnClick="@(Submit)"
+               Disabled="@(!_fileContents.Any())"
+               Class="px-10">
+      Upload @_fileContents.Count files
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  IList<string> _fileContents = new List<string>();
+
+  private UploadFileType _uploadFileType;
+
+  private void CloseDialog()
+  {
+    MudDialog.Close(DialogResult.Cancel());
+  }
+
+  private void Submit()
+  {
+    MudDialog.Close(DialogResult.Ok(new MessagesUploadDialogResult(_uploadFileType, _fileContents)));
+  }
+
+  private async Task UploadFilesAsync(IReadOnlyList<IBrowserFile> files)
+  {
+    _fileContents.Clear();
+
+    foreach (IBrowserFile file in files)
+    {
+      using var reader = new StreamReader(file.OpenReadStream());
+      var fileContent = await reader.ReadToEndAsync(default);
+
+      _fileContents.Add(fileContent);
+    }
+  }
+}

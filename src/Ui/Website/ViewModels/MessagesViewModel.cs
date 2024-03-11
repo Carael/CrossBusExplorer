@@ -13,6 +13,7 @@ using CrossBusExplorer.Website.Mappings;
 using CrossBusExplorer.Website.Models;
 using CrossBusExplorer.Website.Shared;
 using CrossBusExplorer.Website.Shared.Messages;
+using Microsoft.Azure.Amqp.Serialization;
 using MudBlazor;
 namespace CrossBusExplorer.Website.ViewModels;
 
@@ -231,6 +232,55 @@ public class MessagesViewModel : IMessagesViewModel
         catch (Exception ex)
         {
             _snackbar.Add($"Error while removing message. Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    public async Task ImportMessagesFromFileAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            IDialogReference? dialog = await _dialogService.ShowAsync<MessagesUploadDialog>(
+                "Confirm",
+                parameters,
+                new DialogOptions
+                {
+                    CloseOnEscapeKey = true
+                });
+
+            DialogResult? result = await dialog.Result;
+
+            if (result.Data is MessagesUploadDialogResult resultData)
+            {
+                if (resultData.FilesContent.Count == 0)
+                {
+                    _snackbar.Add("No files selected", Severity.Warning);
+                    return;
+                }
+
+                var messages = new List<SendMessage>();
+
+                foreach (var fileContent in resultData.FilesContent)
+                {
+                    messages.Add(SendMessage.CreateFromBody(fileContent));
+                }
+
+                var resultCount = await _messageService.SendMessagesAsync(
+                    _entity!.ConnectionName,
+                    _entity!.QueueOrTopicName,
+                    messages,
+                    cancellationToken);
+
+                _snackbar.Add($"Successfully uploaded {resultCount} messages", Severity.Success);
+            }
+            else
+            {
+                _snackbar.Add("No files were uploaded.", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Add($"Error while sending messages from files. {ex.Message}", Severity.Error);
         }
     }
 

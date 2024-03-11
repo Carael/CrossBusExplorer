@@ -16,6 +16,10 @@
     <MudTooltip Text="Send message">
       <MudIconButton Icon="@Icons.Filled.Send" OnClick="@(() => Model.ViewMessageDetails(null, true))" ButtonType="ButtonType.Button">Send message</MudIconButton>
     </MudTooltip>
+
+    <MudTooltip Text="Import messages from file">
+      <MudIconButton Icon="@Icons.Filled.FileUpload" OnClick="@(() => Model.ImportMessagesFromFileAsync(default))" ButtonType="ButtonType.Button">Import messages from file</MudIconButton>
+    </MudTooltip>
   </div>
 
   <MudTable Items="Model.Messages" Hover="true" SortLabel="Sort By" Elevation="0">
@@ -81,7 +85,7 @@
   </MudTable>
 </MudPaper>
 
-<MudDialog @bind-IsVisible="Model.DialogVisible">
+<MudDialog @bind-IsVisible="Model.DialogVisible" Options="_dialogOptions" DefaultFocus="DefaultFocus.Element">
   <TitleContent>
     <MudText Typo="Typo.h6">
       Receive @QueueOrTopicName @SubscriptionName messages
@@ -132,7 +136,7 @@
                          For="@(() => _formModel.Type)">
 
             @* TODO: fix all receive option
-                            <MudRadio Dense="true" *@
+            <MudRadio Dense="true" *@
             @*           Size="Size.Small" *@
             @*           Option="ReceiveType.All"> *@
             @*     @ReceiveType.All *@
@@ -194,6 +198,10 @@
   MudForm form;
   ReceiveMessagesForm _formModel;
   ReceiveMessageFormValidator _validator = new ReceiveMessageFormValidator();
+  DialogOptions _dialogOptions = new DialogOptions
+  {
+    CloseOnEscapeKey = true,
+  };
 
   protected override async Task OnInitializedAsync()
   {

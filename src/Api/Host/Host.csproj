@@ -11,7 +11,7 @@
 
     <PropertyGroup Condition=" '$(RunConfiguration)' == 'CrossBusExplorer' " />
     <ItemGroup>
-      <PackageReference Include="HotChocolate.AspNetCore" Version="13.8.1" />
+      <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.0" />
     </ItemGroup>
 
     <ItemGroup>
