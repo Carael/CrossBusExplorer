@@ -6,7 +6,7 @@
     <MudText Typo="Typo.h6">
       Upload messages from file
     </MudText>
-    <MudText>Max 1000 at once</MudText>
+    <MudText>Max 200 at once</MudText>
   </TitleContent>
   <DialogContent>
     <MudPaper Elevation="3">
@@ -29,7 +29,7 @@
     </MudPaper>
     <MudPaper Elevation="3">
       <MudField Variant="Variant.Outlined" Label="Select files">
-        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesAsync" MaximumFileCount="1000">
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesAsync" MaximumFileCount="200">
           <ButtonTemplate>
             <MudButton HtmlTag="label"
                        Variant="Variant.Filled"
