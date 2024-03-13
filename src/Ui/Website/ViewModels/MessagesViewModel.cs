@@ -222,7 +222,6 @@ public class MessagesViewModel : IMessagesViewModel
                 }
                 else
                 {
-                    _snackbar.Add("Message successfully removed", Severity.Success);
                     Messages.Remove(message);
                 }
             };

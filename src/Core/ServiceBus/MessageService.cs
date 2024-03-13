@@ -3,6 +3,7 @@ using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
+using Microsoft.Azure.Amqp.Serialization;
 using SubQueue = CrossBusExplorer.ServiceBus.Contracts.Types.SubQueue;
 namespace CrossBusExplorer.ServiceBus;
 
@@ -180,8 +181,17 @@ public class MessageService : IMessageService
 
         try
         {
-            await foreach (var message in receiver.ReceiveMessagesAsync(cancellationToken))
+            var messagesToUnlock = new List<ServiceBusReceivedMessage>();
+
+            await foreach (ServiceBusReceivedMessage message in receiver.ReceiveMessagesAsync(
+                cancellationToken))
             {
+                if (message.SequenceNumber > sequenceNumber)
+                {
+                    messagesToUnlock.Add(message);
+                    break;
+                }
+
                 if (message.SequenceNumber == sequenceNumber)
                 {
                     await receiver.CompleteMessageAsync(message, cancellationToken);
@@ -189,9 +199,14 @@ public class MessageService : IMessageService
                     messageCompleted = true;
                     break;
                 }
+                messagesToUnlock.Add(message);
+            }
 
+            foreach (ServiceBusReceivedMessage message in messagesToUnlock)
+            {
                 await receiver.AbandonMessageAsync(message, null, cancellationToken);
             }
+
         }
         catch (TaskCanceledException)
         {
