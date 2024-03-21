@@ -17,6 +17,7 @@ builder.Services.AddServiceBusServices();
 builder.Services.AddManagement();
 
 builder.Services.AddScoped<IManagementStorage, ManagementStorage>();
+builder.Services.AddScoped<IDirectoryService, DirectoryService>();
 builder.Services.AddScoped<ISettingsService, DefaultSettingsService>();
 
 builder.Services.AddElectron();

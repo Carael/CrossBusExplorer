@@ -14,6 +14,17 @@ public interface IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken);
 
+    Task<IAsyncEnumerable<Message>> ReceiveMessagesAsync(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
+        long? fromSequenceNumber,
+        CancellationToken cancellationToken);
+
     Task<Result> SendMessagesAsync(
         string connectionName,
         string queueOrTopicName,
@@ -28,7 +39,8 @@ public interface IMessageService
         long totalCount,
         CancellationToken cancellationToken);
 
-    IAsyncEnumerable<ResendResult> ResendAsync(string connectionName,
+    IAsyncEnumerable<ResendResult> ResendAsync(
+        string connectionName,
         string topicOrQueueName,
         string? subscriptionName,
         SubQueue subQueue,

@@ -3,7 +3,6 @@ using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
 using CrossBusExplorer.ServiceBus.Mappings;
-using Microsoft.Azure.Amqp.Serialization;
 using SubQueue = CrossBusExplorer.ServiceBus.Contracts.Types.SubQueue;
 namespace CrossBusExplorer.ServiceBus;
 
@@ -47,6 +46,49 @@ public class MessageService : IMessageService
                     cancellationToken);
 
             return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
+        }
+        catch (ServiceBusException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ex.Reason.ToString(), ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            //TODO: log
+
+            throw new ServiceBusOperationException(ErrorCodes.InvalidOperation, ex.Message);
+        }
+    }
+    public async Task<IAsyncEnumerable<Message>> ReceiveMessagesAsync(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
+        long? fromSequenceNumber, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var connection =
+                await _connectionManagement.GetAsync(connectionName, cancellationToken);
+
+            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+
+            await using var receiver =
+                GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
+
+            // IReadOnlyList<ServiceBusReceivedMessage>? result =
+            //     await ReceiveMessagesAsync(
+            //         receiver,
+            //         type,
+            //         messagesCount,
+            //         fromSequenceNumber,
+            //         cancellationToken);
+            //
+            // return result?.Select(p => p.MapToMessage()).ToList() ?? new List<Message>();
         }
         catch (ServiceBusException ex)
         {

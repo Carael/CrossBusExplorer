@@ -1,0 +1,153 @@
+@using CrossBusExplorer.ServiceBus.Contracts.Types
+@using CrossBusExplorer.Website.Models
+<MudDialog>
+  <TitleContent>
+    <MudText Typo="Typo.h6">
+      Export messages to files
+    </MudText>
+  </TitleContent>
+  <DialogContent>
+    <MudPaper Elevation="3">
+      <MudField Variant="Variant.Outlined" Label="File type">
+        <MudRadioGroup @bind-SelectedOption="_formModel.MessageFileType"
+                       For="@(() => _formModel.MessageFileType)">
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="MessageFileType.Body">
+            Body only
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Disabled="true"
+                    Option="MessageFileType.BodyWithApplicationProperties">
+            Body with ApplicationProperties (not yet supported)
+          </MudRadio>
+        </MudRadioGroup>
+      </MudField>
+    </MudPaper>
+    <MudPaper Elevation="3">
+      <MudField Variant="Variant.Outlined" Label="Enter folder path">
+        <MudTextField @bind-Value="@_formModel.FolderPath"/>
+      </MudField>
+    </MudPaper>
+
+    <MudPaper Elevation="3">
+      <MudField Variant="Variant.Outlined" Label="Queue type">
+        <MudRadioGroup @bind-SelectedOption="_formModel.SubQueue"
+                       For="@(() => _formModel.SubQueue)">
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="SubQueue.None">
+            Active messages
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="SubQueue.DeadLetter">
+            Dead letter
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="SubQueue.TransferDeadLetter">
+            Transfer dead letter
+          </MudRadio>
+        </MudRadioGroup>
+      </MudField>
+
+      <MudField Variant="Variant.Outlined" Label="Receive mode">
+        <MudRadioGroup @bind-SelectedOption="_formModel.ReceiveMode"
+                       For="@(() => _formModel.ReceiveMode)">
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="ReceiveMode.ReceiveAndDelete">
+            Receive and delete
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="ReceiveMode.PeekLock">
+            Peek lock
+          </MudRadio>
+        </MudRadioGroup>
+      </MudField>
+
+      <MudField Variant="Variant.Outlined" Label="Receive type">
+        <MudRadioGroup @bind-SelectedOption="_formModel.ReceiveType"
+                       For="@(() => _formModel.ReceiveType)">
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="ReceiveType.All">
+            @ReceiveType.All
+          </MudRadio>
+          <MudRadio Dense="true"
+                    Size="Size.Small"
+                    Option="ReceiveType.ByCount">
+            @ReceiveType.ByCount
+          </MudRadio>
+        </MudRadioGroup>
+        <MudNumericField @bind-Value="_formModel.MessagesCount"
+                         Disabled="@(_formModel.ReceiveType == ReceiveType.All)"
+                         For="@(() => _formModel.MessagesCount)"
+                         T="int?"
+                         Class="px-0 ma-0 pa-0 py-0"
+                         Min="1"
+                         Max="250"
+                         Immediate="true"
+                         HelperText="Messages count">
+        </MudNumericField>
+        <MudNumericField @bind-Value="_formModel.FromSequenceNumber"
+                         T="long?"
+                         For="@(() => _formModel.FromSequenceNumber)"
+                         Disabled="@(_formModel.ReceiveType == ReceiveType.All || _formModel.ReceiveMode == ReceiveMode.ReceiveAndDelete)"
+                         Class="px-0 ma-0 pa-0 py-0"
+                         Min="0"
+                         Immediate="true"
+                         HelperText="From sequence number">
+        </MudNumericField>
+      </MudField>
+    </MudPaper>
+
+  </DialogContent>
+  <DialogActions>
+    <MudButton ButtonType="ButtonType.Reset"
+               Color="Color.Default"
+               OnClick="@(CloseDialog)"
+               Class="px-10">
+      Close
+    </MudButton>
+    <MudButton ButtonType="ButtonType.Button"
+               Color="Color.Success"
+               OnClick="@(Submit)"
+               Class="px-10">
+      Upload export messages
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  [Inject]
+  IDirectoryService _directoryService { get; set; }
+
+  private MessageExportDialogResult _formModel;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _formModel = new MessageExportDialogResult
+    {
+      FolderPath = await _directoryService.GetDefaultDownloadDirectory(default)
+    };
+
+    await base.OnInitializedAsync();
+  }
+
+  private void CloseDialog()
+  {
+    MudDialog.Close(DialogResult.Cancel());
+  }
+
+  private void Submit()
+  {
+    MudDialog.Close(DialogResult.Ok(_formModel));
+  }
+}

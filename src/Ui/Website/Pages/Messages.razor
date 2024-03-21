@@ -20,6 +20,10 @@
     <MudTooltip Text="Import messages from file">
       <MudIconButton Icon="@Icons.Filled.FileUpload" OnClick="@(() => Model.ImportMessagesFromFileAsync(default))" ButtonType="ButtonType.Button">Import messages from file</MudIconButton>
     </MudTooltip>
+
+        <MudTooltip Text="Export messages to files">
+          <MudIconButton Icon="@Icons.Filled.FileDownload" OnClick="@(() => Model.ExportMessagesToFilesAsync(default))" ButtonType="ButtonType.Button">Export messages to files</MudIconButton>
+        </MudTooltip>
   </div>
 
   <MudTable Items="Model.Messages" Hover="true" SortLabel="Sort By" Elevation="0">

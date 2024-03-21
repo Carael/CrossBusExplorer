@@ -23,4 +23,5 @@ public interface IMessagesViewModel : INotifyPropertyChanged
     Task Requeue(string queueOrTopicName, MessageDetailsModel message);
     Task Delete(Message message, SubQueue subQueue);
     Task ImportMessagesFromFileAsync(CancellationToken cancellationToken);
+    Task ExportMessagesToFilesAsync(CancellationToken cancellationToken);
 }

@@ -11,17 +11,17 @@
   <DialogContent>
     <MudPaper Elevation="3">
       <MudField Variant="Variant.Outlined" Label="File type">
-        <MudRadioGroup @bind-SelectedOption="_uploadFileType"
-                       For="@(() => _uploadFileType)">
+        <MudRadioGroup @bind-SelectedOption="_messageFileType"
+                       For="@(() => _messageFileType)">
           <MudRadio Dense="true"
                     Size="Size.Small"
-                    Option="UploadFileType.Body">
+                    Option="MessageFileType.Body">
             Body only
           </MudRadio>
           <MudRadio Dense="true"
                     Size="Size.Small"
                     Disabled="true"
-                    Option="UploadFileType.BodyWithApplicationProperties">
+                    Option="MessageFileType.BodyWithApplicationProperties">
             Body with ApplicationProperties (not yet supported)
           </MudRadio>
         </MudRadioGroup>
@@ -66,7 +66,7 @@
 
   IList<string> _fileContents = new List<string>();
 
-  private UploadFileType _uploadFileType;
+  private MessageFileType _messageFileType;
 
   private void CloseDialog()
   {
@@ -75,7 +75,7 @@
 
   private void Submit()
   {
-    MudDialog.Close(DialogResult.Ok(new MessagesUploadDialogResult(_uploadFileType, _fileContents)));
+    MudDialog.Close(DialogResult.Ok(new MessagesUploadDialogResult(_messageFileType, _fileContents)));
   }
 
   private async Task UploadFilesAsync(IReadOnlyList<IBrowserFile> files)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -264,13 +265,13 @@ public class MessagesViewModel : IMessagesViewModel
                     messages.Add(SendMessage.CreateFromBody(fileContent));
                 }
 
-                var resultCount = await _messageService.SendMessagesAsync(
+                Result resultCount = await _messageService.SendMessagesAsync(
                     _entity!.ConnectionName,
                     _entity!.QueueOrTopicName,
                     messages,
                     cancellationToken);
 
-                _snackbar.Add($"Successfully uploaded {resultCount} messages", Severity.Success);
+                _snackbar.Add($"Successfully uploaded {resultCount.Count} messages", Severity.Success);
             }
             else
             {
@@ -280,6 +281,59 @@ public class MessagesViewModel : IMessagesViewModel
         catch (Exception ex)
         {
             _snackbar.Add($"Error while sending messages from files. {ex.Message}", Severity.Error);
+        }
+    }
+    public async Task ExportMessagesToFilesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            IDialogReference? dialog = await _dialogService.ShowAsync<MessagesExportDialog>(
+                "Confirm",
+                parameters,
+                new DialogOptions
+                {
+                    CloseOnEscapeKey = true
+                });
+
+            DialogResult? result = await dialog.Result;
+
+            if (result.Data is MessageExportDialogResult resultData && resultData.FolderPath != null)
+            {
+                var receiver = await _messageService.ReceiveMessagesAsync(
+                    _entity.ConnectionName,
+                    _entity.QueueOrTopicName,
+                    _entity.SubscriptionName,
+                    resultData.SubQueue,
+                    resultData.ReceiveMode,
+                    resultData.ReceiveType,
+                    resultData.MessagesCount,
+                    resultData.FromSequenceNumber,
+                    cancellationToken);
+
+                var exportedMessagesCount = 0;
+
+                await foreach (Message message in receiver.WithCancellation(cancellationToken))
+                {
+                    var body = message.Body;
+
+                    var path = Path.Combine(resultData.FolderPath, message.Id);
+
+                    using StreamWriter streamWriter = File.CreateText(path);
+                    await streamWriter.WriteAsync(body);
+
+                }
+
+                _snackbar.Add($"Successfully exported {exportedMessagesCount} messages", Severity.Success);
+            }
+            else
+            {
+                _snackbar.Add("No files were exported.", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Add($"Error while exporting messages to files. {ex.Message}", Severity.Error);
         }
     }
 
