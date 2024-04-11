@@ -19,7 +19,13 @@ public class MessageDetailsModel : INotifyPropertyChanged
 
     public string Body
     {
-        get => _body;
+        get
+        {
+            var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(_body);
+            return jsonNode is not null 
+                ? jsonNode.ToString() 
+                : _body;
+        }
         set
         {
             _body = value;
