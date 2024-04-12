@@ -30,17 +30,12 @@ public static class StringExtensions
     {
         if (contentType != null)
         {
-            if (contentType.Contains("json", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return TryFormatJson(value);
-            }
-        }
-        else
-        {
-            return TryFormatJson(value);
+            return contentType.Contains("json", StringComparison.InvariantCultureIgnoreCase) 
+                ? TryFormatJson(value) 
+                : value;
         }
 
-        return value;
+        return TryFormatJson(value);
     }
 
     public static string SplitAndGetLastSection(this string value, char split)
