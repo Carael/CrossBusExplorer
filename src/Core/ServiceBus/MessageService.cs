@@ -80,6 +80,21 @@ public class MessageService : IMessageService
             await using var receiver =
                 GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
 
+            if (type == ReceiveType.All)
+            {
+                IAsyncEnumerable<ServiceBusReceivedMessage>? items =
+                    receiver.ReceiveMessagesAsync(cancellationToken);
+            }
+            else if (type == ReceiveType.)
+            {
+
+            }
+            else
+            {
+                throw new NotSupportedException($"ReceiveType {type} is not supported");
+            }
+
+
             // IReadOnlyList<ServiceBusReceivedMessage>? result =
             //     await ReceiveMessagesAsync(
             //         receiver,
