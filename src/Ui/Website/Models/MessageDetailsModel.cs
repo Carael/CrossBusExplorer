@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using CrossBusExplorer.Website.Extensions;
 namespace CrossBusExplorer.Website.Models;
 
@@ -24,24 +23,7 @@ public class MessageDetailsModel : INotifyPropertyChanged
         set
         {
             _body = value;
-            FormatBody();
             this.Notify(PropertyChanged);
-        }
-    }
-
-    private void FormatBody()
-    {
-        try
-        {
-            var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(_body);
-            if (jsonNode is not null)
-            {
-                _body = jsonNode.ToString();
-            }
-        }
-        catch (JsonException)
-        {
-            // body is not valid json
         }
     }
 

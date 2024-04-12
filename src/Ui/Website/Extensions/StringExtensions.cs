@@ -35,6 +35,10 @@ public static class StringExtensions
                 return TryFormatJson(value);
             }
         }
+        else
+        {
+            return TryFormatJson(value);
+        }
 
         return value;
     }
