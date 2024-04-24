@@ -85,7 +85,7 @@ public class MessageService : IMessageService
                 IAsyncEnumerable<ServiceBusReceivedMessage>? items =
                     receiver.ReceiveMessagesAsync(cancellationToken);
             }
-            else if (type == ReceiveType.)
+            else if (type == ReceiveType.ByCount)
             {
 
             }
@@ -95,6 +95,7 @@ public class MessageService : IMessageService
             }
 
 
+            throw new NotSupportedException("TODO");
             // IReadOnlyList<ServiceBusReceivedMessage>? result =
             //     await ReceiveMessagesAsync(
             //         receiver,
@@ -282,7 +283,7 @@ public class MessageService : IMessageService
         var receiverOptions = new ServiceBusReceiverOptions
         {
             ReceiveMode = Enum.Parse<ServiceBusReceiveMode>(receiveMode.ToString()),
-            SubQueue = Enum.Parse<Azure.Messaging.ServiceBus.SubQueue>(subQueue.ToString()),
+            SubQueue = Enum.Parse<Azure.Messaging.ServiceBus.SubQueue>(subQueue.ToString())
         };
 
         if (subscriptionName != null)
