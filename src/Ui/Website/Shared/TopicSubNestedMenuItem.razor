@@ -1,23 +1,21 @@
-@using System.Web
 @using CrossBusExplorer.Website.Models
+@using System.Web
 
 @if (TopicSubscriptionsModel.Topic.IsFolder)
 {
-    <MudTooltip Text=@TopicSubscriptionsModel.Topic.Name Color="Color.Primary" Placement="Placement.Top">
-        <MudNavGroup Icon="@Icons.Filled.Folder" ExpandedChanged="OnTopicExpandChange" Expanded="TopicSubscriptionsModel.TopicExpanded" Title=@TopicSubscriptionsModel.Topic.Name>
-            @if (TopicSubscriptionsModel.TopicExpanded)
+    <MudNavGroup Icon="@Icons.Filled.FilePresent" ExpandedChanged="OnTopicExpandChange" Expanded="TopicSubscriptionsModel.TopicExpanded" Title=@TopicSubscriptionsModel.Topic.Name>
+        @if (TopicSubscriptionsModel.TopicExpanded)
+        {
+            @foreach (var model in TopicSubscriptionsModel.ChildrenModels)
             {
-                @foreach (var model in TopicSubscriptionsModel.ChildrenModels)
-                {
-                    <TopicSubNestedMenuItem TopicSubscriptionsModel="@model" ConnectionName="@ConnectionName"/>
-                }
+                <TopicNestedMenuItem TopicSubscriptionsModel="@model" ConnectionName="@ConnectionName"/>
             }
-        </MudNavGroup>
-    </MudTooltip>
+        }
+    </MudNavGroup>
 }
 else
 {
-    <MudNavGroup Icon="@Icons.Filled.Folder" Title=@TopicSubscriptionsModel.Topic.Name>
+    <MudNavGroup Icon="@Icons.Filled.FilePresent" Title=@TopicSubscriptionsModel.Topic.Name IconColor="Color.Success">
         <MudNavLink Match="NavLinkMatch.All"
                     Href=@($"topic/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}")
                     Icon="@Icons.Filled.Topic">
@@ -44,7 +42,9 @@ else
                     <MudNavLink Match="NavLinkMatch.All"
                                 Href=@($"subscription/{ConnectionName}/{HttpUtility.UrlEncode(TopicSubscriptionsModel.Topic.FullName)}/{HttpUtility.UrlEncode(subscription.SubscriptionName)}")
                                 Icon="@Icons.Filled.FormatLineSpacing">
-                        <MudTooltip Placement="Placement.Right" Text="@($"{subscription.SubscriptionName} (Active messages: {subscription.ActiveMessagesCount}, " + $"Dead letters: {subscription.DeadLetterMessagesCount}, " + $"Transfer messages: {subscription.TransferMessagesCount}")">
+                        <MudTooltip Placement="Placement.Right" Text="@($"{subscription.SubscriptionName} (Active messages: {subscription.ActiveMessagesCount}, " + 
+                                            $"Dead letters: {subscription.DeadLetterMessagesCount}, " + 
+                                            $"Transfer messages: {subscription.TransferMessagesCount}")">
                             @subscription.SubscriptionName (@subscription.ActiveMessagesCount,
                             @subscription.DeadLetterMessagesCount,
                             @subscription.TransferMessagesCount)
@@ -57,13 +57,19 @@ else
 }
 
 @code {
-    [Inject] public INavigationViewModel Model { get; set; }
-    [Parameter] public TopicSubscriptionsModel TopicSubscriptionsModel { get; set; } = null!;
-    [Parameter] public string ConnectionName { get; set; } = null!;
+    [Inject]
+    public INavigationViewModel Model { get; set; }
+    [Parameter]
+    public TopicSubscriptionsModel TopicSubscriptionsModel { get; set; } = null!;
+    [Parameter]
+    public string ConnectionName { get; set; } = null!;
 
     protected override void OnInitialized()
     {
-        Model.PropertyChanged += (_, _) => { StateHasChanged(); };
+        Model.PropertyChanged += (_, _) =>
+        {
+            StateHasChanged();
+        };
 
         TopicSubscriptionsModel.ShouldRender = true;
     }
@@ -76,10 +82,8 @@ else
         await Model.LoadSubscriptionsAsync(ConnectionName, TopicSubscriptionsModel);
         TopicSubscriptionsModel.ShouldRender = true;
     }
-
     private void OnTopicExpandChange()
     {
         TopicSubscriptionsModel.TopicExpanded = !TopicSubscriptionsModel.TopicExpanded;
     }
-
 }
