@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using CrossBusExplorer.Management;
+using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.Website.Extensions;
 using MudBlazor;
 namespace CrossBusExplorer.Website.Models;
@@ -51,6 +52,18 @@ public class SaveConnectionForm : INotifyPropertyChanged
         set
         {
             _folder = value;
+            this.Notify(PropertyChanged);
+        }
+    }
+
+    private ServiceBusTransportType _transportType = ServiceBusTransportType.AmqpTcp;
+    [Label("Transport Type")]
+    public ServiceBusTransportType TransportType
+    {
+        get => _transportType;
+        set
+        {
+            _transportType = value;
             this.Notify(PropertyChanged);
         }
     }

@@ -1,6 +1,7 @@
 ﻿@page "/"
 @page "/connections"
 @using CrossBusExplorer.Website.Models
+@using CrossBusExplorer.Management.Contracts
 
 <PageTitle>Connections</PageTitle>
 
@@ -130,6 +131,13 @@
                                   Immediate="true"/>
                     <MudTextField @bind-Value="@Model.SaveConnectionForm.Name"
                                   For="@(() => Model.SaveConnectionForm.Name)"/>
+                    <MudSelect T="ServiceBusTransportType"
+                               Label="Transport Type"
+                               @bind-Value="@Model.SaveConnectionForm.TransportType"
+                               For="@(() => Model.SaveConnectionForm.TransportType)">
+                        <MudSelectItem Value="@ServiceBusTransportType.AmqpTcp">AMQP over TCP</MudSelectItem>
+                        <MudSelectItem Value="@ServiceBusTransportType.AmqpWebSockets">AMQP over WebSockets</MudSelectItem>
+                    </MudSelect>
                     <MudAutocomplete
                         T="string"
                         For="@(() => Model.SaveConnectionForm.Folder)"

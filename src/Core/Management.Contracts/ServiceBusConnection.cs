@@ -10,7 +10,8 @@ public class ServiceBusConnection
         string? entityPath,
         string sharedAccessKey,
         string sharedAccessSignature,
-        string sharedAccessKeyName)
+        string sharedAccessKeyName,
+        ServiceBusTransportType transportType = ServiceBusTransportType.AmqpTcp)
     {
         Name = name;
         ConnectionString = connectionString;
@@ -20,6 +21,7 @@ public class ServiceBusConnection
         SharedAccessKey = sharedAccessKey;
         SharedAccessSignature = sharedAccessSignature;
         SharedAccessKeyName = sharedAccessKeyName;
+        TransportType = transportType;
     }
     public string Name { get; }
     public string ConnectionString { get; }
@@ -29,4 +31,5 @@ public class ServiceBusConnection
     public string SharedAccessKey { get; }
     public string SharedAccessSignature { get; }
     public string SharedAccessKeyName { get; }
+    public ServiceBusTransportType TransportType { get; }
 }

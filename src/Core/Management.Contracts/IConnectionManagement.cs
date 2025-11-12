@@ -8,6 +8,7 @@ public interface IConnectionManagement
         string name, 
         string connectionString,
         string folder,
+        ServiceBusTransportType transportType,
         CancellationToken cancellationToken);
     Task DeleteAsync(string name, CancellationToken cancellationToken);
 }
