@@ -17,6 +17,25 @@ public class MessageService : IMessageService
         _connectionManagement = connectionManagement;
     }
 
+    private ServiceBusClientOptions GetServiceBusClientOptions(
+        CrossBusExplorer.Management.Contracts.ServiceBusTransportType transportType)
+    {
+        return new ServiceBusClientOptions
+        {
+            TransportType = transportType == CrossBusExplorer.Management.Contracts.ServiceBusTransportType.AmqpTcp
+                ? Azure.Messaging.ServiceBus.ServiceBusTransportType.AmqpTcp
+                : Azure.Messaging.ServiceBus.ServiceBusTransportType.AmqpWebSockets,
+            RetryOptions = new ServiceBusRetryOptions
+            {
+                Mode = ServiceBusRetryMode.Exponential,
+                MaxRetries = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                MaxDelay = TimeSpan.FromSeconds(10),
+                TryTimeout = TimeSpan.FromSeconds(60)
+            }
+        };
+    }
+
     public async Task<IReadOnlyList<Message>> GetMessagesAsync(
         string connectionName,
         string queueOrTopicName,
@@ -33,7 +52,9 @@ public class MessageService : IMessageService
             var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-            await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+            await using ServiceBusClient client = new ServiceBusClient(
+                connection.ConnectionString,
+                GetServiceBusClientOptions(connection.TransportType));
 
             await using var receiver =
                 GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
@@ -71,7 +92,9 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using var client = new ServiceBusClient(connection.ConnectionString);
+        await using var client = new ServiceBusClient(
+            connection.ConnectionString,
+            GetServiceBusClientOptions(connection.TransportType));
         await using ServiceBusSender sender = client.CreateSender(queueOrTopicName);
 
         return await SendMessagesInternalAsync(
@@ -91,7 +114,9 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+        await using ServiceBusClient client = new ServiceBusClient(
+            connection.ConnectionString,
+            GetServiceBusClientOptions(connection.TransportType));
         await using var receiver = GetReceiver(
             client,
             topicOrQueueName,
@@ -127,7 +152,9 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using ServiceBusClient client = new ServiceBusClient(connection.ConnectionString);
+        await using ServiceBusClient client = new ServiceBusClient(
+            connection.ConnectionString,
+            GetServiceBusClientOptions(connection.TransportType));
         await using ServiceBusReceiver receiver = GetReceiver(
             client,
             topicOrQueueName,
@@ -172,7 +199,9 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using var client = new ServiceBusClient(connection.ConnectionString);
+        await using var client = new ServiceBusClient(
+            connection.ConnectionString,
+            GetServiceBusClientOptions(connection.TransportType));
 
         await using ServiceBusReceiver receiver =
             GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, ReceiveMode.PeekLock);

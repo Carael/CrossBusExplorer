@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.Management.Contracts;
+using ServiceBusTransportType = CrossBusExplorer.Management.Contracts.ServiceBusTransportType;
 namespace CrossBusExplorer.Management;
 
 public static class ServiceBusConnectionStringHelper
@@ -39,7 +40,8 @@ public static class ServiceBusConnectionStringHelper
     }
     public static ServiceBusConnection GetServiceBusConnection(
         string name,
-        string connectionString)
+        string connectionString,
+        ServiceBusTransportType transportType = ServiceBusTransportType.AmqpTcp)
     {
         var properties =
             ServiceBusConnectionStringProperties.Parse(connectionString);
@@ -52,6 +54,7 @@ public static class ServiceBusConnectionStringHelper
             properties.EntityPath,
             properties.SharedAccessKey,
             properties.SharedAccessSignature,
-            properties.SharedAccessKeyName);
+            properties.SharedAccessKeyName,
+            transportType);
     }
 }

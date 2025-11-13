@@ -210,6 +210,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
         string name,
         string connectionString,
         string folder,
+        ServiceBusTransportType transportType,
         CancellationToken cancellationToken)
     {
         ServiceBusConnection newConnection =
@@ -217,6 +218,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
                 name,
                 connectionString,
                 folder,
+                transportType,
                 cancellationToken);
 
         RemoveOrReplace(new ServiceBusConnectionWithFolder(newConnection, folder));
@@ -256,7 +258,8 @@ public class ConnectionsViewModel : IConnectionsViewModel
             {
                 Name = model.Name,
                 ConnectionString = model.ConnectionString,
-                Folder = TryGetFolderSettings(Folders, model?.Name)?.Name
+                Folder = TryGetFolderSettings(Folders, model?.Name)?.Name,
+                TransportType = model.TransportType
             };
         _saveDialogVisible = true;
         _saveConnectionForm.PropertyChanged += (_, _) =>
@@ -294,6 +297,7 @@ public class ConnectionsViewModel : IConnectionsViewModel
                 _saveConnectionForm.ConnectionString!),
             _saveConnectionForm.ConnectionString!,
             _saveConnectionForm.Folder ?? "",
+            _saveConnectionForm.TransportType,
             default);
 
         _saveDialogVisible = false;

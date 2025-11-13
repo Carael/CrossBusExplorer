@@ -12,7 +12,7 @@ public class ConnectionManagement : IConnectionManagement
         throw new NotImplementedException();
     }
     public Task<ServiceBusConnection> SaveAsync(string name, string connectionString, string folder,
-        CancellationToken cancellationToken)
+        ServiceBusTransportType transportType, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

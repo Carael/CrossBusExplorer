@@ -36,13 +36,14 @@ public class ConnectionManagement : IConnectionManagement
         string name,
         string connectionString,
         string folder,
+        ServiceBusTransportType transportType,
         CancellationToken cancellationToken)
     {
         IDictionary<string, ServiceBusConnection> connections =
             await _managementStorage.ReadAsync(cancellationToken);
 
         var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
-            name, connectionString);
+            name, connectionString, transportType);
         
         //TODO: add to folder
 
