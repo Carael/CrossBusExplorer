@@ -34,14 +34,14 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
@@ -85,14 +85,14 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
@@ -130,14 +130,14 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
