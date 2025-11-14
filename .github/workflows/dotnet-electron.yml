@@ -6,7 +6,7 @@ on:
       - "*"
     paths:
       - "src/**/*"
-      - ".github/workflows/dotnet-eletron.yml"
+      - ".github/workflows/dotnet-electron.yml"
 env:
   PROJECT_PATH: "src/Ui/Website.Host/Website.Host.csproj"
   PROJECT_FOLDER: "src/Ui/Website.Host/"
@@ -15,7 +15,7 @@ env:
 
 jobs:
   publish-macos-x64:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -66,7 +66,7 @@ jobs:
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
 
   publish-win-x64:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -111,7 +111,7 @@ jobs:
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
 
   publish-linux-x64:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -160,7 +160,7 @@ jobs:
   # ********************************* #
   create-release:
     needs: [publish-macos-x64, publish-win-x64, publish-linux-x64]
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Create downloads folder
         run: mkdir downloads
