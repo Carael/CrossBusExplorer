@@ -60,7 +60,7 @@ jobs:
       #         electron-sharp build /target osx-arm64
 
       - name: Upload publish artifacts
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        uses: actions/upload-artifact@v4
         with:
           name: crossbusexplorer-macos-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
@@ -105,7 +105,7 @@ jobs:
           electron-sharp build /target win
 
       - name: Upload publish artifacts
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        uses: actions/upload-artifact@v4
         with:
           name: crossbusexplorer-win-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
@@ -150,7 +150,7 @@ jobs:
           electron-sharp build /target linux
 
       - name: Upload publish artifacts
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        uses: actions/upload-artifact@v4
         with:
           name: crossbusexplorer-linux-x64
           path: ${{ env.PROJECT_FOLDER }}/bin/Desktop/*.*
@@ -165,17 +165,17 @@ jobs:
       - name: Create downloads folder
         run: mkdir downloads
       - name: Download artifacts
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v4
         with:
           name: crossbusexplorer-macos-x64
           path: downloads/crossbusexplorer-macos-x64
       - name: Download artifacts
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v4
         with:
           name: crossbusexplorer-win-x64
           path: downloads/crossbusexplorer-win-x64
       - name: Download artifacts
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v4
         with:
           name: crossbusexplorer-linux-x64
           path: downloads/crossbusexplorer-linux-x64
