@@ -13,7 +13,7 @@
     "appId": "com.crossbusexplorer.app",
     "productName": "Cross Bus Explorer",
     "copyright": "Copyright © 2025",
-    "buildVersion": "0.4.12",
+    "buildVersion": "0.4.13",
     "compression": "maximum",
     "directories": {
       "output": "../../../bin/Desktop"
