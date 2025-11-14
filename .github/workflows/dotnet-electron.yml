@@ -41,9 +41,7 @@ jobs:
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: |
-          dotnet new tool-manifest --force
-          dotnet tool install ElectronNET.CLI
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
@@ -53,7 +51,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          dotnet electronize build /target osx
+          electron-sharp build /target osx
 
       #     - name: Publish Mac Arm64
       #       shell: bash
@@ -94,9 +92,7 @@ jobs:
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: |
-          dotnet new tool-manifest --force
-          dotnet tool install ElectronNET.CLI
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
@@ -106,7 +102,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          dotnet electronize build /target win
+          electron-sharp build /target win
 
       - name: Upload publish artifacts
         uses: actions/upload-artifact@v4
@@ -134,16 +130,14 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: |
-          dotnet new tool-manifest --force
-          dotnet tool install ElectronNET.CLI
+        run: dotnet tool install ElectronSharp.CLI --version 29.0.1.46142 -g
 
       - name: Restore NuGet packages
         shell: bash
@@ -153,7 +147,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          dotnet electronize build /target linux
+          electron-sharp build /target linux
 
       - name: Upload publish artifacts
         uses: actions/upload-artifact@v4
