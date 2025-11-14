@@ -34,14 +34,16 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: |
+          dotnet new tool-manifest --force
+          dotnet tool install ElectronNET.CLI
 
       - name: Restore NuGet packages
         shell: bash
@@ -51,7 +53,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          electron-sharp build /target osx
+          dotnet electronize build /target osx
 
       #     - name: Publish Mac Arm64
       #       shell: bash
@@ -85,14 +87,16 @@ jobs:
         run: |
           buildDay=`date +%Y.%m%d`
           echo $buildDay
-          runNum=${{ env.GITHUB_RUN_NUMBER }}
+          runNum=${{ github.run_number }}
           ver="${buildDay}.${runNum}.0"
           echo $ver
           echo "APP_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: |
+          dotnet new tool-manifest --force
+          dotnet tool install ElectronNET.CLI
 
       - name: Restore NuGet packages
         shell: bash
@@ -102,7 +106,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          electron-sharp build /target win
+          dotnet electronize build /target win
 
       - name: Upload publish artifacts
         uses: actions/upload-artifact@v4
@@ -137,7 +141,9 @@ jobs:
 
       - name: Install ElectronSharp.CLI
         shell: bash
-        run: dotnet tool install ElectronSharp.CLI -g
+        run: |
+          dotnet new tool-manifest --force
+          dotnet tool install ElectronNET.CLI
 
       - name: Restore NuGet packages
         shell: bash
@@ -147,7 +153,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ env.PROJECT_FOLDER }}
-          electron-sharp build /target linux
+          dotnet electronize build /target linux
 
       - name: Upload publish artifacts
         uses: actions/upload-artifact@v4
