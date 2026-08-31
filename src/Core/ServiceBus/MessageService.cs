@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.Management.Contracts;
 using CrossBusExplorer.ServiceBus.Contracts;
@@ -12,28 +13,14 @@ public class MessageService : IMessageService
     private const int receiveBatch = 100;
     private const int maxReceiverMessagesCount = 250;
     private readonly IConnectionManagement _connectionManagement;
-    public MessageService(IConnectionManagement connectionManagement)
+    private readonly IServiceBusClientFactory _clientFactory;
+
+    public MessageService(
+        IConnectionManagement connectionManagement,
+        IServiceBusClientFactory clientFactory)
     {
         _connectionManagement = connectionManagement;
-    }
-
-    private ServiceBusClientOptions GetServiceBusClientOptions(
-        CrossBusExplorer.Management.Contracts.ServiceBusTransportType transportType)
-    {
-        return new ServiceBusClientOptions
-        {
-            TransportType = transportType == CrossBusExplorer.Management.Contracts.ServiceBusTransportType.AmqpTcp
-                ? Azure.Messaging.ServiceBus.ServiceBusTransportType.AmqpTcp
-                : Azure.Messaging.ServiceBus.ServiceBusTransportType.AmqpWebSockets,
-            RetryOptions = new ServiceBusRetryOptions
-            {
-                Mode = ServiceBusRetryMode.Exponential,
-                MaxRetries = 3,
-                Delay = TimeSpan.FromSeconds(1),
-                MaxDelay = TimeSpan.FromSeconds(10),
-                TryTimeout = TimeSpan.FromSeconds(60)
-            }
-        };
+        _clientFactory = clientFactory;
     }
 
     public async Task<IReadOnlyList<Message>> GetMessagesAsync(
@@ -52,9 +39,7 @@ public class MessageService : IMessageService
             var connection =
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-            await using ServiceBusClient client = new ServiceBusClient(
-                connection.ConnectionString,
-                GetServiceBusClientOptions(connection.TransportType));
+            ServiceBusClient client = _clientFactory.GetClient(connection);
 
             await using var receiver =
                 GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, mode);
@@ -92,9 +77,7 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using var client = new ServiceBusClient(
-            connection.ConnectionString,
-            GetServiceBusClientOptions(connection.TransportType));
+        ServiceBusClient client = _clientFactory.GetClient(connection);
         await using ServiceBusSender sender = client.CreateSender(queueOrTopicName);
 
         return await SendMessagesInternalAsync(
@@ -109,14 +92,12 @@ public class MessageService : IMessageService
         string? subscriptionName,
         SubQueue subQueue,
         long totalCount,
-        CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using ServiceBusClient client = new ServiceBusClient(
-            connection.ConnectionString,
-            GetServiceBusClientOptions(connection.TransportType));
+        ServiceBusClient client = _clientFactory.GetClient(connection);
         await using var receiver = GetReceiver(
             client,
             topicOrQueueName,
@@ -147,14 +128,12 @@ public class MessageService : IMessageService
         SubQueue subQueue,
         string destinationTopicOrQueueName,
         long totalCount,
-        CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using ServiceBusClient client = new ServiceBusClient(
-            connection.ConnectionString,
-            GetServiceBusClientOptions(connection.TransportType));
+        ServiceBusClient client = _clientFactory.GetClient(connection);
         await using ServiceBusReceiver receiver = GetReceiver(
             client,
             topicOrQueueName,
@@ -199,9 +178,7 @@ public class MessageService : IMessageService
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
-        await using var client = new ServiceBusClient(
-            connection.ConnectionString,
-            GetServiceBusClientOptions(connection.TransportType));
+        ServiceBusClient client = _clientFactory.GetClient(connection);
 
         await using ServiceBusReceiver receiver =
             GetReceiver(client, queueOrTopicName, subscriptionName, subQueue, ReceiveMode.PeekLock);
@@ -275,6 +252,13 @@ public class MessageService : IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
+        if (type == ReceiveType.All)
+        {
+            return receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock
+                ? await PeekAllAsync(receiver, fromSequenceNumber, cancellationToken)
+                : await ReceiveAllAsync(receiver, cancellationToken);
+        }
+
         if (receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock)
         {
             return await receiver.PeekMessagesAsync(
@@ -286,6 +270,56 @@ public class MessageService : IMessageService
         return await receiver.ReceiveMessagesAsync(
             maxMessages ?? maxReceiverMessagesCount,
             cancellationToken: cancellationToken);
+    }
+
+    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> PeekAllAsync(
+        ServiceBusReceiver receiver,
+        long? fromSequenceNumber,
+        CancellationToken cancellationToken)
+    {
+        var messages = new List<ServiceBusReceivedMessage>();
+        var sequenceNumber = fromSequenceNumber;
+
+        while (true)
+        {
+            var batch = await receiver.PeekMessagesAsync(
+                maxReceiverMessagesCount,
+                sequenceNumber,
+                cancellationToken);
+            messages.AddRange(batch);
+
+            if (batch.Count < maxReceiverMessagesCount)
+            {
+                break;
+            }
+
+            sequenceNumber = batch[^1].SequenceNumber + 1;
+        }
+
+        return messages;
+    }
+
+    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> ReceiveAllAsync(
+        ServiceBusReceiver receiver,
+        CancellationToken cancellationToken)
+    {
+        var messages = new List<ServiceBusReceivedMessage>();
+
+        while (true)
+        {
+            var batch = await receiver.ReceiveMessagesAsync(
+                maxReceiverMessagesCount,
+                TimeSpan.FromSeconds(2),
+                cancellationToken);
+            messages.AddRange(batch);
+
+            if (batch.Count == 0)
+            {
+                break;
+            }
+        }
+
+        return messages;
     }
 
     private async Task<Result> SendMessagesInternalAsync(

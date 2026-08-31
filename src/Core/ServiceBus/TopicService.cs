@@ -13,10 +13,14 @@ namespace CrossBusExplorer.ServiceBus;
 public class TopicService : ITopicService
 {
     private readonly IConnectionManagement _connectionManagement;
-    
-    public TopicService(IConnectionManagement connectionManagement)
+    private readonly IServiceBusClientFactory _clientFactory;
+
+    public TopicService(
+        IConnectionManagement connectionManagement,
+        IServiceBusClientFactory clientFactory)
     {
         _connectionManagement = connectionManagement;
+        _clientFactory = clientFactory;
     }
     
     public async IAsyncEnumerable<TopicStructure> GetStructureAsync(
@@ -27,7 +31,7 @@ public class TopicService : ITopicService
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
         
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         AsyncPageable<TopicProperties> topicsPageable =
             administrationClient.GetTopicsAsync(cancellationToken);
@@ -75,7 +79,7 @@ public class TopicService : ITopicService
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
         
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         var topicResponse = await administrationClient.GetTopicAsync(name, cancellationToken);
 
@@ -100,7 +104,7 @@ public class TopicService : ITopicService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
             
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var response = await administrationClient.DeleteTopicAsync(name, cancellationToken);
 
@@ -125,7 +129,7 @@ public class TopicService : ITopicService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
             
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var createTopicOptions = options.MapToCreateTopicOptions();
 
@@ -164,7 +168,7 @@ public class TopicService : ITopicService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
             
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             Response<TopicProperties>? sourceTopicResponse =
                 await administrationClient.GetTopicAsync(sourceName, cancellationToken);
@@ -211,7 +215,7 @@ public class TopicService : ITopicService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
             
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var getTopicResponse = await administrationClient.GetTopicAsync(
                 options.Name,

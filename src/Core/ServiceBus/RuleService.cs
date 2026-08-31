@@ -10,10 +10,14 @@ namespace CrossBusExplorer.ServiceBus;
 public class RuleService : IRuleService
 {
     private readonly IConnectionManagement _connectionManagement;
+    private readonly IServiceBusClientFactory _clientFactory;
 
-    public RuleService(IConnectionManagement connectionManagement)
+    public RuleService(
+        IConnectionManagement connectionManagement,
+        IServiceBusClientFactory clientFactory)
     {
         _connectionManagement = connectionManagement;
+        _clientFactory = clientFactory;
     }
 
     public async IAsyncEnumerable<Rule> GetAsync(
@@ -26,7 +30,7 @@ public class RuleService : IRuleService
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         AsyncPageable<RuleProperties> subscriptionsPageable =
             administrationClient.GetRulesAsync(
@@ -56,7 +60,7 @@ public class RuleService : IRuleService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var response = await administrationClient.DeleteRuleAsync(
                 topicName,
@@ -89,7 +93,7 @@ public class RuleService : IRuleService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var options = GetCreateOptions(ruleName, type, value);
 
@@ -132,7 +136,7 @@ public class RuleService : IRuleService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var ruleProperties = await administrationClient.GetRuleAsync(
                 topicName,

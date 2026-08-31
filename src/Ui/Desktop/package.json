@@ -1,0 +1,32 @@
+{
+  "name": "cross-bus-explorer-desktop",
+  "private": true,
+  "version": "0.5.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "sidecar:debug": "node scripts/prepare-sidecar.mjs Debug",
+    "sidecar:release": "node scripts/prepare-sidecar.mjs Release",
+    "tauri:dev": "npm run sidecar:debug && tauri dev",
+    "tauri:build": "npm run sidecar:release && tauri build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.102.8",
+    "@tauri-apps/api": "2.11.1",
+    "lucide-react": "1.35.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@types/node": "26.4.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}

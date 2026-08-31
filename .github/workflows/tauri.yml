@@ -1,0 +1,90 @@
+name: Build and test Tauri desktop
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+    tags: ["*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Test C# backend
+        run: dotnet test tests/CrossBusExplorer.Tests/CrossBusExplorer.Tests.csproj --configuration Release --nologo
+
+  build-desktop:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            bundles: "app,dmg"
+            artifact: macos
+            paths: |
+              src/Ui/Desktop/src-tauri/target/release/bundle/macos/*.app
+              src/Ui/Desktop/src-tauri/target/release/bundle/dmg/*.dmg
+          - os: windows-2022
+            bundles: "nsis,msi"
+            artifact: windows
+            paths: |
+              src/Ui/Desktop/src-tauri/target/release/bundle/nsis/*
+              src/Ui/Desktop/src-tauri/target/release/bundle/msi/*
+          - os: ubuntu-22.04
+            bundles: "appimage,deb"
+            artifact: linux
+            paths: |
+              src/Ui/Desktop/src-tauri/target/release/bundle/appimage/*
+              src/Ui/Desktop/src-tauri/target/release/bundle/deb/*
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/Ui/Desktop/package-lock.json
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Install frontend dependencies
+        working-directory: src/Ui/Desktop
+        run: npm ci
+      - name: Build native package
+        working-directory: src/Ui/Desktop
+        run: npm run tauri:build -- --bundles ${{ matrix.bundles }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-bus-explorer-${{ matrix.artifact }}
+          path: ${{ matrix.paths }}
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-desktop
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

@@ -11,14 +11,13 @@
 
     <PropertyGroup Condition=" '$(RunConfiguration)' == 'CrossBusExplorer' " />
     <ItemGroup>
-      <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Remove="appsettings.Development.json" />
+      <Compile Remove="Mutations\**\*.cs" />
+      <Compile Remove="Queries\**\*.cs" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Core\Management\Management.csproj" />
       <ProjectReference Include="..\..\Core\ServiceBus\ServiceBus.csproj" />
     </ItemGroup>
 

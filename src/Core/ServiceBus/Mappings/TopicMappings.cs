@@ -135,7 +135,7 @@ public static class TopicMappings
             queue.EnableBatchedOperations = options.EnableBatchedOperations.Value;
         }
 
-        if (options.EnableBatchedOperations.HasValue)
+        if (options.SupportOrdering.HasValue)
         {
             queue.SupportOrdering = options.SupportOrdering.Value;
         }
