@@ -9,9 +9,9 @@
     "preview": "vite preview",
     "sidecar:debug": "node scripts/prepare-sidecar.mjs Debug",
     "sidecar:release": "node scripts/prepare-sidecar.mjs Release",
-    "tauri:dev": "npm run sidecar:debug && tauri dev",
-    "tauri:build": "npm run sidecar:release && tauri build",
-    "tauri": "tauri"
+    "tauri:dev": "npm run sidecar:debug && node scripts/run-tauri.mjs dev",
+    "tauri:build": "npm run sidecar:release && node scripts/run-tauri.mjs build",
+    "tauri": "node scripts/run-tauri.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "5.102.8",

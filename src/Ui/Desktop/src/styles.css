@@ -53,9 +53,15 @@ button { color: inherit; }
 .rail-button:hover, .rail-button.active { color: #e9fffc; background: #24313a; }
 .rail-button.active { box-shadow: inset 3px 0 #35c9b8; }
 .rail-spacer { flex: 1; }
-.workspace { display: grid; grid-template-columns: 310px minmax(0, 1fr); min-width: 0; flex: 1; }
+.workspace { display: grid; grid-template-columns: 310px 6px minmax(0, 1fr); min-width: 0; flex: 1; }
 
-.resource-panel { background: var(--surface-soft); border-right: 1px solid var(--border); min-width: 0; display: flex; flex-direction: column; }
+.resource-panel { background: var(--surface-soft); min-width: 0; display: flex; flex-direction: column; }
+.resource-resizer { position: relative; width: 6px; height: 100%; padding: 0; border: 0; border-left: 1px solid var(--border); outline: 0; cursor: col-resize; touch-action: none; background: var(--surface-soft); }
+.resource-resizer::before { content: ""; position: absolute; inset: 0 -3px; }
+.resource-resizer span { position: absolute; top: 50%; left: 1px; width: 3px; height: 38px; border-radius: 3px; background: var(--border-strong); opacity: 0; transform: translateY(-50%); transition: opacity .14s ease, background .14s ease; }
+.resource-resizer:hover span, .resource-resizer:focus-visible span, .workspace.is-resizing .resource-resizer span { opacity: 1; background: var(--accent); }
+.resource-resizer:focus-visible { box-shadow: inset 2px 0 var(--accent); }
+.workspace.is-resizing, .workspace.is-resizing * { cursor: col-resize !important; user-select: none !important; }
 .panel-heading { padding: 20px 18px 13px; display: flex; align-items: center; justify-content: space-between; }
 .panel-heading h2, .jobs-panel h2, .card h2 { margin: 2px 0 0; font-size: 18px; letter-spacing: -.02em; }
 .eyebrow { display: block; color: var(--accent); text-transform: uppercase; letter-spacing: .115em; font-size: 10px; font-weight: 700; }
@@ -244,7 +250,6 @@ button { color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 900px) {
-  .workspace { grid-template-columns: 245px minmax(0, 1fr); }
   .overview-grid, .metric-grid { grid-template-columns: 1fr 1fr; }
   .auth-grid { grid-template-columns: repeat(2, 1fr); }
   .page-header { align-items: flex-start; flex-direction: column; }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -20,6 +20,12 @@ import { SubscriptionOverview } from "./components/SubscriptionOverview";
 import { TopicOverview } from "./components/TopicOverview";
 import type { Connection, ResourceSelection, SaveConnection } from "./types";
 
+const EXPLORER_MIN_WIDTH = 245;
+const EXPLORER_DEFAULT_WIDTH = 310;
+const EXPLORER_ABSOLUTE_MAX_WIDTH = 720;
+const MAIN_CONTENT_MIN_WIDTH = 480;
+const EXPLORER_WIDTH_STORAGE_KEY = "explorer-width";
+
 export function App() {
   const queryClient = useQueryClient();
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
@@ -27,6 +33,16 @@ export function App() {
   const [jobsOpen, setJobsOpen] = useState(false);
   const [selection, setSelection] = useState<ResourceSelection>();
   const [dark, setDark] = useState(() => localStorage.getItem("theme") !== "light");
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const resizeStartRef = useRef<{ x: number; width: number } | undefined>(undefined);
+  const [resizingExplorer, setResizingExplorer] = useState(false);
+  const [explorerMaxWidth, setExplorerMaxWidth] = useState(EXPLORER_ABSOLUTE_MAX_WIDTH);
+  const [explorerWidth, setExplorerWidth] = useState(() => {
+    const storedWidth = Number.parseInt(localStorage.getItem(EXPLORER_WIDTH_STORAGE_KEY) ?? "", 10);
+    return Number.isFinite(storedWidth)
+      ? Math.min(EXPLORER_ABSOLUTE_MAX_WIDTH, Math.max(EXPLORER_MIN_WIDTH, storedWidth))
+      : EXPLORER_DEFAULT_WIDTH;
+  });
   const connections = useQuery({ queryKey: ["connections"], queryFn: api.connections });
   const saveConnection = useMutation({
     mutationFn: (connection: SaveConnection) => api.saveConnection(cleanConnection(connection)),
@@ -58,6 +74,29 @@ export function App() {
   }, [dark]);
 
   useEffect(() => {
+    localStorage.setItem(EXPLORER_WIDTH_STORAGE_KEY, explorerWidth.toString());
+  }, [explorerWidth]);
+
+  useEffect(() => {
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+
+    const updateBounds = () => {
+      const maxWidth = Math.max(
+        EXPLORER_MIN_WIDTH,
+        Math.min(EXPLORER_ABSOLUTE_MAX_WIDTH, workspace.clientWidth - MAIN_CONTENT_MIN_WIDTH),
+      );
+      setExplorerMaxWidth(maxWidth);
+      setExplorerWidth((width) => Math.min(width, maxWidth));
+    };
+
+    updateBounds();
+    const observer = new ResizeObserver(updateBounds);
+    observer.observe(workspace);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (!selection && connections.data?.length) {
       setSelection({ kind: "connection", connectionName: connections.data[0].name });
     }
@@ -80,7 +119,11 @@ export function App() {
         <button className="rail-button" title="Settings" aria-label="Settings"><Settings size={19} /></button>
       </nav>
 
-      <div className="workspace">
+      <div
+        className={`workspace ${resizingExplorer ? "is-resizing" : ""}`}
+        ref={workspaceRef}
+        style={{ gridTemplateColumns: `${explorerWidth}px 6px minmax(0, 1fr)` }}
+      >
         <ResourceExplorer
           connections={connections.data ?? []}
           selection={selection}
@@ -90,6 +133,54 @@ export function App() {
             if (name) createEntity.mutate({ kind, connectionName, name });
           }}
         />
+
+        <div
+          className="resource-resizer"
+          role="separator"
+          aria-label="Resize resource explorer"
+          aria-orientation="vertical"
+          aria-valuemin={EXPLORER_MIN_WIDTH}
+          aria-valuemax={explorerMaxWidth}
+          aria-valuenow={explorerWidth}
+          tabIndex={0}
+          title="Drag to resize · Double-click to reset"
+          onDoubleClick={() => setExplorerWidth(Math.min(EXPLORER_DEFAULT_WIDTH, explorerMaxWidth))}
+          onKeyDown={(event) => {
+            let nextWidth: number | undefined;
+            if (event.key === "ArrowLeft") nextWidth = explorerWidth - 16;
+            if (event.key === "ArrowRight") nextWidth = explorerWidth + 16;
+            if (event.key === "Home") nextWidth = EXPLORER_MIN_WIDTH;
+            if (event.key === "End") nextWidth = explorerMaxWidth;
+            if (nextWidth === undefined) return;
+            event.preventDefault();
+            setExplorerWidth(Math.min(explorerMaxWidth, Math.max(EXPLORER_MIN_WIDTH, nextWidth)));
+          }}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            resizeStartRef.current = { x: event.clientX, width: explorerWidth };
+            setResizingExplorer(true);
+          }}
+          onPointerMove={(event) => {
+            const start = resizeStartRef.current;
+            if (!start) return;
+            const nextWidth = start.width + event.clientX - start.x;
+            setExplorerWidth(Math.min(explorerMaxWidth, Math.max(EXPLORER_MIN_WIDTH, nextWidth)));
+          }}
+          onPointerUp={(event) => {
+            if (!resizeStartRef.current) return;
+            resizeStartRef.current = undefined;
+            setResizingExplorer(false);
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }}
+          onPointerCancel={() => {
+            resizeStartRef.current = undefined;
+            setResizingExplorer(false);
+          }}
+        >
+          <span />
+        </div>
 
         <main className="main-content">
           {connections.isPending ? (

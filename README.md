@@ -44,7 +44,7 @@ CI environments.
 
 Prerequisites:
 
-- .NET 8 SDK or newer
+- .NET 10 SDK
 - Node.js 22.12 or newer
 - Rust stable and the platform-specific [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/)
 

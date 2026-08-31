@@ -110,7 +110,7 @@ function ConnectionTree({
           onClick={() => onSelect({ kind: "connection", connectionName: connection.name })}
         >
           <RadioTower size={15} />
-          <span>{connection.name}</span>
+          <span className="entity-name" title={connection.name}>{connection.name}</span>
         </button>
       </div>
 
@@ -141,7 +141,7 @@ function ConnectionTree({
                   }
                 >
                   <CircleDot size={13} />
-                  <span className="entity-name">{queue.name}</span>
+                  <span className="entity-name" title={queue.name}>{queue.name}</span>
                   <span className="count-badge" title="Active messages">
                     {queue.activeMessagesCount}
                   </span>
@@ -243,7 +243,7 @@ function TopicNode({
       <div className="topic-folder">
         <div className="entity-row folder-label">
           <Folder size={13} />
-          <span>{topic.name}</span>
+          <span className="entity-name" title={topic.name}>{topic.name}</span>
         </div>
         <div className="nested-topics">
           {topic.childTopics.map((child) => (
@@ -311,7 +311,7 @@ function TopicLeaf({
           onClick={() => onSelect({ kind: "topic", connectionName, name })}
         >
           <CircleDot size={13} />
-          <span className="entity-name">{topic.name}</span>
+          <span className="entity-name" title={topic.name}>{topic.name}</span>
         </button>
       </div>
       {expanded && (
@@ -332,7 +332,7 @@ function TopicLeaf({
                 })}
               >
                 <Layers3 size={12} />
-                <span className="entity-name">{item.subscriptionName}</span>
+                <span className="entity-name" title={item.subscriptionName}>{item.subscriptionName}</span>
                 <span className="count-badge">{item.activeMessagesCount}</span>
                 {item.deadLetterMessagesCount > 0 && (
                   <span className="count-badge danger">{item.deadLetterMessagesCount}</span>
