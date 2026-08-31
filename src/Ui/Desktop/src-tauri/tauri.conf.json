@@ -29,8 +29,8 @@
     "targets": "all",
     "externalBin": ["binaries/crossbus-host"],
     "icon": [
-      "../../Website.Host/build/icon.png",
-      "../../Website.Host/build/icon512x512.png"
+      "icons/icon.png",
+      "icons/icon512x512.png"
     ],
     "shortDescription": "A lightweight cross-platform Azure Service Bus explorer"
   }

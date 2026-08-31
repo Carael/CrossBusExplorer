@@ -76,9 +76,6 @@ Run backend regression tests:
 dotnet test tests/CrossBusExplorer.Tests/CrossBusExplorer.Tests.csproj
 ```
 
-The legacy Blazor/Electron projects remain in the solution temporarily as a
-reference during migration, but release packaging now builds the React/Tauri app.
-
 ## Unsigned local builds
 
 Local packages are not code-signed. macOS may require **Open Anyway** under
