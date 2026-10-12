@@ -14,9 +14,14 @@ namespace CrossBusExplorer.ServiceBus;
 public class QueueService : IQueueService
 {
     private readonly IConnectionManagement _connectionManagement;
-    public QueueService(IConnectionManagement connectionManagement)
+    private readonly IServiceBusClientFactory _clientFactory;
+
+    public QueueService(
+        IConnectionManagement connectionManagement,
+        IServiceBusClientFactory clientFactory)
     {
         _connectionManagement = connectionManagement;
+        _clientFactory = clientFactory;
     }
 
     public async IAsyncEnumerable<QueueInfo> GetAsync(
@@ -26,7 +31,7 @@ public class QueueService : IQueueService
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         AsyncPageable<QueueProperties> queuesPageable =
             administrationClient.GetQueuesAsync(cancellationToken);
@@ -63,7 +68,7 @@ public class QueueService : IQueueService
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         var queueResponse = await administrationClient.GetQueueAsync(name, cancellationToken);
 
@@ -87,7 +92,7 @@ public class QueueService : IQueueService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var response = await administrationClient.DeleteQueueAsync(name, cancellationToken);
 
@@ -111,7 +116,7 @@ public class QueueService : IQueueService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var createQueueOptions = options.MapToCreateQueueOptions();
 
@@ -149,7 +154,7 @@ public class QueueService : IQueueService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             Response<QueueProperties>? sourceQueueResponse =
                 await administrationClient.GetQueueAsync(sourceName, cancellationToken);
@@ -196,7 +201,7 @@ public class QueueService : IQueueService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var getQueueResponse = await administrationClient.GetQueueAsync(
                 options.Name,

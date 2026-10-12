@@ -10,5 +10,8 @@ public interface IConnectionManagement
         string folder,
         ServiceBusTransportType transportType,
         CancellationToken cancellationToken);
+    Task<ServiceBusConnection> SaveAsync(
+        ServiceBusConnection connection,
+        CancellationToken cancellationToken);
     Task DeleteAsync(string name, CancellationToken cancellationToken);
 }

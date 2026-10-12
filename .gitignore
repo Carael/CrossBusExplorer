@@ -237,6 +237,15 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# React/Tauri generated output
+src/Ui/Desktop/dist/
+src/Ui/Desktop/src-tauri/target/
+src/Ui/Desktop/src-tauri/binaries/
+src/Ui/Desktop/src-tauri/gen/
+src/Ui/Desktop/*.tsbuildinfo
+src/Ui/Desktop/vite.config.js
+src/Ui/Desktop/vite.config.d.ts
+
 # Typescript v1 declaration files
 typings/
 

@@ -15,10 +15,14 @@ namespace CrossBusExplorer.ServiceBus;
 public class SubscriptionService : ISubscriptionService
 {
     private readonly IConnectionManagement _connectionManagement;
+    private readonly IServiceBusClientFactory _clientFactory;
 
-    public SubscriptionService(IConnectionManagement connectionManagement)
+    public SubscriptionService(
+        IConnectionManagement connectionManagement,
+        IServiceBusClientFactory clientFactory)
     {
         _connectionManagement = connectionManagement;
+        _clientFactory = clientFactory;
     }
 
     public async IAsyncEnumerable<SubscriptionInfo> GetAsync(
@@ -30,7 +34,7 @@ public class SubscriptionService : ISubscriptionService
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         AsyncPageable<SubscriptionProperties> subscriptionsPageable =
             administrationClient.GetSubscriptionsAsync(topicName, cancellationToken);
@@ -70,7 +74,7 @@ public class SubscriptionService : ISubscriptionService
         var connection = await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
         ServiceBusAdministrationClient administrationClient =
-            new ServiceBusAdministrationClient(connection.ConnectionString);
+            _clientFactory.GetAdministrationClient(connection);
 
         var subscriptionResponse =
             await administrationClient.GetSubscriptionAsync(
@@ -101,7 +105,7 @@ public class SubscriptionService : ISubscriptionService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var response = await administrationClient.DeleteSubscriptionAsync(
                 topicName,
@@ -129,7 +133,7 @@ public class SubscriptionService : ISubscriptionService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var createSubscriptionOptions = options.MapToCreateSubscriptionOptions();
 
@@ -170,7 +174,7 @@ public class SubscriptionService : ISubscriptionService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             Response<SubscriptionProperties>? sourceSubscriptionResponse =
                 await administrationClient.GetSubscriptionAsync(
@@ -222,7 +226,7 @@ public class SubscriptionService : ISubscriptionService
                 await _connectionManagement.GetAsync(connectionName, cancellationToken);
 
             ServiceBusAdministrationClient administrationClient =
-                new ServiceBusAdministrationClient(connection.ConnectionString);
+                _clientFactory.GetAdministrationClient(connection);
 
             var subscriptionResponse = await administrationClient.GetSubscriptionAsync(
                 options.TopicName,

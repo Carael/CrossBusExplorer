@@ -39,29 +39,36 @@ public class ConnectionManagement : IConnectionManagement
         ServiceBusTransportType transportType,
         CancellationToken cancellationToken)
     {
+        var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
+            name, connectionString, transportType, folder);
+
+        return await SaveAsync(connection, cancellationToken);
+    }
+
+    public async Task<ServiceBusConnection> SaveAsync(
+        ServiceBusConnection connection,
+        CancellationToken cancellationToken)
+    {
         IDictionary<string, ServiceBusConnection> connections =
             await _managementStorage.ReadAsync(cancellationToken);
 
-        var connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
-            name, connectionString, transportType);
-        
-        //TODO: add to folder
-
-        if (connections.ContainsKey(name))
+        if (connections.ContainsKey(connection.Name))
         {
-            connections[name] = connection;
+            connections[connection.Name] = connection;
         }
-        else if (connections.Any(p => p.Value.ConnectionString == connectionString))
+        else if (connection.ConnectionString is not null &&
+                 connections.Any(p => p.Value.ConnectionString == connection.ConnectionString))
         {
-            var keyToRemove = connections.First(p => p.Value.ConnectionString == connectionString)
+            var keyToRemove = connections
+                .First(p => p.Value.ConnectionString == connection.ConnectionString)
                 .Key;
 
             connections.Remove(keyToRemove);
-            connections.Add(name, connection);
+            connections.Add(connection.Name, connection);
         }
         else
         {
-            connections.Add(name, connection);
+            connections.Add(connection.Name, connection);
         }
 
         await _managementStorage.StoreAsync(

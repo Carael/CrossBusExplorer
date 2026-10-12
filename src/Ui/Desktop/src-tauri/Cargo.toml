@@ -1,0 +1,22 @@
+[package]
+name = "cross-bus-explorer-desktop"
+version = "0.5.0"
+description = "A lightweight cross-platform Azure Service Bus explorer"
+authors = ["Mariusz Matysek"]
+edition = "2021"
+
+[lib]
+name = "cross_bus_explorer_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+tokio = { version = "1", features = ["sync", "time"] }
+uuid = { version = "1", features = ["v4"] }
