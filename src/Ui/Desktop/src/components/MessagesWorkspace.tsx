@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDownToLine,
+  ArrowRightLeft,
   CopyPlus,
   Eye,
   FileUp,
@@ -78,10 +79,34 @@ export function MessagesWorkspace({
   });
 
   const send = useMutation({
-    mutationFn: (message: SendMessage) => api.sendMessages(connectionName, entityName, [message]),
-    onSuccess: (result) => {
+    mutationFn: ({ message, destination = entityName }: { message: SendMessage; destination?: string }) =>
+      api.sendMessages(connectionName, destination, [message]),
+    onSuccess: (result, { destination = entityName }) => {
       setComposer(undefined);
-      setNotice(`Sent ${result.count} message${result.count === 1 ? "" : "s"} to ${entityName}.`);
+      setNotice(`Sent ${result.count} message${result.count === 1 ? "" : "s"} to ${destination}.`);
+    },
+  });
+
+  const move = useMutation({
+    mutationFn: async ({ message, destination }: { message: ServiceBusMessage; destination: string }) => {
+      if (subQueue === "None" && destination === entityName) {
+        throw new Error("Choose a different destination to move an active message.");
+      }
+      await api.sendMessages(connectionName, destination, [{ ...messageToSend(message), id: message.id }]);
+      return api.deleteMessage(
+        connectionName,
+        entityName,
+        subscriptionName,
+        subQueue,
+        message.systemProperties.sequenceNumber,
+      );
+    },
+    onSuccess: (_, { message, destination }) => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      setMessages((current) => current.filter((item) => item !== message));
+      setSelected(undefined);
+      setNotice(`Sent sequence ${message.systemProperties.sequenceNumber} to ${destination}. Removal from this source is running in Operations.`);
+      onJobStarted?.();
     },
   });
 
@@ -97,13 +122,16 @@ export function MessagesWorkspace({
         );
       }
       if (action === "resend") {
-        const destination = await dialogs.prompt({
-          title: "Resend messages",
-          message: `Move up to ${formatCount(availableCount)} messages to another entity.`,
-          defaultValue: entityName,
-          confirmLabel: "Resend",
-        });
+        const destination = (await dialogs.prompt({
+          title: "Move messages",
+          message: `Move up to ${formatCount(availableCount)} messages to a queue or topic. They are removed from this source.`,
+          defaultValue: suggestedDestination(entityName),
+          confirmLabel: "Move",
+        }))?.trim();
         if (!destination) throw new Error("A destination is required.");
+        if (subQueue === "None" && destination === entityName) {
+          throw new Error("Choose a different destination to move active messages.");
+        }
         return api.resendMessages(
           connectionName,
           entityName,
@@ -158,11 +186,22 @@ export function MessagesWorkspace({
     if (confirmed) startJob.mutate({ action: "purge" });
   }
 
-  function requeue(message: ServiceBusMessage) {
-    send.mutate(messageToSend(message));
+  function promptDestination(title: string, message: string, confirmLabel: string) {
+    return dialogs.prompt({ title, message, defaultValue: suggestedDestination(entityName), confirmLabel })
+      .then((value) => value?.trim());
   }
 
-  const error = receive.error ?? send.error ?? startJob.error;
+  async function requeue(message: ServiceBusMessage) {
+    const destination = await promptDestination("Send copy", "Send a copy to a queue or topic. The original stays in this source.", "Send");
+    if (destination) send.mutate({ message: messageToSend(message), destination });
+  }
+
+  async function moveMessage(message: ServiceBusMessage) {
+    const destination = await promptDestination("Move message", "Send the message to a queue or topic and remove it from this source.", "Move");
+    if (destination) move.mutate({ message, destination });
+  }
+
+  const error = receive.error ?? send.error ?? move.error ?? startJob.error;
 
   return (
     <section className="messages-workspace">
@@ -178,7 +217,7 @@ export function MessagesWorkspace({
           <button className="button secondary" onClick={() => setComposer({ body: "" })}><MessageSquarePlus size={15} /> New message</button>
           <input ref={fileInput} type="file" multiple hidden onChange={(event) => importFiles(event.target.files)} />
           <button className="button secondary" onClick={() => fileInput.current?.click()}><FileUp size={15} /> Import files</button>
-          {subQueue !== "None" && <button className="button secondary" onClick={() => startJob.mutate({ action: "resend" })} disabled={!availableCount}><RotateCcw size={15} /> Resend all</button>}
+          <button className="button secondary" onClick={() => startJob.mutate({ action: "resend" })} disabled={!availableCount}><RotateCcw size={15} /> Move all</button>
           <button className="button danger-ghost" onClick={confirmPurge} disabled={!availableCount}><Trash2 size={15} /> Purge</button>
         </div>
       </div>
@@ -209,7 +248,8 @@ export function MessagesWorkspace({
                     <td className="row-actions">
                       <button title="View" onClick={() => setSelected(message)}><Eye size={14} /></button>
                       <button title="Edit and send a copy" onClick={() => setComposer(messageToSend(message))}><CopyPlus size={14} /></button>
-                      <button title="Requeue to this entity" onClick={() => requeue(message)}><Send size={14} /></button>
+                      <button title="Send a copy to…" onClick={() => requeue(message)}><Send size={14} /></button>
+                      <button title="Move to…" onClick={() => moveMessage(message)} disabled={move.isPending}><ArrowRightLeft size={14} /></button>
                       <button title="Delete" onClick={async () => { if (await dialogs.confirm({ title: `Delete sequence ${message.systemProperties.sequenceNumber}?`, message: "The message is permanently removed from this source.", confirmLabel: "Delete", danger: true })) startJob.mutate({ action: "delete", message }); }}><Trash2 size={14} /></button>
                     </td>
                     <td><button className="table-link" onClick={() => setSelected(message)}>{message.id}</button></td>
@@ -223,7 +263,7 @@ export function MessagesWorkspace({
             </table>
           )}
         </div>
-        {selected && <MessageDetails message={selected} onClose={() => setSelected(undefined)} onEdit={() => setComposer(messageToSend(selected))} onRequeue={() => requeue(selected)} />}
+        {selected && <MessageDetails message={selected} onClose={() => setSelected(undefined)} onEdit={() => setComposer(messageToSend(selected))} onRequeue={() => requeue(selected)} actions={<button className="button secondary" onClick={() => moveMessage(selected)} disabled={move.isPending}><ArrowRightLeft size={14} /> Move</button>} />}
       </div>
 
       {composer && (
@@ -232,7 +272,7 @@ export function MessagesWorkspace({
           busy={send.isPending}
           error={send.error?.message}
           onClose={() => setComposer(undefined)}
-          onSend={(message) => send.mutate(message)}
+          onSend={(message) => send.mutate({ message })}
         />
       )}
     </section>
@@ -317,6 +357,11 @@ function messageToSend(message: ServiceBusMessage): SendMessage {
     to: message.systemProperties.to,
     applicationProperties: message.applicationProperties,
   };
+}
+
+// MassTransit-style error/skipped queues map back to their source queue.
+function suggestedDestination(entityName: string) {
+  return entityName.replace(/_(error|skipped)$/i, "");
 }
 
 function nextSequence(messages: ServiceBusMessage[]) {
