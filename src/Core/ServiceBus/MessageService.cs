@@ -252,32 +252,67 @@ public class MessageService : IMessageService
         long? fromSequenceNumber,
         CancellationToken cancellationToken)
     {
-        if (type == ReceiveType.All)
-        {
-            return receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock
-                ? await PeekAllAsync(receiver, fromSequenceNumber, cancellationToken)
-                : await ReceiveAllAsync(receiver, cancellationToken);
-        }
+        var peek = receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock;
 
-        if (receiver.ReceiveMode == ServiceBusReceiveMode.PeekLock)
+        return type switch
         {
-            return await receiver.PeekMessagesAsync(
-                maxMessages ?? maxReceiverMessagesCount,
+            ReceiveType.All => peek
+                ? await PeekAsync(receiver, fromSequenceNumber, int.MaxValue, cancellationToken)
+                : await ReceiveAsync(receiver, int.MaxValue, cancellationToken),
+            ReceiveType.Newest => await PeekNewestAsync(
+                receiver,
                 fromSequenceNumber,
-                cancellationToken);
-        }
-
-        return await receiver.ReceiveMessagesAsync(
-            maxMessages ?? maxReceiverMessagesCount,
-            cancellationToken: cancellationToken);
+                maxMessages ?? maxReceiverMessagesCount,
+                cancellationToken),
+            _ => peek
+                ? await PeekAsync(
+                    receiver,
+                    fromSequenceNumber,
+                    maxMessages ?? maxReceiverMessagesCount,
+                    cancellationToken)
+                : await ReceiveAsync(
+                    receiver,
+                    maxMessages ?? maxReceiverMessagesCount,
+                    cancellationToken)
+        };
     }
 
-    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> PeekAllAsync(
+    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> PeekAsync(
         ServiceBusReceiver receiver,
         long? fromSequenceNumber,
+        int maxMessages,
         CancellationToken cancellationToken)
     {
         var messages = new List<ServiceBusReceivedMessage>();
+        var sequenceNumber = fromSequenceNumber;
+
+        while (messages.Count < maxMessages)
+        {
+            var batch = await receiver.PeekMessagesAsync(
+                Math.Min(maxReceiverMessagesCount, maxMessages - messages.Count),
+                sequenceNumber,
+                cancellationToken);
+
+            // Peek may return fewer than requested even when more messages exist.
+            if (batch.Count == 0)
+            {
+                break;
+            }
+
+            messages.AddRange(batch);
+            sequenceNumber = batch[^1].SequenceNumber + 1;
+        }
+
+        return messages;
+    }
+
+    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> PeekNewestAsync(
+        ServiceBusReceiver receiver,
+        long? fromSequenceNumber,
+        int maxMessages,
+        CancellationToken cancellationToken)
+    {
+        var newest = new Queue<ServiceBusReceivedMessage>(maxMessages);
         var sequenceNumber = fromSequenceNumber;
 
         while (true)
@@ -286,37 +321,47 @@ public class MessageService : IMessageService
                 maxReceiverMessagesCount,
                 sequenceNumber,
                 cancellationToken);
-            messages.AddRange(batch);
-
-            if (batch.Count < maxReceiverMessagesCount)
-            {
-                break;
-            }
-
-            sequenceNumber = batch[^1].SequenceNumber + 1;
-        }
-
-        return messages;
-    }
-
-    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> ReceiveAllAsync(
-        ServiceBusReceiver receiver,
-        CancellationToken cancellationToken)
-    {
-        var messages = new List<ServiceBusReceivedMessage>();
-
-        while (true)
-        {
-            var batch = await receiver.ReceiveMessagesAsync(
-                maxReceiverMessagesCount,
-                TimeSpan.FromSeconds(2),
-                cancellationToken);
-            messages.AddRange(batch);
 
             if (batch.Count == 0)
             {
                 break;
             }
+
+            foreach (var message in batch)
+            {
+                if (newest.Count == maxMessages)
+                {
+                    newest.Dequeue();
+                }
+                newest.Enqueue(message);
+            }
+
+            sequenceNumber = batch[^1].SequenceNumber + 1;
+        }
+
+        return newest.Reverse().ToList();
+    }
+
+    private static async Task<IReadOnlyList<ServiceBusReceivedMessage>> ReceiveAsync(
+        ServiceBusReceiver receiver,
+        int maxMessages,
+        CancellationToken cancellationToken)
+    {
+        var messages = new List<ServiceBusReceivedMessage>();
+
+        while (messages.Count < maxMessages)
+        {
+            var batch = await receiver.ReceiveMessagesAsync(
+                Math.Min(maxReceiverMessagesCount, maxMessages - messages.Count),
+                TimeSpan.FromSeconds(2),
+                cancellationToken);
+
+            if (batch.Count == 0)
+            {
+                break;
+            }
+
+            messages.AddRange(batch);
         }
 
         return messages;

@@ -256,8 +256,8 @@ export function App() {
         </main>
       </div>
 
-      <button className="floating-add" onClick={() => { setEditingConnection(undefined); setConnectionDialogOpen(true); }} title="Add connection" aria-label="Add connection"><Plus size={20} /></button>
       <JobsPanel open={jobsOpen} onClose={() => setJobsOpen(false)} />
+      <button className={`floating-add ${jobsOpen ? "with-jobs" : ""}`} onClick={() => { setEditingConnection(undefined); setConnectionDialogOpen(true); }} title="Add connection" aria-label="Add connection"><Plus size={20} /></button>
       <ConnectionDialog
         open={connectionDialogOpen}
         busy={saveConnection.isPending}
