@@ -5,6 +5,7 @@ import type {
   OperationResult,
   QueueDetails,
   QueueInfo,
+  ReceiveType,
   Rule,
   SaveConnection,
   SendMessage,
@@ -204,7 +205,7 @@ export const api = {
     subscriptionName?: string;
     subQueue: SubQueue;
     mode: "PeekLock" | "ReceiveAndDelete";
-    type: "All" | "ByCount";
+    type: ReceiveType;
     messagesCount?: number;
     fromSequenceNumber?: number;
   }) => request<ServiceBusMessage[]>(

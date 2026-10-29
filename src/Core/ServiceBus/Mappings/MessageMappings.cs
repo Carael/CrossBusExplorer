@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Azure.Core.Amqp;
 using Azure.Messaging.ServiceBus;
 using CrossBusExplorer.ServiceBus.Contracts.Types;
@@ -71,7 +72,7 @@ public static class MessageMappings
             {
                 sbMessage.ApplicationProperties.Add(
                     applicationProperty.Key,
-                    applicationProperty.Value);
+                    ToAmqpValue(applicationProperty.Value));
             }
         }
 
@@ -121,6 +122,26 @@ public static class MessageMappings
         }
 
         return sbMessage;
+    }
+
+    private static object? ToAmqpValue(object? value)
+    {
+        if (value is not JsonElement element)
+        {
+            return value;
+        }
+
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString(),
+            JsonValueKind.Number => element.TryGetInt64(out var number)
+                ? number
+                : element.GetDouble(),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null or JsonValueKind.Undefined => null,
+            _ => element.GetRawText()
+        };
     }
 
     private static string ReadMessageValue(object? value)

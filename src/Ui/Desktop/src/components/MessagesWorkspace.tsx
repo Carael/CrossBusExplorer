@@ -1,8 +1,11 @@
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowDown,
   ArrowDownToLine,
   ArrowRightLeft,
+  ArrowUp,
+  ArrowUpDown,
   CopyPlus,
   Eye,
   FileUp,
@@ -17,7 +20,20 @@ import {
 import { api } from "../api";
 import { formatCount } from "../format";
 import { useDialogs } from "./Dialogs";
-import type { SendMessage, ServiceBusMessage, SubQueue } from "../types";
+import type { ReceiveType, SendMessage, ServiceBusMessage, SubQueue } from "../types";
+
+const MAX_COUNT = 5000;
+
+type SortKey = "id" | "sequence" | "subject" | "enqueued" | "expires";
+type Sort = { key: SortKey; direction: "asc" | "desc" };
+
+const sortValue: Record<SortKey, (message: ServiceBusMessage) => string | number> = {
+  id: (message) => message.id,
+  sequence: (message) => message.systemProperties.sequenceNumber,
+  subject: (message) => message.subject ?? "",
+  enqueued: (message) => message.systemProperties.enqueuedTime ?? "",
+  expires: (message) => message.systemProperties.expiresAt ?? "",
+};
 
 interface Props {
   connectionName: string;
@@ -43,10 +59,11 @@ export function MessagesWorkspace({
   const fileInput = useRef<HTMLInputElement>(null);
   const [subQueue, setSubQueue] = useState<SubQueue>("None");
   const [mode, setMode] = useState<"PeekLock" | "ReceiveAndDelete">("PeekLock");
-  const [receiveType, setReceiveType] = useState<"All" | "ByCount">("ByCount");
+  const [receiveType, setReceiveType] = useState<ReceiveType>("ByCount");
   const [count, setCount] = useState(25);
   const [fromSequence, setFromSequence] = useState("");
   const [messages, setMessages] = useState<ServiceBusMessage[]>([]);
+  const [sort, setSort] = useState<Sort>({ key: "sequence", direction: "asc" });
   const [selected, setSelected] = useState<ServiceBusMessage>();
   const [composer, setComposer] = useState<SendMessage>();
   const [notice, setNotice] = useState<string>();
@@ -57,6 +74,23 @@ export function MessagesWorkspace({
       ? deadLetterCount
       : transferDeadLetterCount;
 
+  const sortedMessages = useMemo(() => {
+    const value = sortValue[sort.key];
+    const factor = sort.direction === "asc" ? 1 : -1;
+    return [...messages].sort((a, b) => {
+      const left = value(a);
+      const right = value(b);
+      return (left < right ? -1 : left > right ? 1 : 0) * factor;
+    });
+  }, [messages, sort]);
+
+  function toggleSort(key: SortKey) {
+    setSort((current) => ({
+      key,
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  }
+
   const receive = useMutation({
     mutationFn: (append: boolean) => api.receiveMessages(connectionName, {
       entityName,
@@ -64,7 +98,7 @@ export function MessagesWorkspace({
       subQueue,
       mode,
       type: receiveType,
-      messagesCount: receiveType === "ByCount" ? count : undefined,
+      messagesCount: receiveType === "All" ? undefined : count,
       fromSequenceNumber: append
         ? nextSequence(messages)
         : fromSequence
@@ -73,6 +107,7 @@ export function MessagesWorkspace({
     }),
     onSuccess: (result, append) => {
       setMessages((current) => append ? [...current, ...result] : result);
+      if (!append && receiveType === "Newest") setSort({ key: "sequence", direction: "desc" });
       setSelected(undefined);
       setNotice(`${append ? "Loaded" : "Received"} ${result.length} message${result.length === 1 ? "" : "s"}.`);
     },
@@ -223,9 +258,9 @@ export function MessagesWorkspace({
       </div>
 
       <div className="receive-bar">
-        <label>Mode<select value={mode} onChange={(event) => setMode(event.target.value as typeof mode)}><option value="PeekLock">Peek (safe)</option><option value="ReceiveAndDelete">Receive and delete</option></select></label>
-        <label>Receive<select value={receiveType} onChange={(event) => setReceiveType(event.target.value as typeof receiveType)}><option value="ByCount">By count</option><option value="All">All messages</option></select></label>
-        <label>Count<input type="number" min={1} max={250} disabled={receiveType === "All"} value={count} onChange={(event) => setCount(Math.min(250, Math.max(1, Number(event.target.value))))} /></label>
+        <label>Mode<select value={mode} onChange={(event) => { const value = event.target.value as typeof mode; setMode(value); if (value === "ReceiveAndDelete" && receiveType === "Newest") setReceiveType("ByCount"); }}><option value="PeekLock">Peek (safe)</option><option value="ReceiveAndDelete">Receive and delete</option></select></label>
+        <label>Receive<select value={receiveType} onChange={(event) => setReceiveType(event.target.value as ReceiveType)}><option value="ByCount">Oldest first</option><option value="Newest" disabled={mode === "ReceiveAndDelete"}>Newest first</option><option value="All">All messages</option></select></label>
+        <label>Count<input type="number" min={1} max={MAX_COUNT} disabled={receiveType === "All"} value={count} onChange={(event) => setCount(Math.min(MAX_COUNT, Math.max(1, Number(event.target.value))))} /></label>
         <label>From sequence<input inputMode="numeric" disabled={mode === "ReceiveAndDelete"} value={fromSequence} onChange={(event) => setFromSequence(event.target.value)} placeholder="Beginning" /></label>
         <button className="button primary" onClick={() => receive.mutate(false)} disabled={receive.isPending}><Play size={15} /> {receive.isPending ? "Receiving…" : "Receive"}</button>
         {messages.length > 0 && mode === "PeekLock" && receiveType === "ByCount" && <button className="button secondary" onClick={() => receive.mutate(true)} disabled={receive.isPending}><ArrowDownToLine size={15} /> Peek more</button>}
@@ -238,12 +273,12 @@ export function MessagesWorkspace({
       <div className="message-layout">
         <div className="message-table-wrap">
           {messages.length === 0 ? (
-            <div className="empty-messages"><RefreshCw size={23} /><strong>No messages loaded</strong><span>Choose a source and receive mode, then load up to 250 messages.</span></div>
+            <div className="empty-messages"><RefreshCw size={23} /><strong>No messages loaded</strong><span>Choose a source and receive mode, then load up to {formatCount(MAX_COUNT)} messages or all of them.</span></div>
           ) : (
             <table className="data-table message-table">
-              <thead><tr><th>Actions</th><th>Message ID</th><th>Sequence</th><th>Subject</th><th>Enqueued</th><th>Expires</th></tr></thead>
+              <thead><tr><th>Actions</th><SortHeader label="Message ID" column="id" sort={sort} onSort={toggleSort} /><SortHeader label="Sequence" column="sequence" sort={sort} onSort={toggleSort} /><SortHeader label="Subject" column="subject" sort={sort} onSort={toggleSort} /><SortHeader label="Enqueued" column="enqueued" sort={sort} onSort={toggleSort} /><SortHeader label="Expires" column="expires" sort={sort} onSort={toggleSort} /></tr></thead>
               <tbody>
-                {messages.map((message) => (
+                {sortedMessages.map((message) => (
                   <tr key={`${message.id}-${message.systemProperties.sequenceNumber}`} className={selected === message ? "selected" : ""}>
                     <td className="row-actions">
                       <button title="View" onClick={() => setSelected(message)}><Eye size={14} /></button>
@@ -281,6 +316,16 @@ export function MessagesWorkspace({
 
 function SourceButton({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
   return <button className={active ? "active" : ""} onClick={onClick}>{label}<span>{formatCount(count)}</span></button>;
+}
+
+function SortHeader({ label, column, sort, onSort }: { label: string; column: SortKey; sort: Sort; onSort: (key: SortKey) => void }) {
+  const active = sort.key === column;
+  const Icon = !active ? ArrowUpDown : sort.direction === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <th aria-sort={active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}>
+      <button className="sort-header" onClick={() => onSort(column)}>{label}<Icon size={12} /></button>
+    </th>
+  );
 }
 
 export function MessageDetails({ message, onClose, onEdit, onRequeue, actions }: { message: ServiceBusMessage; onClose: () => void; onEdit?: () => void; onRequeue?: () => void; actions?: React.ReactNode }) {

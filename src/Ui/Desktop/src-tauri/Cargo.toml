@@ -1,6 +1,6 @@
 [package]
 name = "cross-bus-explorer-desktop"
-version = "0.5.0"
+version = "0.5.1"
 description = "A lightweight cross-platform Azure Service Bus explorer"
 authors = ["Mariusz Matysek"]
 edition = "2021"

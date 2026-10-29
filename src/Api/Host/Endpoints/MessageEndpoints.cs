@@ -6,6 +6,8 @@ namespace CrossBusExplorer.Host.Endpoints;
 
 public static class MessageEndpoints
 {
+    private const int MaxMessagesCount = 5000;
+
     public static RouteGroupBuilder MapMessageEndpoints(this RouteGroupBuilder api)
     {
         var group = api.MapGroup("/connections/{connectionName}/messages")
@@ -21,13 +23,17 @@ public static class MessageEndpoints
             {
                 return Results.BadRequest(new { error = "Entity name is required." });
             }
-            if (request.Type == ReceiveType.ByCount &&
-                (request.MessagesCount is null or < 1 or > 250))
+            if ((request.Type is ReceiveType.ByCount or ReceiveType.Newest) &&
+                (request.MessagesCount is null or < 1 or > MaxMessagesCount))
             {
                 return Results.BadRequest(new
                 {
-                    error = "Messages count must be between 1 and 250 when receiving by count."
+                    error = $"Messages count must be between 1 and {MaxMessagesCount}."
                 });
+            }
+            if (request.Type == ReceiveType.Newest && request.Mode != ReceiveMode.PeekLock)
+            {
+                return Results.BadRequest(new { error = "Newest messages can only be peeked." });
             }
             if (request.FromSequenceNumber < 0)
             {
