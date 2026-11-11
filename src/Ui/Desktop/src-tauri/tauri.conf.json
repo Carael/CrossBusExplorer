@@ -1,7 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Cross Bus Explorer",
-  "version": "0.5.1",
   "identifier": "com.crossbusexplorer.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -36,6 +35,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "A lightweight cross-platform Azure Service Bus explorer"
+    "shortDescription": "A lightweight cross-platform Azure Service Bus explorer",
+    "macOS": {
+      "signingIdentity": "-",
+      "hardenedRuntime": false
+    }
   }
 }

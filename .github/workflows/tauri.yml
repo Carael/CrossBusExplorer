@@ -4,7 +4,8 @@ on:
   pull_request:
   push:
     branches: [main, master]
-    tags: ["*"]
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -26,27 +27,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14
+          - os: macos-15
             bundles: "app,dmg"
-            artifact: macos
+            artifact: macos-arm64
             paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/macos/*.app
               src/Ui/Desktop/src-tauri/target/release/bundle/dmg/*.dmg
+              src/Ui/Desktop/src-tauri/target/release/bundle/macos/*.app.zip
           - os: windows-2022
             bundles: "nsis,msi"
-            artifact: windows
+            artifact: windows-x64
             paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/nsis/*
-              src/Ui/Desktop/src-tauri/target/release/bundle/msi/*
+              src/Ui/Desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+              src/Ui/Desktop/src-tauri/target/release/bundle/msi/*.msi
           - os: ubuntu-22.04
             bundles: "appimage,deb"
-            artifact: linux
+            artifact: linux-x64
             paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/appimage/*
-              src/Ui/Desktop/src-tauri/target/release/bundle/deb/*
+              src/Ui/Desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+              src/Ui/Desktop/src-tauri/target/release/bundle/deb/*.deb
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -66,7 +69,15 @@ jobs:
         run: npm ci
       - name: Build native package
         working-directory: src/Ui/Desktop
+        env:
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
         run: npm run tauri:build -- --bundles ${{ matrix.bundles }}
+      - name: Verify macOS arm64 signature and package .app.zip
+        if: runner.os == 'macOS'
+        working-directory: src/Ui/Desktop/src-tauri/target/release/bundle/macos
+        run: |
+          codesign --verify --deep --strict -vvv "Cross Bus Explorer.app"
+          ditto -c -k --sequesterRsrc --keepParent "Cross Bus Explorer.app" "Cross-Bus-Explorer_macos_arm64.app.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: cross-bus-explorer-${{ matrix.artifact }}
@@ -74,7 +85,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'release'
     needs: build-desktop
     runs-on: ubuntu-22.04
     permissions:
@@ -84,7 +95,22 @@ jobs:
         with:
           path: artifacts
           merge-multiple: true
+      - name: Flatten release assets
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.dmg" -o -name "*.app.zip" -o -name "*-setup.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp -v {} release-assets/ \;
+          ls -lh release-assets
       - uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
-          generate_release_notes: true
+          tag_name: ${{ github.event.release.tag_name }}
+          files: release-assets/*
+          append_body: true
+          body: |
+
+            ### Installation Notes
+            - **macOS (Apple Silicon `arm64`)**: Download the `.dmg` or `.app.zip`. Because builds are ad-hoc signed without paid Apple notarization, if macOS Gatekeeper blocks first launch after downloading from a browser, clear the quarantine attribute in Terminal:
+              ```bash
+              xattr -cr "/Applications/Cross Bus Explorer.app"
+              ```
+            - **Windows (`x64`)**: Run the `*-setup.exe` (NSIS) or `*.msi` installer.
+            - **Linux (`x64`)**: Install the `*.deb` package (`sudo apt install ./Cross*.deb`) or make `*.AppImage` executable (`chmod +x *.AppImage`).
