@@ -109,7 +109,7 @@ export function DebugPage() {
   }
 
   return (
-    <div className="content-page wide-page">
+    <div className="content-page wide-page debug-page">
       <header className="page-header">
         <div>
           <div className="breadcrumbs">Debug</div>

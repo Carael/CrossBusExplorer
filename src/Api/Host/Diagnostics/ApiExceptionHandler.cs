@@ -32,10 +32,14 @@ public sealed class ApiExceptionHandler(
             ? title
             : exception.Message;
 
+        var detail = ExceptionHints.Format(
+            code is null ? message : $"{message} ({code})",
+            ExceptionHints.Find(exception));
+
         diagnostics.Add(
             "error",
             $"{httpContext.Request.Method} {httpContext.Request.Path}",
-            code is null ? message : $"[{code}] {message}",
+            detail,
             exception.ToString());
 
         httpContext.Response.StatusCode = status;
@@ -43,7 +47,7 @@ public sealed class ApiExceptionHandler(
         {
             Status = status,
             Title = title,
-            Detail = code is null ? message : $"{message} ({code})"
+            Detail = detail
         };
 
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
