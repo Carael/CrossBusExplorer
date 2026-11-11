@@ -28,6 +28,22 @@ function resolveVersionFromTag() {
   const normalized = rawTag.replace(/^v/i, "");
   return /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(normalized) ? normalized : null;
 }
+
+function toWixVersion(version) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
+  if (!match) {
+    return undefined;
+  }
+  const [, major, minor, patch, prerelease] = match;
+  if (!prerelease) {
+    return `${major}.${minor}.${patch}`;
+  }
+  const numericMatches = prerelease.match(/\d+/g);
+  const buildNumber = numericMatches
+    ? Math.min(Number.parseInt(numericMatches[numericMatches.length - 1], 10), 65535)
+    : 0;
+  return `${major}.${minor}.${patch}.${buildNumber}`;
+}
 const cargoExecutable = process.platform === "win32" ? "cargo.exe" : "cargo";
 const currentPathDirectories = (process.env.PATH ?? "").split(delimiter).filter(Boolean);
 const cargoHome = process.env.CARGO_HOME ?? join(homedir(), ".cargo");
@@ -58,9 +74,21 @@ const rawArgs = process.argv.slice(2);
 const subcommand = rawArgs[0];
 const hasConfigFlag = rawArgs.includes("--config") || rawArgs.includes("-c");
 const tagVersion = resolveVersionFromTag();
+const tauriConfigOverride = tagVersion
+  ? {
+      version: tagVersion,
+      bundle: {
+        windows: {
+          wix: {
+            version: toWixVersion(tagVersion),
+          },
+        },
+      },
+    }
+  : null;
 const tauriArgs =
-  tagVersion && (subcommand === "build" || subcommand === "dev") && !hasConfigFlag
-    ? [subcommand, "--config", JSON.stringify({ version: tagVersion }), ...rawArgs.slice(1)]
+  tauriConfigOverride && (subcommand === "build" || subcommand === "dev") && !hasConfigFlag
+    ? [subcommand, "--config", JSON.stringify(tauriConfigOverride), ...rawArgs.slice(1)]
     : rawArgs;
 
 console.log(`Using Cargo from ${join(cargoDirectory, cargoExecutable)}`);

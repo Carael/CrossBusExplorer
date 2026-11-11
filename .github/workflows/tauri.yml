@@ -6,6 +6,12 @@ on:
     branches: [main, master]
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Optional existing release tag to build and attach artifacts to (e.g. 0.6.0-preview.1)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -70,7 +76,7 @@ jobs:
       - name: Build native package
         working-directory: src/Ui/Desktop
         env:
-          RELEASE_VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_VERSION: ${{ inputs.tag || github.event.release.tag_name }}
         run: npm run tauri:build -- --bundles ${{ matrix.bundles }}
       - name: Verify macOS arm64 signature and package .app.zip
         if: runner.os == 'macOS'
@@ -85,7 +91,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
     needs: build-desktop
     runs-on: ubuntu-22.04
     permissions:
@@ -102,7 +108,7 @@ jobs:
           ls -lh release-assets
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name }}
+          tag_name: ${{ inputs.tag != '' && inputs.tag || github.event.release.tag_name }}
           files: release-assets/*
           append_body: true
           body: |
