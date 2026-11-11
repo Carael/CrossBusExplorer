@@ -14,7 +14,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -35,22 +35,10 @@ jobs:
         include:
           - os: macos-15
             bundles: "app,dmg"
-            artifact: macos-arm64
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/dmg/*.dmg
-              src/Ui/Desktop/src-tauri/target/release/bundle/macos/*.app.zip
           - os: windows-2022
             bundles: "nsis,msi"
-            artifact: windows-x64
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
-              src/Ui/Desktop/src-tauri/target/release/bundle/msi/*.msi
           - os: ubuntu-22.04
             bundles: "appimage,deb"
-            artifact: linux-x64
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/appimage/*.AppImage
-              src/Ui/Desktop/src-tauri/target/release/bundle/deb/*.deb
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -84,39 +72,16 @@ jobs:
         run: |
           codesign --verify --deep --strict -vvv "Cross Bus Explorer.app"
           ditto -c -k --sequesterRsrc --keepParent "Cross Bus Explorer.app" "Cross-Bus-Explorer_macos_arm64.app.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cross-bus-explorer-${{ matrix.artifact }}
-          path: ${{ matrix.paths }}
-          if-no-files-found: error
-
-  release:
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
-    needs: build-desktop
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-      - name: Flatten release assets
+      - name: Upload installers to GitHub Release
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag != '' && inputs.tag || github.event.release.tag_name }}
         run: |
           mkdir -p release-assets
-          find artifacts -type f \( -name "*.dmg" -o -name "*.app.zip" -o -name "*-setup.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp -v {} release-assets/ \;
+          find src/Ui/Desktop/src-tauri/target/release/bundle -maxdepth 2 -type f \
+            \( -name "*.dmg" -o -name "*.app.zip" -o -name "*-setup.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" \) \
+            -exec cp -v {} release-assets/ \;
           ls -lh release-assets
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ inputs.tag != '' && inputs.tag || github.event.release.tag_name }}
-          files: release-assets/*
-          append_body: true
-          body: |
-
-            ### Installation Notes
-            - **macOS (Apple Silicon `arm64`)**: Download the `.dmg` or `.app.zip`. Because builds are ad-hoc signed without paid Apple notarization, if macOS Gatekeeper blocks first launch after downloading from a browser, clear the quarantine attribute in Terminal:
-              ```bash
-              xattr -cr "/Applications/Cross Bus Explorer.app"
-              ```
-            - **Windows (`x64`)**: Run the `*-setup.exe` (NSIS) or `*.msi` installer.
-            - **Linux (`x64`)**: Install the `*.deb` package (`sudo apt install ./Cross*.deb`) or make `*.AppImage` executable (`chmod +x *.AppImage`).
+          gh release upload "$RELEASE_TAG" release-assets/* --clobber
