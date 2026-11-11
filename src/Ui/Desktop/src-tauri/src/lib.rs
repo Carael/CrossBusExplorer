@@ -276,6 +276,7 @@ fn start_backend(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn backend_path() -> Option<std::ffi::OsString> {
+    #[cfg_attr(not(any(target_os = "macos", target_os = "linux")), allow(unused_mut))]
     let mut paths: Vec<std::path::PathBuf> = std::env::var_os("PATH")
         .map(|value| std::env::split_paths(&value).collect())
         .unwrap_or_default();

@@ -4,10 +4,17 @@ on:
   pull_request:
   push:
     branches: [main, master]
-    tags: ["*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Optional existing release tag to build and attach artifacts to (e.g. 0.6.0-preview.1)"
+        required: false
+        type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -26,27 +33,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14
+          - os: macos-15
             bundles: "app,dmg"
-            artifact: macos
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/macos/*.app
-              src/Ui/Desktop/src-tauri/target/release/bundle/dmg/*.dmg
           - os: windows-2022
             bundles: "nsis,msi"
-            artifact: windows
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/nsis/*
-              src/Ui/Desktop/src-tauri/target/release/bundle/msi/*
           - os: ubuntu-22.04
             bundles: "appimage,deb"
-            artifact: linux
-            paths: |
-              src/Ui/Desktop/src-tauri/target/release/bundle/appimage/*
-              src/Ui/Desktop/src-tauri/target/release/bundle/deb/*
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -66,25 +63,25 @@ jobs:
         run: npm ci
       - name: Build native package
         working-directory: src/Ui/Desktop
+        env:
+          RELEASE_VERSION: ${{ inputs.tag || github.event.release.tag_name }}
         run: npm run tauri:build -- --bundles ${{ matrix.bundles }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cross-bus-explorer-${{ matrix.artifact }}
-          path: ${{ matrix.paths }}
-          if-no-files-found: error
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build-desktop
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/**/*
-          generate_release_notes: true
+      - name: Verify macOS arm64 signature and package .app.zip
+        if: runner.os == 'macOS'
+        working-directory: src/Ui/Desktop/src-tauri/target/release/bundle/macos
+        run: |
+          codesign --verify --deep --strict -vvv "Cross Bus Explorer.app"
+          ditto -c -k --sequesterRsrc --keepParent "Cross Bus Explorer.app" "Cross-Bus-Explorer_macos_arm64.app.zip"
+      - name: Upload installers to GitHub Release
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag != '' && inputs.tag || github.event.release.tag_name }}
+        run: |
+          mkdir -p release-assets
+          find src/Ui/Desktop/src-tauri/target/release/bundle -maxdepth 2 -type f \
+            \( -name "*.dmg" -o -name "*.app.zip" -o -name "*-setup.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" \) \
+            -exec cp -v {} release-assets/ \;
+          ls -lh release-assets
+          gh release upload "$RELEASE_TAG" release-assets/* --clobber
