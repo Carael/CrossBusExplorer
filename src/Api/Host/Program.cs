@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using CrossBusExplorer.Host;
+using CrossBusExplorer.Host.Diagnostics;
 using CrossBusExplorer.Host.Endpoints;
 using CrossBusExplorer.Host.Jobs;
 using CrossBusExplorer.Host.Tracking;
@@ -23,7 +24,12 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
 });
 
+var diagnosticsLog = new DiagnosticsLog();
+builder.Logging.AddProvider(new DiagnosticsLoggerProvider(diagnosticsLog));
+
 builder.Services
+    .AddSingleton(diagnosticsLog)
+    .AddExceptionHandler<ApiExceptionHandler>()
     .AddSingleton<IManagementStorage, DesktopManagementStorage>()
     .AddManagement()
     .AddServiceBusServices()
@@ -87,6 +93,7 @@ api.MapEntityEndpoints();
 api.MapMessageEndpoints();
 api.MapJobEndpoints();
 api.MapTrackingEndpoints();
+api.MapDiagnosticsEndpoints();
 
 await app.StartAsync();
 

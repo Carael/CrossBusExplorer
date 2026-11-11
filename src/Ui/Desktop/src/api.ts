@@ -1,10 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
+import { describeError, logFrontend } from "./diagnostics";
 import type {
   BackgroundJob,
   Connection,
   OperationResult,
   QueueDetails,
   QueueInfo,
+  BackendLogEntry,
+  DesktopLogEntry,
   ReceiveType,
   Rule,
   SaveConnection,
@@ -36,22 +39,31 @@ export class ApiError extends Error {
 
 async function request<T>(
   path: string,
-  options: { method?: string; body?: unknown } = {},
+  options: { method?: string; body?: unknown; silent?: boolean } = {},
 ): Promise<T> {
   const method = options.method ?? "GET";
   let status: number;
   let body: string | undefined;
 
+  const logFailure = (message: string, details?: string) => {
+    if (!options.silent) logFrontend("error", `${method} ${path}`, message, details);
+  };
+
   if ("__TAURI_INTERNALS__" in window) {
-    const response = await invoke<BridgeResponse>("backend_request", {
-      request: {
-        method,
-        path,
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
-      },
-    });
-    status = response.status;
-    body = response.body;
+    try {
+      const response = await invoke<BridgeResponse>("backend_request", {
+        request: {
+          method,
+          path,
+          body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        },
+      });
+      status = response.status;
+      body = response.body;
+    } catch (error) {
+      // The desktop bridge records its own failures in the Rust diagnostics log.
+      throw new ApiError(describeError(error).message, 0);
+    }
   } else {
     const baseUrl = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5055";
     const response = await fetch(`${baseUrl}${path}`, {
@@ -63,6 +75,10 @@ async function request<T>(
           : {}),
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    }).catch((error: unknown) => {
+      const { message, details } = describeError(error);
+      logFailure(message, details);
+      throw new ApiError(message, 0);
     });
     status = response.status;
     body = await response.text();
@@ -78,6 +94,7 @@ async function request<T>(
         message = body;
       }
     }
+    logFailure(message, [`HTTP ${status}`, body].filter(Boolean).join("\n"));
     throw new ApiError(message, status);
   }
 
@@ -235,6 +252,16 @@ export const api = {
   jobs: () => request<BackgroundJob[]>("/api/v1/jobs/"),
   cancelJob: (id: string) =>
     request<void>(`/api/v1/jobs/${segment(id)}`, { method: "DELETE" }),
+  backendLogs: () =>
+    request<BackendLogEntry[]>("/api/v1/diagnostics/logs", { silent: true }),
+  clearBackendLogs: () =>
+    request<void>("/api/v1/diagnostics/logs", { method: "DELETE", silent: true }),
+  desktopLogs: () =>
+    "__TAURI_INTERNALS__" in window
+      ? invoke<DesktopLogEntry[]>("get_diagnostics")
+      : Promise.resolve([] as DesktopLogEntry[]),
+  clearDesktopLogs: () =>
+    "__TAURI_INTERNALS__" in window ? invoke<void>("clear_diagnostics") : Promise.resolve(),
   trackingSessions: () => request<TrackingSession[]>("/api/v1/tracking/sessions/"),
   startTracking: (options: StartTracking) =>
     request<TrackingSession>("/api/v1/tracking/sessions/", { method: "POST", body: options }),

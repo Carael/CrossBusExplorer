@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  Bug,
   BusFront,
   Cable,
   FolderTree,
@@ -13,6 +14,7 @@ import {
 import { api } from "./api";
 import { ConnectionDialog } from "./components/ConnectionDialog";
 import { ConnectionOverview } from "./components/ConnectionOverview";
+import { DebugPage } from "./components/DebugPage";
 import { useDialogs } from "./components/Dialogs";
 import { JobsPanel } from "./components/JobsPanel";
 import { LiveTracker } from "./components/LiveTracker";
@@ -20,6 +22,7 @@ import { QueueOverview } from "./components/QueueOverview";
 import { ResourceExplorer } from "./components/ResourceExplorer";
 import { SubscriptionOverview } from "./components/SubscriptionOverview";
 import { TopicOverview } from "./components/TopicOverview";
+import { useFrontendLogs } from "./diagnostics";
 import type { Connection, ResourceSelection, SaveConnection } from "./types";
 
 const EXPLORER_MIN_WIDTH = 245;
@@ -34,7 +37,15 @@ export function App() {
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
   const [editingConnection, setEditingConnection] = useState<Connection>();
   const [jobsOpen, setJobsOpen] = useState(false);
-  const [selection, setSelection] = useState<ResourceSelection>();
+  const [debugOpen, setDebugOpen] = useState(false);
+  const [selection, setSelectionState] = useState<ResourceSelection>();
+  const setSelection = (next: ResourceSelection | undefined) => {
+    setSelectionState(next);
+    setDebugOpen(false);
+  };
+  const frontendLogs = useFrontendLogs();
+  const [seenErrors, setSeenErrors] = useState(0);
+  const errorCount = frontendLogs.filter((entry) => entry.level === "error").length;
   const [dark, setDark] = useState(() => localStorage.getItem("theme") !== "light");
   const workspaceRef = useRef<HTMLDivElement>(null);
   const resizeStartRef = useRef<{ x: number; width: number } | undefined>(undefined);
@@ -126,7 +137,7 @@ export function App() {
 
   useEffect(() => {
     if (!selection && connections.data?.length) {
-      setSelection({ kind: "connection", connectionName: connections.data[0].name });
+      setSelectionState({ kind: "connection", connectionName: connections.data[0].name });
     }
   }, [connections.data, selection]);
 
@@ -144,6 +155,10 @@ export function App() {
         <button className={`rail-button ${jobsOpen ? "active" : ""}`} title="Operations" aria-label="Operations" onClick={() => setJobsOpen((value) => !value)}><Activity size={20} /></button>
         <div className="rail-spacer" />
         <button className="rail-button" title={dark ? "Use light theme" : "Use dark theme"} aria-label={dark ? "Use light theme" : "Use dark theme"} onClick={() => setDark((value) => !value)}>{dark ? <Sun size={19} /> : <Moon size={19} />}</button>
+        <button className={`rail-button ${debugOpen ? "active" : ""}`} title="Debug" aria-label="Debug" onClick={() => { setDebugOpen((value) => !value); setSeenErrors(errorCount); }}>
+          <Bug size={19} />
+          {!debugOpen && errorCount > seenErrors && <span className="rail-badge">{Math.min(errorCount - seenErrors, 99)}</span>}
+        </button>
         <button className="rail-button" title="Settings" aria-label="Settings"><Settings size={19} /></button>
       </nav>
 
@@ -216,7 +231,9 @@ export function App() {
         </div>
 
         <main className="main-content">
-          {connections.isPending ? (
+          {debugOpen ? (
+            <DebugPage />
+          ) : connections.isPending ? (
             <WelcomeState title="Opening workspace" detail="Loading connection profiles…" />
           ) : connections.error ? (
             <WelcomeState title="The backend is unavailable" detail={connections.error.message} error />

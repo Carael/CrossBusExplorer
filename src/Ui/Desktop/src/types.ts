@@ -302,3 +302,21 @@ export type ResourceSelection =
       topicName: string;
       name: string;
     };
+
+export interface BackendLogEntry {
+  id: number;
+  timestamp: string;
+  level: "error" | "warning" | "info";
+  source: string;
+  message: string;
+  details?: string | null;
+}
+
+export interface DesktopLogEntry {
+  id: number;
+  timestamp: number;
+  level: "error" | "warning" | "info";
+  source: string;
+  message: string;
+  details?: string | null;
+}
