@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Test C# backend
+        run: dotnet test tests/CrossBusExplorer.Tests/CrossBusExplorer.Tests.csproj --configuration Release --nologo
+
+  build-desktop:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            bundles: "app,dmg"
+          - os: windows-2022
+            bundles: "nsis,msi"
+          - os: ubuntu-22.04
+            bundles: "appimage,deb"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/Ui/Desktop/package-lock.json
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Install frontend dependencies
+        working-directory: src/Ui/Desktop
+        run: npm ci
+      - name: Build native package
+        working-directory: src/Ui/Desktop
+        run: npm run tauri:build -- --bundles ${{ matrix.bundles }}
+      - name: Verify macOS arm64 signature and package .app.zip
+        if: runner.os == 'macOS'
+        working-directory: src/Ui/Desktop/src-tauri/target/release/bundle/macos
+        run: |
+          codesign --verify --deep --strict -vvv "Cross Bus Explorer.app"
+          ditto -c -k --sequesterRsrc --keepParent "Cross Bus Explorer.app" "Cross-Bus-Explorer_macos_arm64.app.zip"

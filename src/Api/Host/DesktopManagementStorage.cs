@@ -1,5 +1,5 @@
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using System.Text.Json.Serialization;
 using CrossBusExplorer.Management;
 using CrossBusExplorer.Management.Contracts;
 using Path = System.IO.Path;
@@ -14,12 +14,6 @@ public sealed class DesktopManagementStorage : IManagementStorage
     private const string LegacyConnectionsFileName = "cross_bus_explorer_connections.json";
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly string _dataDirectory;
-    private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
-    };
 
     public DesktopManagementStorage()
     {
@@ -65,9 +59,9 @@ public sealed class DesktopManagementStorage : IManagementStorage
             }
 
             var legacyJson = await File.ReadAllTextAsync(legacyPath, cancellationToken);
-            var legacyConnections = JsonSerializer.Deserialize<Dictionary<string, ServiceBusConnection>>(
+            var legacyConnections = JsonSerializer.Deserialize(
                                         legacyJson,
-                                        _serializerOptions)
+                                        DesktopManagementStorageJsonContext.Default.DictionaryStringServiceBusConnection)
                                     ?? NewConnectionDictionary();
 
             await StoreCoreAsync(legacyConnections, cancellationToken);
@@ -85,9 +79,9 @@ public sealed class DesktopManagementStorage : IManagementStorage
         string path,
         CancellationToken cancellationToken)
     {
-        var document = JsonSerializer.Deserialize<ConnectionStoreDocument>(
+        var document = JsonSerializer.Deserialize(
                            await File.ReadAllTextAsync(path, cancellationToken),
-                           _serializerOptions)
+                           DesktopManagementStorageJsonContext.Default.ConnectionStoreDocument)
                        ?? new ConnectionStoreDocument(2, []);
         var secrets = await ReadSecretsAsync(cancellationToken);
         var connections = NewConnectionDictionary();
@@ -120,11 +114,15 @@ public sealed class DesktopManagementStorage : IManagementStorage
 
         await WriteAtomicAsync(
             Path.Combine(_dataDirectory, ConnectionsFileName),
-            JsonSerializer.Serialize(new ConnectionStoreDocument(2, profiles), _serializerOptions),
+            JsonSerializer.Serialize(
+                new ConnectionStoreDocument(2, profiles),
+                DesktopManagementStorageJsonContext.Default.ConnectionStoreDocument),
             cancellationToken);
         await WriteAtomicAsync(
             Path.Combine(_dataDirectory, SecretsFileName),
-            JsonSerializer.Serialize(secrets, _serializerOptions),
+            JsonSerializer.Serialize(
+                secrets,
+                DesktopManagementStorageJsonContext.Default.DictionaryStringString),
             cancellationToken);
     }
 
@@ -137,9 +135,9 @@ public sealed class DesktopManagementStorage : IManagementStorage
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        var result = JsonSerializer.Deserialize<Dictionary<string, string>>(
+        var result = JsonSerializer.Deserialize(
                          await File.ReadAllTextAsync(path, cancellationToken),
-                         _serializerOptions)
+                         DesktopManagementStorageJsonContext.Default.DictionaryStringString)
                      ?? [];
         return new Dictionary<string, string>(result, StringComparer.OrdinalIgnoreCase);
     }
@@ -184,11 +182,11 @@ public sealed class DesktopManagementStorage : IManagementStorage
         File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
     }
 
-    private sealed record ConnectionStoreDocument(
+    internal sealed record ConnectionStoreDocument(
         int Version,
         Dictionary<string, StoredConnectionProfile> Connections);
 
-    private sealed record StoredConnectionProfile(
+    internal sealed record StoredConnectionProfile(
         string Name,
         string FullyQualifiedName,
         string? EntityPath,
@@ -244,3 +242,13 @@ public sealed class DesktopManagementStorage : IManagementStorage
         }
     }
 }
+
+[JsonSourceGenerationOptions(
+    JsonSerializerDefaults.Web,
+    PropertyNameCaseInsensitive = true,
+    WriteIndented = true)]
+[JsonSerializable(typeof(Dictionary<string, ServiceBusConnection>))]
+[JsonSerializable(typeof(DesktopManagementStorage.ConnectionStoreDocument))]
+[JsonSerializable(typeof(DesktopManagementStorage.StoredConnectionProfile))]
+[JsonSerializable(typeof(Dictionary<string, string>))]
+internal sealed partial class DesktopManagementStorageJsonContext : JsonSerializerContext;

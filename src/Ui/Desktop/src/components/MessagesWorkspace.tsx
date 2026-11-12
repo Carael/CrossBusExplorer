@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -298,7 +298,23 @@ export function MessagesWorkspace({
             </table>
           )}
         </div>
-        {selected && <MessageDetails message={selected} onClose={() => setSelected(undefined)} onEdit={() => setComposer(messageToSend(selected))} onRequeue={() => requeue(selected)} actions={<button className="button secondary" onClick={() => moveMessage(selected)} disabled={move.isPending}><ArrowRightLeft size={14} /> Move</button>} />}
+        {selected && (
+          <MessageDetails
+            message={selected}
+            onClose={() => setSelected(undefined)}
+            onEdit={() => {
+              const draft = messageToSend(selected);
+              setSelected(undefined);
+              setComposer(draft);
+            }}
+            onRequeue={() => requeue(selected)}
+            actions={
+              <button className="button secondary" onClick={() => moveMessage(selected)} disabled={move.isPending}>
+                <ArrowRightLeft size={14} /> Move
+              </button>
+            }
+          />
+        )}
       </div>
 
       {composer && (
@@ -330,20 +346,58 @@ function SortHeader({ label, column, sort, onSort }: { label: string; column: So
 
 export function MessageDetails({ message, onClose, onEdit, onRequeue, actions }: { message: ServiceBusMessage; onClose: () => void; onEdit?: () => void; onRequeue?: () => void; actions?: React.ReactNode }) {
   const body = useMemo(() => prettyBody(message.body), [message.body]);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      if (document.querySelectorAll(".dialog-backdrop").length > 1) return;
+      onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   return (
-    <aside className="message-details-panel">
-      <header><div><span className="eyebrow">Message</span><h3>{message.subject || message.id}</h3></div><button className="icon-button" onClick={onClose}><X size={17} /></button></header>
-      {(onEdit || onRequeue || actions) && (
-        <div className="detail-actions">
-          {actions}
-          {onEdit && <button className="button secondary" onClick={onEdit}><CopyPlus size={14} /> Edit copy</button>}
-          {onRequeue && <button className="button primary" onClick={onRequeue}><Send size={14} /> Requeue</button>}
+    <div className="dialog-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="dialog message-details-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Message ${message.subject || message.id}`}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="dialog-header message-details-header">
+          <div className="message-details-title">
+            <span className="eyebrow">Message</span>
+            <h2>{message.subject || message.id}</h2>
+          </div>
+          <div className="message-details-header-actions">
+            {(onEdit || onRequeue || actions) && (
+              <div className="detail-actions">
+                {actions}
+                {onEdit && <button className="button secondary" onClick={onEdit}><CopyPlus size={14} /> Edit copy</button>}
+                {onRequeue && <button className="button primary" onClick={onRequeue}><Send size={14} /> Requeue</button>}
+              </div>
+            )}
+            <button className="icon-button" onClick={onClose} aria-label="Close message details"><X size={18} /></button>
+          </div>
+        </header>
+        <div className="message-details-body">
+          <section className="message-details-section">
+            <h4>Body</h4>
+            <pre className="code-view">{body}</pre>
+          </section>
+          <section className="message-details-section">
+            <h4>System properties</h4>
+            <PropertyTable value={{ id: message.id, subject: message.subject, ...message.systemProperties }} />
+          </section>
+          <section className="message-details-section">
+            <h4>Application properties</h4>
+            <PropertyTable value={message.applicationProperties ?? {}} />
+          </section>
         </div>
-      )}
-      <section><h4>Body</h4><pre className="code-view">{body}</pre></section>
-      <section><h4>System properties</h4><PropertyTable value={{ id: message.id, subject: message.subject, ...message.systemProperties }} /></section>
-      <section><h4>Application properties</h4><PropertyTable value={message.applicationProperties ?? {}} /></section>
-    </aside>
+      </section>
+    </div>
   );
 }
 
