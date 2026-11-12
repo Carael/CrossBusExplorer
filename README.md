@@ -85,3 +85,9 @@ dotnet test tests/CrossBusExplorer.Tests/CrossBusExplorer.Tests.csproj
 Local packages are not code-signed. macOS may require **Open Anyway** under
 Privacy & Security, and Windows may show a SmartScreen warning. Official releases
 should add platform signing and notarization credentials in CI.
+
+## License
+
+Cross Bus Explorer is released under the [MIT License](LICENSE.md). It is free to
+use, modify, and distribute for both private/personal and commercial/company use.
+
