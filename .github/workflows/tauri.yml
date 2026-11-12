@@ -1,16 +1,13 @@
-name: Build and test Tauri desktop
+name: Release Tauri desktop
 
 on:
-  pull_request:
-  push:
-    branches: [main, master]
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: "Optional existing release tag to build and attach artifacts to (e.g. 0.6.0-preview.1)"
-        required: false
+        description: "Existing release tag to build and attach artifacts to (e.g. 0.6.0-preview.1)"
+        required: true
         type: string
 
 permissions:
