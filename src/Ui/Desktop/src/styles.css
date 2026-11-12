@@ -263,15 +263,19 @@ button { color: inherit; }
 .message-table td { white-space: nowrap; color: var(--muted); font: 500 10px ui-monospace, "SFMono-Regular", Consolas, monospace; }
 .empty-messages { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: var(--muted); text-align: center; font-size: 11px; }
 .empty-messages strong { color: var(--text); font-size: 13px; }
-.message-details-panel { width: min(480px, 44%); flex: 0 0 auto; overflow: auto; border-left: 1px solid var(--border); background: var(--surface-soft); }
-.message-details-panel > header { position: sticky; top: 0; z-index: 2; padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); background: var(--surface-soft); }
-.message-details-panel h3 { max-width: 340px; margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-.detail-actions { padding: 10px 14px; display: flex; gap: 6px; border-bottom: 1px solid var(--border); }
-.message-details-panel section { padding: 13px 14px; border-bottom: 1px solid var(--border); }
-.message-details-panel h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.code-view { max-height: 310px; overflow: auto; margin: 0; padding: 11px; border: 1px solid var(--border); border-radius: 7px; color: var(--text); background: var(--surface); white-space: pre-wrap; overflow-wrap: anywhere; font: 10px/1.55 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.message-details-dialog { width: min(960px, 100%); display: flex; flex-direction: column; overflow: hidden; }
+.message-details-header { gap: 16px; align-items: center; flex-shrink: 0; }
+.message-details-title { min-width: 0; flex: 1; }
+.message-details-title h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; }
+.message-details-header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.detail-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.message-details-body { overflow: auto; flex: 1; min-height: 0; }
+.message-details-section { padding: 16px 23px; border-bottom: 1px solid var(--border); }
+.message-details-section:last-child { border-bottom: 0; }
+.message-details-section h4 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.code-view { max-height: 380px; overflow: auto; margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface-soft); white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.6 ui-monospace, "SFMono-Regular", Consolas, monospace; }
 .property-table { margin: 0; }
-.property-table div { display: grid; grid-template-columns: minmax(110px, .7fr) minmax(0, 1fr); gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 10px; }
+.property-table div { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 14px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 12px; }
 .property-table dt { color: var(--muted); }.property-table dd { margin: 0; overflow-wrap: anywhere; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
 .message-composer { width: min(900px, 100%); }
 .compact-dialog { width: min(530px, 100%); }
