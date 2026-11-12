@@ -106,118 +106,118 @@ const segment = encodeURIComponent;
 export const api = {
   connections: () => request<Connection[]>("/api/v1/connections/"),
   saveConnection: (connection: SaveConnection) =>
-    request<Connection>(`/api/v1/connections/${segment(connection.name)}`, {
+    request<Connection>(`/api/v1/connections/${segment(connection.id)}`, {
       method: "PUT",
       body: connection,
     }),
-  deleteConnection: (name: string) =>
-    request<void>(`/api/v1/connections/${segment(name)}`, { method: "DELETE" }),
-  testConnection: (name: string) =>
+  deleteConnection: (id: string) =>
+    request<void>(`/api/v1/connections/${segment(id)}`, { method: "DELETE" }),
+  testConnection: (id: string) =>
     request<{ success: boolean; message: string; duration: string }>(
-      `/api/v1/connections/${segment(name)}/test`,
+      `/api/v1/connections/${segment(id)}/test`,
       { method: "POST" },
     ),
-  queues: (connectionName: string) =>
+  queues: (connectionId: string) =>
     request<QueueInfo[]>(
-      `/api/v1/connections/${segment(connectionName)}/queues/`,
+      `/api/v1/connections/${segment(connectionId)}/queues/`,
     ),
-  queue: (connectionName: string, queueName: string) =>
+  queue: (connectionId: string, queueName: string) =>
     request<QueueDetails>(
-      `/api/v1/connections/${segment(connectionName)}/queues/${segment(queueName)}`,
+      `/api/v1/connections/${segment(connectionId)}/queues/${segment(queueName)}`,
     ),
-  createQueue: (connectionName: string, options: Record<string, unknown>) =>
+  createQueue: (connectionId: string, options: Record<string, unknown>) =>
     request<OperationResult<QueueDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/queues/`,
+      `/api/v1/connections/${segment(connectionId)}/queues/`,
       { method: "POST", body: options },
     ),
-  updateQueue: (connectionName: string, queueName: string, options: Record<string, unknown>) =>
+  updateQueue: (connectionId: string, queueName: string, options: Record<string, unknown>) =>
     request<OperationResult<QueueDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/queues/${segment(queueName)}`,
+      `/api/v1/connections/${segment(connectionId)}/queues/${segment(queueName)}`,
       { method: "PUT", body: options },
     ),
-  cloneQueue: (connectionName: string, queueName: string, name: string) =>
+  cloneQueue: (connectionId: string, queueName: string, name: string) =>
     request<OperationResult<QueueDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/queues/${segment(queueName)}/clone`,
+      `/api/v1/connections/${segment(connectionId)}/queues/${segment(queueName)}/clone`,
       { method: "POST", body: { name } },
     ),
-  deleteQueue: (connectionName: string, queueName: string) =>
+  deleteQueue: (connectionId: string, queueName: string) =>
     request<OperationResult>(
-      `/api/v1/connections/${segment(connectionName)}/queues/${segment(queueName)}`,
+      `/api/v1/connections/${segment(connectionId)}/queues/${segment(queueName)}`,
       { method: "DELETE" },
     ),
-  topics: (connectionName: string) =>
+  topics: (connectionId: string) =>
     request<TopicStructure[]>(
-      `/api/v1/connections/${segment(connectionName)}/topics/`,
+      `/api/v1/connections/${segment(connectionId)}/topics/`,
     ),
-  topic: (connectionName: string, topicName: string) =>
+  topic: (connectionId: string, topicName: string) =>
     request<TopicDetails>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}`,
     ),
-  createTopic: (connectionName: string, options: Record<string, unknown>) =>
+  createTopic: (connectionId: string, options: Record<string, unknown>) =>
     request<OperationResult<TopicDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/`,
+      `/api/v1/connections/${segment(connectionId)}/topics/`,
       { method: "POST", body: options },
     ),
-  updateTopic: (connectionName: string, topicName: string, options: Record<string, unknown>) =>
+  updateTopic: (connectionId: string, topicName: string, options: Record<string, unknown>) =>
     request<OperationResult<TopicDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}`,
       { method: "PUT", body: options },
     ),
-  cloneTopic: (connectionName: string, topicName: string, name: string) =>
+  cloneTopic: (connectionId: string, topicName: string, name: string) =>
     request<OperationResult<TopicDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/clone`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/clone`,
       { method: "POST", body: { name } },
     ),
-  deleteTopic: (connectionName: string, topicName: string) =>
+  deleteTopic: (connectionId: string, topicName: string) =>
     request<OperationResult>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}`,
       { method: "DELETE" },
     ),
-  subscriptions: (connectionName: string, topicName: string) =>
+  subscriptions: (connectionId: string, topicName: string) =>
     request<SubscriptionInfo[]>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/`,
     ),
-  subscription: (connectionName: string, topicName: string, subscriptionName: string) =>
+  subscription: (connectionId: string, topicName: string, subscriptionName: string) =>
     request<SubscriptionDetails>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
     ),
-  createSubscription: (connectionName: string, topicName: string, options: Record<string, unknown>) =>
+  createSubscription: (connectionId: string, topicName: string, options: Record<string, unknown>) =>
     request<OperationResult<SubscriptionDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/`,
       { method: "POST", body: options },
     ),
-  updateSubscription: (connectionName: string, topicName: string, subscriptionName: string, options: Record<string, unknown>) =>
+  updateSubscription: (connectionId: string, topicName: string, subscriptionName: string, options: Record<string, unknown>) =>
     request<OperationResult<SubscriptionDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
       { method: "PUT", body: options },
     ),
-  cloneSubscription: (connectionName: string, topicName: string, subscriptionName: string, name: string) =>
+  cloneSubscription: (connectionId: string, topicName: string, subscriptionName: string, name: string) =>
     request<OperationResult<SubscriptionDetails>>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/clone`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/clone`,
       { method: "POST", body: { name } },
     ),
-  deleteSubscription: (connectionName: string, topicName: string, subscriptionName: string) =>
+  deleteSubscription: (connectionId: string, topicName: string, subscriptionName: string) =>
     request<OperationResult>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}`,
       { method: "DELETE" },
     ),
-  rules: (connectionName: string, topicName: string, subscriptionName: string) =>
+  rules: (connectionId: string, topicName: string, subscriptionName: string) =>
     request<Rule[]>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/`,
     ),
-  saveRule: (connectionName: string, topicName: string, subscriptionName: string, rule: Rule, originalName?: string) =>
+  saveRule: (connectionId: string, topicName: string, subscriptionName: string, rule: Rule, originalName?: string) =>
     request<OperationResult<Rule>>(
       originalName
-        ? `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/${segment(originalName)}`
-        : `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/`,
+        ? `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/${segment(originalName)}`
+        : `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/`,
       { method: originalName ? "PUT" : "POST", body: rule },
     ),
-  deleteRule: (connectionName: string, topicName: string, subscriptionName: string, ruleName: string) =>
+  deleteRule: (connectionId: string, topicName: string, subscriptionName: string, ruleName: string) =>
     request<OperationResult>(
-      `/api/v1/connections/${segment(connectionName)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/${segment(ruleName)}`,
+      `/api/v1/connections/${segment(connectionId)}/topics/${segment(topicName)}/subscriptions/${segment(subscriptionName)}/rules/${segment(ruleName)}`,
       { method: "DELETE" },
     ),
-  receiveMessages: (connectionName: string, options: {
+  receiveMessages: (connectionId: string, options: {
     entityName: string;
     subscriptionName?: string;
     subQueue: SubQueue;
@@ -226,28 +226,28 @@ export const api = {
     messagesCount?: number;
     fromSequenceNumber?: number;
   }) => request<ServiceBusMessage[]>(
-    `/api/v1/connections/${segment(connectionName)}/messages/receive`,
+    `/api/v1/connections/${segment(connectionId)}/messages/receive`,
     { method: "POST", body: options },
   ),
-  sendMessages: (connectionName: string, entityName: string, messages: SendMessage[]) =>
+  sendMessages: (connectionId: string, entityName: string, messages: SendMessage[]) =>
     request<{ count: number }>(
-      `/api/v1/connections/${segment(connectionName)}/messages/send`,
+      `/api/v1/connections/${segment(connectionId)}/messages/send`,
       { method: "POST", body: { entityName, messages } },
     ),
-  purgeMessages: (connectionName: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, totalCount: number) =>
+  purgeMessages: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, totalCount: number) =>
     request<BackgroundJob>("/api/v1/jobs/purge", {
       method: "POST",
-      body: { connectionName, entityName, subscriptionName, subQueue, totalCount },
+      body: { connectionId, entityName, subscriptionName, subQueue, totalCount },
     }),
-  resendMessages: (connectionName: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, destinationEntityName: string, totalCount: number) =>
+  resendMessages: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, destinationEntityName: string, totalCount: number) =>
     request<BackgroundJob>("/api/v1/jobs/resend", {
       method: "POST",
-      body: { connectionName, entityName, subscriptionName, subQueue, destinationEntityName, totalCount },
+      body: { connectionId, entityName, subscriptionName, subQueue, destinationEntityName, totalCount },
     }),
-  deleteMessage: (connectionName: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, sequenceNumber: number) =>
+  deleteMessage: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, sequenceNumber: number) =>
     request<BackgroundJob>("/api/v1/jobs/delete-message", {
       method: "POST",
-      body: { connectionName, entityName, subscriptionName, subQueue, sequenceNumber },
+      body: { connectionId, entityName, subscriptionName, subQueue, sequenceNumber },
     }),
   jobs: () => request<BackgroundJob[]>("/api/v1/jobs/"),
   cancelJob: (id: string) =>

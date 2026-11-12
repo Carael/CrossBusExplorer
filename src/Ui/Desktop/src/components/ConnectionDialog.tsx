@@ -11,17 +11,20 @@ interface Props {
   initial?: Connection;
 }
 
-const emptyForm: SaveConnection = {
-  name: "",
-  authenticationType: "AzureCli",
-  fullyQualifiedName: "",
-  connectionString: "",
-  transportType: "AmqpWebSockets",
-  tenantId: "",
-  clientId: "",
-  tokenFilePath: "",
-  folder: "",
-};
+function createEmptyForm(): SaveConnection {
+  return {
+    id: crypto.randomUUID(),
+    name: "",
+    authenticationType: "AzureCli",
+    fullyQualifiedName: "",
+    connectionString: "",
+    transportType: "AmqpWebSockets",
+    tenantId: "",
+    clientId: "",
+    tokenFilePath: "",
+    folder: "",
+  };
+}
 
 const authenticationOptions: Array<{
   value: AuthenticationType;
@@ -80,13 +83,14 @@ export function extractServiceBusName(rawValue: string): string {
 }
 
 export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }: Props) {
-  const [form, setForm] = useState<SaveConnection>(emptyForm);
+  const [form, setForm] = useState<SaveConnection>(createEmptyForm);
   const [nameManuallyEdited, setNameManuallyEdited] = useState(false);
 
   useEffect(() => {
     if (open) {
       setNameManuallyEdited(Boolean(initial?.name));
       setForm(initial ? {
+        id: initial.id,
         name: initial.name,
         authenticationType: initial.authenticationType,
         fullyQualifiedName: initial.fullyQualifiedName,
@@ -96,7 +100,7 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
         clientId: initial.clientId ?? "",
         tokenFilePath: initial.tokenFilePath ?? "",
         folder: initial.folder,
-      } : emptyForm);
+      } : createEmptyForm());
     }
   }, [open, initial]);
 
@@ -163,7 +167,6 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
               <input
                 autoFocus
                 required
-                disabled={!!initial}
                 value={form.name}
                 onChange={(event) => {
                   const value = event.target.value;

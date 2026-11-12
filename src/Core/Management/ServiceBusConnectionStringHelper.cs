@@ -42,7 +42,8 @@ public static class ServiceBusConnectionStringHelper
         string name,
         string connectionString,
         ServiceBusTransportType transportType = ServiceBusTransportType.AmqpTcp,
-        string? folder = null)
+        string? folder = null,
+        string? id = null)
     {
         var properties =
             ServiceBusConnectionStringProperties.Parse(connectionString);
@@ -57,6 +58,7 @@ public static class ServiceBusConnectionStringHelper
             properties.SharedAccessSignature,
             properties.SharedAccessKeyName,
             transportType,
-            folder: folder);
+            folder: folder,
+            id: id);
     }
 }

@@ -3,6 +3,7 @@ using CrossBusExplorer.Management.Contracts;
 namespace CrossBusExplorer.Host.Contracts;
 
 public sealed record SaveConnectionRequest(
+    string? Id,
     string Name,
     ServiceBusAuthenticationType AuthenticationType,
     string? FullyQualifiedName,
@@ -14,6 +15,7 @@ public sealed record SaveConnectionRequest(
     string? Folder);
 
 public sealed record ConnectionResponse(
+    string Id,
     string Name,
     string FullyQualifiedName,
     ServiceBusAuthenticationType AuthenticationType,
@@ -26,6 +28,7 @@ public sealed record ConnectionResponse(
 {
     public static ConnectionResponse From(ServiceBusConnection connection) =>
         new(
+            connection.Id,
             connection.Name,
             connection.FullyQualifiedName,
             connection.AuthenticationType,

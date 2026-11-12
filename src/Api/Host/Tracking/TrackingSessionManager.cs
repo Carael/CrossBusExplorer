@@ -29,7 +29,7 @@ public sealed class TrackingSessionManager : IHostedService
         CancellationToken cancellationToken)
     {
         var options = new TrackingOptions(
-            request.ConnectionName,
+            request.ConnectionId,
             string.IsNullOrWhiteSpace(request.NameFilter) ? null : request.NameFilter.Trim(),
             request.EnableTopicTaps,
             request.IncludeDeadLetter,
@@ -43,7 +43,7 @@ public sealed class TrackingSessionManager : IHostedService
         {
             connection = await scope.ServiceProvider
                 .GetRequiredService<IConnectionManagement>()
-                .GetAsync(request.ConnectionName, cancellationToken);
+                .GetAsync(request.ConnectionId, cancellationToken);
         }
 
         await _startLock.WaitAsync(cancellationToken);
@@ -51,7 +51,7 @@ public sealed class TrackingSessionManager : IHostedService
         {
             // One session per connection keeps tap subscriptions and polling load bounded.
             foreach (var existing in _sessions.Values.Where(session =>
-                         session.Options.ConnectionName == request.ConnectionName))
+                         session.Options.ConnectionId == request.ConnectionId))
             {
                 await RemoveSessionAsync(existing.Id);
             }

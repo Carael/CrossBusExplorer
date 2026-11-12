@@ -30,7 +30,7 @@ public static class JobEndpoints
                     var messageService = services.GetRequiredService<IMessageService>();
                     long removed = 0;
                     await foreach (var result in messageService.PurgeAsync(
-                                       request.ConnectionName,
+                                       request.ConnectionId,
                                        request.EntityName,
                                        request.SubscriptionName,
                                        request.SubQueue,
@@ -56,7 +56,7 @@ public static class JobEndpoints
                     var messageService = services.GetRequiredService<IMessageService>();
                     long resent = 0;
                     await foreach (var result in messageService.ResendAsync(
-                                       request.ConnectionName,
+                                       request.ConnectionId,
                                        request.EntityName,
                                        request.SubscriptionName,
                                        request.SubQueue,
@@ -84,7 +84,7 @@ public static class JobEndpoints
                 {
                     var messageService = services.GetRequiredService<IMessageService>();
                     var result = await messageService.DeleteMessage(
-                        request.ConnectionName,
+                        request.ConnectionId,
                         request.EntityName,
                         request.SubscriptionName,
                         request.SubQueue,

@@ -17,31 +17,31 @@ public static class EntityEndpoints
 
     private static void MapQueueEndpoints(RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/connections/{connectionName}/queues")
+        var group = api.MapGroup("/connections/{connectionId}/queues")
             .WithTags("Queues");
 
         group.MapGet("/", (
-            string connectionName,
+            string connectionId,
             IQueueService service,
             CancellationToken cancellationToken) =>
-            service.GetAsync(connectionName, cancellationToken));
+            service.GetAsync(connectionId, cancellationToken));
 
         group.MapGet("/{queueName}", (
-            string connectionName,
+            string connectionId,
             string queueName,
             IQueueService service,
             CancellationToken cancellationToken) =>
-            service.GetAsync(connectionName, queueName, cancellationToken));
+            service.GetAsync(connectionId, queueName, cancellationToken));
 
         group.MapPost("/", (
-            string connectionName,
+            string connectionId,
             CreateQueueOptions options,
             IQueueService service,
             CancellationToken cancellationToken) =>
-            service.CreateAsync(connectionName, options, cancellationToken));
+            service.CreateAsync(connectionId, options, cancellationToken));
 
         group.MapPut("/{queueName}", async (
-            string connectionName,
+            string connectionId,
             string queueName,
             UpdateQueueOptions options,
             IQueueService service,
@@ -52,56 +52,56 @@ public static class EntityEndpoints
                 return Results.BadRequest(new { error = "The route and request queue names must match." });
             }
 
-            return Results.Ok(await service.UpdateAsync(connectionName, options, cancellationToken));
+            return Results.Ok(await service.UpdateAsync(connectionId, options, cancellationToken));
         });
 
         group.MapPost("/{queueName}/clone", (
-            string connectionName,
+            string connectionId,
             string queueName,
             CloneEntityRequest request,
             IQueueService service,
             CancellationToken cancellationToken) =>
             service.CloneAsync(
-                connectionName,
+                connectionId,
                 request.Name,
                 queueName,
                 cancellationToken));
 
         group.MapDelete("/{queueName}", (
-            string connectionName,
+            string connectionId,
             string queueName,
             IQueueService service,
             CancellationToken cancellationToken) =>
-            service.DeleteAsync(connectionName, queueName, cancellationToken));
+            service.DeleteAsync(connectionId, queueName, cancellationToken));
     }
 
     private static void MapTopicEndpoints(RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/connections/{connectionName}/topics")
+        var group = api.MapGroup("/connections/{connectionId}/topics")
             .WithTags("Topics");
 
         group.MapGet("/", (
-            string connectionName,
+            string connectionId,
             ITopicService service,
             CancellationToken cancellationToken) =>
-            service.GetStructureAsync(connectionName, cancellationToken));
+            service.GetStructureAsync(connectionId, cancellationToken));
 
         group.MapGet("/{topicName}", (
-            string connectionName,
+            string connectionId,
             string topicName,
             ITopicService service,
             CancellationToken cancellationToken) =>
-            service.GetAsync(connectionName, topicName, cancellationToken));
+            service.GetAsync(connectionId, topicName, cancellationToken));
 
         group.MapPost("/", (
-            string connectionName,
+            string connectionId,
             CreateTopicOptions options,
             ITopicService service,
             CancellationToken cancellationToken) =>
-            service.CreateAsync(connectionName, options, cancellationToken));
+            service.CreateAsync(connectionId, options, cancellationToken));
 
         group.MapPut("/{topicName}", async (
-            string connectionName,
+            string connectionId,
             string topicName,
             UpdateTopicOptions options,
             ITopicService service,
@@ -112,56 +112,56 @@ public static class EntityEndpoints
                 return Results.BadRequest(new { error = "The route and request topic names must match." });
             }
 
-            return Results.Ok(await service.UpdateAsync(connectionName, options, cancellationToken));
+            return Results.Ok(await service.UpdateAsync(connectionId, options, cancellationToken));
         });
 
         group.MapPost("/{topicName}/clone", (
-            string connectionName,
+            string connectionId,
             string topicName,
             CloneEntityRequest request,
             ITopicService service,
             CancellationToken cancellationToken) =>
             service.CloneAsync(
-                connectionName,
+                connectionId,
                 request.Name,
                 topicName,
                 cancellationToken));
 
         group.MapDelete("/{topicName}", (
-            string connectionName,
+            string connectionId,
             string topicName,
             ITopicService service,
             CancellationToken cancellationToken) =>
-            service.DeleteAsync(connectionName, topicName, cancellationToken));
+            service.DeleteAsync(connectionId, topicName, cancellationToken));
     }
 
     private static void MapSubscriptionEndpoints(RouteGroupBuilder api)
     {
         var group = api.MapGroup(
-                "/connections/{connectionName}/topics/{topicName}/subscriptions")
+                "/connections/{connectionId}/topics/{topicName}/subscriptions")
             .WithTags("Subscriptions");
 
         group.MapGet("/", (
-            string connectionName,
+            string connectionId,
             string topicName,
             ISubscriptionService service,
             CancellationToken cancellationToken) =>
-            service.GetAsync(connectionName, topicName, cancellationToken));
+            service.GetAsync(connectionId, topicName, cancellationToken));
 
         group.MapGet("/{subscriptionName}", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             ISubscriptionService service,
             CancellationToken cancellationToken) =>
             service.GetAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 cancellationToken));
 
         group.MapPost("/", async (
-            string connectionName,
+            string connectionId,
             string topicName,
             CreateSubscriptionOptions options,
             ISubscriptionService service,
@@ -172,11 +172,11 @@ public static class EntityEndpoints
                 return Results.BadRequest(new { error = "The route and request topic names must match." });
             }
 
-            return Results.Ok(await service.CreateAsync(connectionName, options, cancellationToken));
+            return Results.Ok(await service.CreateAsync(connectionId, options, cancellationToken));
         });
 
         group.MapPut("/{subscriptionName}", async (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             UpdateSubscriptionOptions options,
@@ -194,31 +194,31 @@ public static class EntityEndpoints
                 });
             }
 
-            return Results.Ok(await service.UpdateAsync(connectionName, options, cancellationToken));
+            return Results.Ok(await service.UpdateAsync(connectionId, options, cancellationToken));
         });
 
         group.MapPost("/{subscriptionName}/clone", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             CloneEntityRequest request,
             ISubscriptionService service,
             CancellationToken cancellationToken) =>
             service.CloneAsync(
-                connectionName,
+                connectionId,
                 request.Name,
                 topicName,
                 subscriptionName,
                 cancellationToken));
 
         group.MapDelete("/{subscriptionName}", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             ISubscriptionService service,
             CancellationToken cancellationToken) =>
             service.DeleteAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 cancellationToken));
@@ -227,30 +227,30 @@ public static class EntityEndpoints
     private static void MapRuleEndpoints(RouteGroupBuilder api)
     {
         var group = api.MapGroup(
-                "/connections/{connectionName}/topics/{topicName}/subscriptions/{subscriptionName}/rules")
+                "/connections/{connectionId}/topics/{topicName}/subscriptions/{subscriptionName}/rules")
             .WithTags("Rules");
 
         group.MapGet("/", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             IRuleService service,
             CancellationToken cancellationToken) =>
             service.GetAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 cancellationToken));
 
         group.MapPost("/", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             RuleRequest request,
             IRuleService service,
             CancellationToken cancellationToken) =>
             service.CreateAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 request.Name,
@@ -259,7 +259,7 @@ public static class EntityEndpoints
                 cancellationToken));
 
         group.MapPut("/{ruleName}", async (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             string ruleName,
@@ -273,7 +273,7 @@ public static class EntityEndpoints
             }
 
             return Results.Ok(await service.UpdateAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 ruleName,
@@ -283,14 +283,14 @@ public static class EntityEndpoints
         });
 
         group.MapDelete("/{ruleName}", (
-            string connectionName,
+            string connectionId,
             string topicName,
             string subscriptionName,
             string ruleName,
             IRuleService service,
             CancellationToken cancellationToken) =>
             service.DeleteAsync(
-                connectionName,
+                connectionId,
                 topicName,
                 subscriptionName,
                 ruleName,

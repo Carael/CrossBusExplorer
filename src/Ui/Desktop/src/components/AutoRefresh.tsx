@@ -3,29 +3,29 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 
 interface AutoRefreshState {
   intervals: Record<string, number>;
-  setInterval: (connectionName: string, ms: number) => void;
+  setInterval: (connectionId: string, ms: number) => void;
 }
 
 const AutoRefreshContext = createContext<AutoRefreshState>({ intervals: {}, setInterval: () => {} });
 
 export function AutoRefreshProvider({ children }: { children: React.ReactNode }) {
   const [intervals, setIntervals] = useState<Record<string, number>>({});
-  const setInterval = useCallback((connectionName: string, ms: number) => {
-    setIntervals((current) => ({ ...current, [connectionName]: ms }));
+  const setInterval = useCallback((connectionId: string, ms: number) => {
+    setIntervals((current) => ({ ...current, [connectionId]: ms }));
   }, []);
   const value = useMemo(() => ({ intervals, setInterval }), [intervals, setInterval]);
   return <AutoRefreshContext.Provider value={value}>{children}</AutoRefreshContext.Provider>;
 }
 
-export function useAutoRefresh(connectionName: string) {
+export function useAutoRefresh(connectionId: string) {
   const { intervals, setInterval } = useContext(AutoRefreshContext);
-  const ms = intervals[connectionName] ?? 0;
-  const set = useCallback((value: number) => setInterval(connectionName, value), [connectionName, setInterval]);
+  const ms = intervals[connectionId] ?? 0;
+  const set = useCallback((value: number) => setInterval(connectionId, value), [connectionId, setInterval]);
   return [ms, set] as const;
 }
 
-export function useRefetchInterval(connectionName: string): number | false {
-  const [ms] = useAutoRefresh(connectionName);
+export function useRefetchInterval(connectionId: string): number | false {
+  const [ms] = useAutoRefresh(connectionId);
   return ms > 0 ? ms : false;
 }
 

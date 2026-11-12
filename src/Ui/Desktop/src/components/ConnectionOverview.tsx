@@ -7,9 +7,9 @@ import type { Connection } from "../types";
 export function ConnectionOverview({ connection, onEdit, onDeleted, onOpenTracker }: { connection: Connection; onEdit: () => void; onDeleted: () => void; onOpenTracker: () => void }) {
   const queryClient = useQueryClient();
   const dialogs = useDialogs();
-  const test = useMutation({ mutationFn: () => api.testConnection(connection.name) });
+  const test = useMutation({ mutationFn: () => api.testConnection(connection.id) });
   const remove = useMutation({
-    mutationFn: () => api.deleteConnection(connection.name),
+    mutationFn: () => api.deleteConnection(connection.id),
     onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["connections"] }); onDeleted(); },
   });
 

@@ -130,7 +130,7 @@ public sealed class ServiceBusClientFactory : IServiceBusClientFactory, IAsyncDi
     {
         var value = string.Join(
             '|',
-            connection.Name,
+            connection.Id,
             connection.FullyQualifiedName,
             connection.AuthenticationType,
             connection.TransportType,

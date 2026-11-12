@@ -8,6 +8,7 @@ export type AuthenticationType =
 export type TransportType = "AmqpTcp" | "AmqpWebSockets";
 
 export interface Connection {
+  id: string;
   name: string;
   fullyQualifiedName: string;
   authenticationType: AuthenticationType;
@@ -20,6 +21,7 @@ export interface Connection {
 }
 
 export interface SaveConnection {
+  id: string;
   name: string;
   authenticationType: AuthenticationType;
   fullyQualifiedName?: string;
@@ -217,7 +219,7 @@ export type TrackedEntityKind = "Queue" | "Topic" | "Subscription";
 export type TrackedMessageSource = "Tap" | "Peek" | "DeadLetter";
 
 export interface StartTracking {
-  connectionName: string;
+  connectionId: string;
   nameFilter?: string;
   enableTopicTaps: boolean;
   includeDeadLetter: boolean;
@@ -233,7 +235,7 @@ export interface TapStatus {
 
 export interface TrackingSession {
   id: string;
-  connectionName: string;
+  connectionId: string;
   nameFilter?: string;
   enableTopicTaps: boolean;
   includeDeadLetter: boolean;
@@ -292,13 +294,13 @@ export interface TrackingUpdates {
 }
 
 export type ResourceSelection =
-  | { kind: "connection"; connectionName: string }
-  | { kind: "tracker"; connectionName: string }
-  | { kind: "queue"; connectionName: string; name: string }
-  | { kind: "topic"; connectionName: string; name: string }
+  | { kind: "connection"; connectionId: string }
+  | { kind: "tracker"; connectionId: string }
+  | { kind: "queue"; connectionId: string; name: string }
+  | { kind: "topic"; connectionId: string; name: string }
   | {
       kind: "subscription";
-      connectionName: string;
+      connectionId: string;
       topicName: string;
       name: string;
     };

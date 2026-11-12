@@ -24,9 +24,9 @@ public class ConnectionManagement : IConnectionManagement
     {
         var connections = await _managementStorage.ReadAsync(cancellationToken);
 
-        if (connections.ContainsKey(name))
+        if (connections.TryGetValue(name, out var connection))
         {
-            return connections[name];
+            return connection;
         }
 
         throw new ServiceBusConnectionDoesntExist(name);
@@ -52,24 +52,7 @@ public class ConnectionManagement : IConnectionManagement
         IDictionary<string, ServiceBusConnection> connections =
             await _managementStorage.ReadAsync(cancellationToken);
 
-        if (connections.ContainsKey(connection.Name))
-        {
-            connections[connection.Name] = connection;
-        }
-        else if (connection.ConnectionString is not null &&
-                 connections.Any(p => p.Value.ConnectionString == connection.ConnectionString))
-        {
-            var keyToRemove = connections
-                .First(p => p.Value.ConnectionString == connection.ConnectionString)
-                .Key;
-
-            connections.Remove(keyToRemove);
-            connections.Add(connection.Name, connection);
-        }
-        else
-        {
-            connections.Add(connection.Name, connection);
-        }
+        connections[connection.Id] = connection;
 
         await _managementStorage.StoreAsync(
             connections,
@@ -82,10 +65,8 @@ public class ConnectionManagement : IConnectionManagement
     {
         var connections = await _managementStorage.ReadAsync(cancellationToken);
 
-        if (connections.ContainsKey(name))
+        if (connections.Remove(name))
         {
-            connections.Remove(name);
-
             await _managementStorage.StoreAsync(
                 connections,
                 cancellationToken);

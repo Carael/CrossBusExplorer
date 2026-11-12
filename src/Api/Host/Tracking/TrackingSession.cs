@@ -64,7 +64,7 @@ public sealed class TrackingSession : IAsyncDisposable
         {
             return new TrackingSessionSnapshot(
                 Id,
-                Options.ConnectionName,
+                Options.ConnectionId,
                 Options.NameFilter,
                 Options.EnableTopicTaps,
                 Options.IncludeDeadLetter,

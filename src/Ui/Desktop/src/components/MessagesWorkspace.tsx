@@ -36,7 +36,7 @@ const sortValue: Record<SortKey, (message: ServiceBusMessage) => string | number
 };
 
 interface Props {
-  connectionName: string;
+  connectionId: string;
   entityName: string;
   subscriptionName?: string;
   activeCount: number;
@@ -46,7 +46,7 @@ interface Props {
 }
 
 export function MessagesWorkspace({
-  connectionName,
+  connectionId,
   entityName,
   subscriptionName,
   activeCount,
@@ -92,7 +92,7 @@ export function MessagesWorkspace({
   }
 
   const receive = useMutation({
-    mutationFn: (append: boolean) => api.receiveMessages(connectionName, {
+    mutationFn: (append: boolean) => api.receiveMessages(connectionId, {
       entityName,
       subscriptionName,
       subQueue,
@@ -115,7 +115,7 @@ export function MessagesWorkspace({
 
   const send = useMutation({
     mutationFn: ({ message, destination = entityName }: { message: SendMessage; destination?: string }) =>
-      api.sendMessages(connectionName, destination, [message]),
+      api.sendMessages(connectionId, destination, [message]),
     onSuccess: (result, { destination = entityName }) => {
       setComposer(undefined);
       setNotice(`Sent ${result.count} message${result.count === 1 ? "" : "s"} to ${destination}.`);
@@ -127,9 +127,9 @@ export function MessagesWorkspace({
       if (subQueue === "None" && destination === entityName) {
         throw new Error("Choose a different destination to move an active message.");
       }
-      await api.sendMessages(connectionName, destination, [{ ...messageToSend(message), id: message.id }]);
+      await api.sendMessages(connectionId, destination, [{ ...messageToSend(message), id: message.id }]);
       return api.deleteMessage(
-        connectionName,
+        connectionId,
         entityName,
         subscriptionName,
         subQueue,
@@ -149,7 +149,7 @@ export function MessagesWorkspace({
     mutationFn: async ({ action, message }: { action: "purge" | "resend" | "delete"; message?: ServiceBusMessage; destination?: string }) => {
       if (action === "delete" && message) {
         return api.deleteMessage(
-          connectionName,
+          connectionId,
           entityName,
           subscriptionName,
           subQueue,
@@ -168,7 +168,7 @@ export function MessagesWorkspace({
           throw new Error("Choose a different destination to move active messages.");
         }
         return api.resendMessages(
-          connectionName,
+          connectionId,
           entityName,
           subscriptionName,
           subQueue,
@@ -177,7 +177,7 @@ export function MessagesWorkspace({
         );
       }
       return api.purgeMessages(
-        connectionName,
+        connectionId,
         entityName,
         subscriptionName,
         subQueue,
@@ -201,7 +201,7 @@ export function MessagesWorkspace({
       const imported = await Promise.all(
         Array.from(files).map(async (file) => ({ body: await file.text() })),
       );
-      const result = await api.sendMessages(connectionName, entityName, imported);
+      const result = await api.sendMessages(connectionId, entityName, imported);
       setNotice(`Imported and sent ${result.count} message${result.count === 1 ? "" : "s"}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to import messages.");

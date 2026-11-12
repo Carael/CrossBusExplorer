@@ -16,8 +16,10 @@ public class ServiceBusConnection
         string? tenantId = null,
         string? clientId = null,
         string? tokenFilePath = null,
-        string? folder = null)
+        string? folder = null,
+        string? id = null)
     {
+        Id = string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString("N") : id.Trim();
         Name = name;
         ConnectionString = connectionString;
         Endpoint = endpoint;
@@ -42,7 +44,8 @@ public class ServiceBusConnection
         string? tenantId = null,
         string? clientId = null,
         string? tokenFilePath = null,
-        string? folder = null)
+        string? folder = null,
+        string? id = null)
     {
         if (authenticationType == ServiceBusAuthenticationType.ConnectionString)
         {
@@ -70,9 +73,11 @@ public class ServiceBusConnection
             tenantId,
             clientId,
             tokenFilePath,
-            folder);
+            folder,
+            id);
     }
 
+    public string Id { get; }
     public string Name { get; }
     public string? ConnectionString { get; }
     public Uri Endpoint { get; }

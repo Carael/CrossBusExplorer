@@ -9,11 +9,13 @@ import { useDialogs } from "./Dialogs";
 import { Capability, Metric } from "./QueueOverview";
 
 export function TopicOverview({
+  connectionId,
   connectionName,
   topicName,
   onDeleted,
   onSelectSubscription,
 }: {
+  connectionId: string;
   connectionName: string;
   topicName: string;
   onDeleted: () => void;
@@ -22,24 +24,24 @@ export function TopicOverview({
   const queryClient = useQueryClient();
   const dialogs = useDialogs();
   const [tab, setTab] = useState<"overview" | "subscriptions" | "settings">("overview");
-  const refetchInterval = useRefetchInterval(connectionName);
-  const topic = useQuery({ queryKey: ["topic", connectionName, topicName], queryFn: () => api.topic(connectionName, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
-  const subscriptions = useQuery({ queryKey: ["subscriptions", connectionName, topicName], queryFn: () => api.subscriptions(connectionName, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
+  const refetchInterval = useRefetchInterval(connectionId);
+  const topic = useQuery({ queryKey: ["topic", connectionId, topicName], queryFn: () => api.topic(connectionId, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
+  const subscriptions = useQuery({ queryKey: ["subscriptions", connectionId, topicName], queryFn: () => api.subscriptions(connectionId, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
   const clone = useMutation({
-    mutationFn: (name: string) => api.cloneTopic(connectionName, topicName, name),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["topics", connectionName] }),
+    mutationFn: (name: string) => api.cloneTopic(connectionId, topicName, name),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["topics", connectionId] }),
   });
   const remove = useMutation({
-    mutationFn: () => api.deleteTopic(connectionName, topicName),
+    mutationFn: () => api.deleteTopic(connectionId, topicName),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["topics", connectionName] });
+      await queryClient.invalidateQueries({ queryKey: ["topics", connectionId] });
       onDeleted();
     },
   });
   const createSubscription = useMutation({
-    mutationFn: (subscriptionName: string) => api.createSubscription(connectionName, topicName, { topicName, subscriptionName }),
+    mutationFn: (subscriptionName: string) => api.createSubscription(connectionId, topicName, { topicName, subscriptionName }),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["subscriptions", connectionName, topicName] });
+      queryClient.invalidateQueries({ queryKey: ["subscriptions", connectionId, topicName] });
       if (result.data) onSelectSubscription(result.data.info.subscriptionName);
     },
   });
@@ -113,7 +115,7 @@ export function TopicOverview({
           )}
         </section>
       )}
-      {tab === "settings" && <TopicSettings connectionName={connectionName} topicName={topicName} details={details} />}
+      {tab === "settings" && <TopicSettings connectionId={connectionId} topicName={topicName} details={details} />}
     </div>
   );
 }
@@ -122,10 +124,10 @@ function TopicSummary({ details, onEdit }: { details: TopicDetails; onEdit: () =
   return <div className="overview-grid"><section className="card"><div className="card-heading"><div><span className="eyebrow">Configuration</span><h2>Capacity and retention</h2></div><button className="button tertiary" onClick={onEdit}>Edit settings</button></div><dl className="definition-list compact"><div><dt>Maximum size</dt><dd>{formatCount(details.properties.maxQueueSizeInMegabytes)} MB</dd></div><div><dt>Maximum message</dt><dd>{details.properties.maxMessageSizeInKilobytes != null ? formatCount(details.properties.maxMessageSizeInKilobytes) : "Default"} KB</dd></div><div><dt>Default message TTL</dt><dd>{details.timeSettings.defaultMessageTimeToLive}</dd></div><div><dt>Auto-delete on idle</dt><dd>{details.timeSettings.autoDeleteOnIdle}</dd></div><div><dt>Duplicate detection window</dt><dd>{details.timeSettings.duplicateDetectionHistoryTimeWindow}</dd></div></dl></section><section className="card"><div className="card-heading"><div><span className="eyebrow">Behavior</span><h2>Capabilities</h2></div></div><div className="capability-list"><Capability label="Batched operations" enabled={details.settings.enableBatchedOperations} /><Capability label="Partitioning" enabled={details.settings.enablePartitioning} /><Capability label="Duplicate detection" enabled={details.settings.requiresDuplicateDetection} /><Capability label="Ordering" enabled={details.settings.supportOrdering} /></div></section></div>;
 }
 
-function TopicSettings({ connectionName, topicName, details }: { connectionName: string; topicName: string; details: TopicDetails }) {
+function TopicSettings({ connectionId, topicName, details }: { connectionId: string; topicName: string; details: TopicDetails }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(() => ({ name: topicName, maxSizeInMegabytes: details.properties.maxQueueSizeInMegabytes, maxMessageSizeInKilobytes: details.properties.maxMessageSizeInKilobytes, defaultMessageTimeToLive: details.timeSettings.defaultMessageTimeToLive, autoDeleteOnIdle: details.timeSettings.autoDeleteOnIdle, duplicateDetectionHistoryTimeWindow: details.timeSettings.duplicateDetectionHistoryTimeWindow, enableBatchedOperations: details.settings.enableBatchedOperations, supportOrdering: details.settings.supportOrdering, status: details.info.status, userMetadata: details.properties.userMetadata ?? "" }));
-  const save = useMutation({ mutationFn: () => api.updateTopic(connectionName, topicName, clean(form)), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["topic", connectionName, topicName] }); queryClient.invalidateQueries({ queryKey: ["topics", connectionName] }); } });
+  const save = useMutation({ mutationFn: () => api.updateTopic(connectionId, topicName, clean(form)), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["topic", connectionId, topicName] }); queryClient.invalidateQueries({ queryKey: ["topics", connectionId] }); } });
   return <form className="card settings-card" onSubmit={(event) => { event.preventDefault(); save.mutate(); }}><div className="card-heading"><div><span className="eyebrow">Topic</span><h2>Editable settings</h2></div><button className="button primary" disabled={save.isPending}><Save size={15} /> {save.isPending ? "Saving…" : "Save changes"}</button></div><div className="form-grid entity-form"><Field label="Maximum size (MB)" type="number" value={form.maxSizeInMegabytes} onChange={(value) => setForm({ ...form, maxSizeInMegabytes: Number(value) })} /><Field label="Maximum message size (KB)" type="number" value={form.maxMessageSizeInKilobytes ?? 0} onChange={(value) => setForm({ ...form, maxMessageSizeInKilobytes: Number(value) || undefined })} /><Field label="Default message TTL" value={form.defaultMessageTimeToLive} onChange={(value) => setForm({ ...form, defaultMessageTimeToLive: value })} /><Field label="Auto-delete on idle" value={form.autoDeleteOnIdle} onChange={(value) => setForm({ ...form, autoDeleteOnIdle: value })} /><Field label="Duplicate detection window" value={form.duplicateDetectionHistoryTimeWindow} onChange={(value) => setForm({ ...form, duplicateDetectionHistoryTimeWindow: value })} /><label><span>Status</span><select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option>Active</option><option>Disabled</option><option>SendDisabled</option><option>ReceiveDisabled</option></select></label><label className="wide"><span>User metadata</span><textarea rows={4} value={form.userMetadata} onChange={(event) => setForm({ ...form, userMetadata: event.target.value })} /></label><div className="wide toggle-grid"><Toggle label="Batched operations" checked={form.enableBatchedOperations} onChange={(value) => setForm({ ...form, enableBatchedOperations: value })} /><Toggle label="Support ordering" checked={form.supportOrdering} onChange={(value) => setForm({ ...form, supportOrdering: value })} /></div></div>{save.isSuccess && <div className="notice success">Topic settings saved.</div>}{save.error && <div className="notice error">{save.error.message}</div>}</form>;
 }
 

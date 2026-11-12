@@ -33,7 +33,7 @@ interface Props {
   connections: Connection[];
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
-  onCreateEntity: (kind: "queue" | "topic", connectionName: string) => void;
+  onCreateEntity: (kind: "queue" | "topic", connection: Connection) => void;
 }
 
 interface TreeCommand {
@@ -136,7 +136,7 @@ function ConnectionFolder({
   filter: string;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
-  onCreateEntity: (kind: "queue" | "topic", connectionName: string) => void;
+  onCreateEntity: (kind: "queue" | "topic", connection: Connection) => void;
 }) {
   const [expanded, setExpanded] = useTreeExpansion(true);
 
@@ -154,7 +154,7 @@ function ConnectionFolder({
       {expanded &&
         connections.map((connection) => (
           <ConnectionTree
-            key={connection.name}
+            key={connection.id}
             connection={connection}
             filter={filter}
             selection={selection}
@@ -177,24 +177,24 @@ function ConnectionTree({
   filter: string;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
-  onCreateEntity: (kind: "queue" | "topic", connectionName: string) => void;
+  onCreateEntity: (kind: "queue" | "topic", connection: Connection) => void;
 }) {
   const [expanded, setExpanded] = useTreeExpansion(true);
   const [queuesExpanded, setQueuesExpanded] = useTreeExpansion(false, false);
   const [topicsExpanded, setTopicsExpanded] = useTreeExpansion(false, false);
-  const [autoRefreshMs, setAutoRefreshMs] = useAutoRefresh(connection.name);
+  const [autoRefreshMs, setAutoRefreshMs] = useAutoRefresh(connection.id);
   // Polling only runs for branches the user opened, and pauses while the window is hidden.
   const refetchInterval: number | false = autoRefreshMs > 0 ? autoRefreshMs : false;
   const queues = useQuery({
-    queryKey: ["queues", connection.name],
-    queryFn: () => api.queues(connection.name),
+    queryKey: ["queues", connection.id],
+    queryFn: () => api.queues(connection.id),
     enabled: queuesExpanded,
     refetchInterval,
     refetchIntervalInBackground: false,
   });
   const topics = useQuery({
-    queryKey: ["topics", connection.name],
-    queryFn: () => api.topics(connection.name),
+    queryKey: ["topics", connection.id],
+    queryFn: () => api.topics(connection.id),
     enabled: topicsExpanded,
     refetchInterval,
     refetchIntervalInBackground: false,
@@ -202,9 +202,9 @@ function ConnectionTree({
   const queryClient = useQueryClient();
   useEffect(() => {
     for (const queue of queues.data ?? []) {
-      syncQueryData<QueueDetails>(queryClient, ["queue", connection.name, queue.name], queues.dataUpdatedAt, (details) => ({ ...details, info: queue }));
+      syncQueryData<QueueDetails>(queryClient, ["queue", connection.id, queue.name], queues.dataUpdatedAt, (details) => ({ ...details, info: queue }));
     }
-  }, [queryClient, connection.name, queues.data, queues.dataUpdatedAt]);
+  }, [queryClient, connection.id, queues.data, queues.dataUpdatedAt]);
   const normalizedFilter = filter.trim().toLocaleLowerCase();
 
   return (
@@ -218,8 +218,8 @@ function ConnectionTree({
           {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
         </button>
         <button
-          className={`tree-label ${selection?.kind === "connection" && selection.connectionName === connection.name ? "active" : ""}`}
-          onClick={() => onSelect({ kind: "connection", connectionName: connection.name })}
+          className={`tree-label ${selection?.kind === "connection" && selection.connectionId === connection.id ? "active" : ""}`}
+          onClick={() => onSelect({ kind: "connection", connectionId: connection.id })}
         >
           <RadioTower size={15} />
           <span className="entity-name" title={connection.name}>{connection.name}</span>
@@ -254,8 +254,8 @@ function ConnectionTree({
           <div className="tree-group">
             <div className="tree-row group-row">
               <button
-                className={`tree-label ${selection?.kind === "tracker" && selection.connectionName === connection.name ? "active" : ""}`}
-                onClick={() => onSelect({ kind: "tracker", connectionName: connection.name })}
+                className={`tree-label ${selection?.kind === "tracker" && selection.connectionId === connection.id ? "active" : ""}`}
+                onClick={() => onSelect({ kind: "tracker", connectionId: connection.id })}
               >
                 <span className="tree-spacer" />
                 <Radar size={15} />
@@ -270,7 +270,7 @@ function ConnectionTree({
             loading={queues.isFetching}
             onToggle={() => setQueuesExpanded((value) => !value)}
             onRefresh={() => queues.refetch()}
-            onCreate={() => onCreateEntity("queue", connection.name)}
+            onCreate={() => onCreateEntity("queue", connection)}
           >
             {queues.error && <TreeError message={(queues.error as Error).message} />}
             {queues.data
@@ -278,11 +278,11 @@ function ConnectionTree({
               .map((queue) => (
                 <button
                   key={queue.name}
-                  className={`entity-row ${selection?.kind === "queue" && selection.connectionName === connection.name && selection.name === queue.name ? "active" : ""}`}
+                  className={`entity-row ${selection?.kind === "queue" && selection.connectionId === connection.id && selection.name === queue.name ? "active" : ""}`}
                   onClick={() =>
                     onSelect({
                       kind: "queue",
-                      connectionName: connection.name,
+                      connectionId: connection.id,
                       name: queue.name,
                     })
                   }
@@ -308,12 +308,12 @@ function ConnectionTree({
             loading={topics.isFetching}
             onToggle={() => setTopicsExpanded((value) => !value)}
             onRefresh={() => topics.refetch()}
-            onCreate={() => onCreateEntity("topic", connection.name)}
+            onCreate={() => onCreateEntity("topic", connection)}
           >
             {topics.error && <TreeError message={(topics.error as Error).message} />}
             <TopicTreeItems
               folder={buildTopicTree(flattenTopics(topics.data ?? []).filter((name) => name.toLocaleLowerCase().includes(normalizedFilter)))}
-              connectionName={connection.name}
+              connectionId={connection.id}
               filter={normalizedFilter}
               selection={selection}
               onSelect={onSelect}
@@ -412,7 +412,7 @@ function countTopics(folder: TopicFolderNode): number {
 }
 
 interface TopicItemProps {
-  connectionName: string;
+  connectionId: string;
   filter: string;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
@@ -452,14 +452,14 @@ function TopicFolder({ folder, ...props }: TopicItemProps & { folder: TopicFolde
 
 function TopicLeaf({
   name,
-  connectionName,
+  connectionId,
   filter,
   selection,
   onSelect,
   autoRefreshMs,
 }: {
   name: string;
-  connectionName: string;
+  connectionId: string;
   filter: string;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
@@ -468,8 +468,8 @@ function TopicLeaf({
   const [expanded, setExpanded] = useTreeExpansion(false, false);
   const label = name.slice(name.lastIndexOf("/") + 1);
   const subscriptions = useQuery({
-    queryKey: ["subscriptions", connectionName, name],
-    queryFn: () => api.subscriptions(connectionName, name),
+    queryKey: ["subscriptions", connectionId, name],
+    queryFn: () => api.subscriptions(connectionId, name),
     enabled: expanded,
     refetchInterval: autoRefreshMs > 0 ? autoRefreshMs : false,
     refetchIntervalInBackground: false,
@@ -477,9 +477,9 @@ function TopicLeaf({
   const queryClient = useQueryClient();
   useEffect(() => {
     for (const item of subscriptions.data ?? []) {
-      syncQueryData<SubscriptionDetails>(queryClient, ["subscription", connectionName, name, item.subscriptionName], subscriptions.dataUpdatedAt, (details) => ({ ...details, info: item }));
+      syncQueryData<SubscriptionDetails>(queryClient, ["subscription", connectionId, name, item.subscriptionName], subscriptions.dataUpdatedAt, (details) => ({ ...details, info: item }));
     }
-  }, [queryClient, connectionName, name, subscriptions.data, subscriptions.dataUpdatedAt]);
+  }, [queryClient, connectionId, name, subscriptions.data, subscriptions.dataUpdatedAt]);
 
   return (
     <div>
@@ -492,8 +492,8 @@ function TopicLeaf({
           {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
         </button>
         <button
-          className={`entity-row ${selection?.kind === "topic" && selection.connectionName === connectionName && selection.name === name ? "active" : ""}`}
-          onClick={() => onSelect({ kind: "topic", connectionName, name })}
+          className={`entity-row ${selection?.kind === "topic" && selection.connectionId === connectionId && selection.name === name ? "active" : ""}`}
+          onClick={() => onSelect({ kind: "topic", connectionId, name })}
         >
           <CircleDot size={13} />
           <span className="entity-name" title={name}>{label}</span>
@@ -508,10 +508,10 @@ function TopicLeaf({
             .map((item) => (
               <button
                 key={item.subscriptionName}
-                className={`entity-row ${selection?.kind === "subscription" && selection.connectionName === connectionName && selection.topicName === name && selection.name === item.subscriptionName ? "active" : ""}`}
+                className={`entity-row ${selection?.kind === "subscription" && selection.connectionId === connectionId && selection.topicName === name && selection.name === item.subscriptionName ? "active" : ""}`}
                 onClick={() => onSelect({
                   kind: "subscription",
-                  connectionName,
+                  connectionId,
                   topicName: name,
                   name: item.subscriptionName,
                 })}
