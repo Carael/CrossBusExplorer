@@ -10,11 +10,11 @@ public static class MessageEndpoints
 
     public static RouteGroupBuilder MapMessageEndpoints(this RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/connections/{connectionName}/messages")
+        var group = api.MapGroup("/connections/{connectionId}/messages")
             .WithTags("Messages");
 
         group.MapPost("/receive", async (
-            string connectionName,
+            string connectionId,
             ReceiveMessagesRequest request,
             IMessageService service,
             CancellationToken cancellationToken) =>
@@ -41,7 +41,7 @@ public static class MessageEndpoints
             }
 
             return Results.Ok(await service.GetMessagesAsync(
-                connectionName,
+                connectionId,
                 request.EntityName,
                 request.SubscriptionName,
                 request.SubQueue,
@@ -53,7 +53,7 @@ public static class MessageEndpoints
         });
 
         group.MapPost("/send", async (
-            string connectionName,
+            string connectionId,
             SendMessagesRequest request,
             IMessageService service,
             CancellationToken cancellationToken) =>
@@ -69,7 +69,7 @@ public static class MessageEndpoints
             }
 
             return Results.Ok(await service.SendMessagesAsync(
-                connectionName,
+                connectionId,
                 request.EntityName,
                 request.Messages,
                 cancellationToken));

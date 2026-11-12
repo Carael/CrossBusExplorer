@@ -33,14 +33,14 @@ public enum TapState
 }
 
 public sealed record StartTrackingRequest(
-    string ConnectionName,
+    string ConnectionId,
     string? NameFilter,
     bool EnableTopicTaps,
     bool IncludeDeadLetter,
     int? PollIntervalSeconds);
 
 public sealed record TrackingOptions(
-    string ConnectionName,
+    string ConnectionId,
     string? NameFilter,
     bool EnableTopicTaps,
     bool IncludeDeadLetter,
@@ -99,7 +99,7 @@ public sealed record TapStatus(
 
 public sealed record TrackingSessionSnapshot(
     Guid Id,
-    string ConnectionName,
+    string ConnectionId,
     string? NameFilter,
     bool EnableTopicTaps,
     bool IncludeDeadLetter,

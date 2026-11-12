@@ -16,9 +16,9 @@ public static class TrackingEndpoints
             TrackingSessionManager tracking,
             CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.ConnectionName))
+            if (string.IsNullOrWhiteSpace(request.ConnectionId))
             {
-                return Results.BadRequest(new { error = "Connection name is required." });
+                return Results.BadRequest(new { error = "Connection ID is required." });
             }
 
             try

@@ -19,11 +19,13 @@ import { useDialogs } from "./Dialogs";
 import { MessagesWorkspace } from "./MessagesWorkspace";
 
 export function QueueOverview({
+  connectionId,
   connectionName,
   queueName,
   onDeleted,
   onJobStarted,
 }: {
+  connectionId: string;
   connectionName: string;
   queueName: string;
   onDeleted: () => void;
@@ -33,21 +35,21 @@ export function QueueOverview({
   const dialogs = useDialogs();
   const [tab, setTab] = useState<"overview" | "messages" | "settings">("overview");
   const queue = useQuery({
-    queryKey: ["queue", connectionName, queueName],
-    queryFn: () => api.queue(connectionName, queueName),
+    queryKey: ["queue", connectionId, queueName],
+    queryFn: () => api.queue(connectionId, queueName),
     staleTime: 0,
     refetchOnMount: "always",
-    refetchInterval: useRefetchInterval(connectionName),
+    refetchInterval: useRefetchInterval(connectionId),
     refetchIntervalInBackground: false,
   });
   const clone = useMutation({
-    mutationFn: (name: string) => api.cloneQueue(connectionName, queueName, name),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["queues", connectionName] }),
+    mutationFn: (name: string) => api.cloneQueue(connectionId, queueName, name),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["queues", connectionId] }),
   });
   const remove = useMutation({
-    mutationFn: () => api.deleteQueue(connectionName, queueName),
+    mutationFn: () => api.deleteQueue(connectionId, queueName),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["queues", connectionName] });
+      await queryClient.invalidateQueries({ queryKey: ["queues", connectionId] });
       onDeleted();
     },
   });
@@ -55,9 +57,9 @@ export function QueueOverview({
   useEffect(() => {
     const info = queue.data?.info;
     if (!info) return;
-    syncQueryData<QueueInfo[]>(queryClient, ["queues", connectionName], queue.dataUpdatedAt, (list) =>
+    syncQueryData<QueueInfo[]>(queryClient, ["queues", connectionId], queue.dataUpdatedAt, (list) =>
       list.map((item) => item.name === info.name ? info : item));
-  }, [queryClient, connectionName, queue.data, queue.dataUpdatedAt]);
+  }, [queryClient, connectionId, queue.data, queue.dataUpdatedAt]);
 
   if (queue.isPending) return <PageState title="Loading queue" detail="Reading settings and runtime metrics…" />;
   if (queue.error) return <PageState title="Unable to load queue" detail={queue.error.message} error />;
@@ -122,7 +124,7 @@ export function QueueOverview({
       {tab === "overview" && <QueueSummary details={details} onEdit={() => setTab("settings")} />}
       {tab === "messages" && (
         <MessagesWorkspace
-          connectionName={connectionName}
+          connectionId={connectionId}
           entityName={queueName}
           activeCount={info.activeMessagesCount}
           deadLetterCount={info.deadLetterMessagesCount}
@@ -130,7 +132,7 @@ export function QueueOverview({
           onJobStarted={onJobStarted}
         />
       )}
-      {tab === "settings" && <QueueSettings connectionName={connectionName} queueName={queueName} details={details} />}
+      {tab === "settings" && <QueueSettings connectionId={connectionId} queueName={queueName} details={details} />}
     </div>
   );
 }
@@ -165,7 +167,7 @@ function QueueSummary({ details, onEdit }: { details: QueueDetails; onEdit: () =
   );
 }
 
-function QueueSettings({ connectionName, queueName, details }: { connectionName: string; queueName: string; details: QueueDetails }) {
+function QueueSettings({ connectionId, queueName, details }: { connectionId: string; queueName: string; details: QueueDetails }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(() => ({
     name: queueName,
@@ -185,10 +187,10 @@ function QueueSettings({ connectionName, queueName, details }: { connectionName:
     userMetadata: details.properties.userMetadata ?? "",
   }));
   const save = useMutation({
-    mutationFn: () => api.updateQueue(connectionName, queueName, cleanOptions(form)),
+    mutationFn: () => api.updateQueue(connectionId, queueName, cleanOptions(form)),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["queue", connectionName, queueName] });
-      queryClient.invalidateQueries({ queryKey: ["queues", connectionName] });
+      await queryClient.invalidateQueries({ queryKey: ["queue", connectionId, queueName] });
+      queryClient.invalidateQueries({ queryKey: ["queues", connectionId] });
     },
   });
 

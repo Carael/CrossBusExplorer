@@ -58,7 +58,7 @@ export function LiveTracker({ connection, onNavigate }: Props) {
     api.trackingSessions()
       .then((sessions) => {
         if (cancelled) return;
-        const existing = sessions.find((item) => item.connectionName === connection.name);
+        const existing = sessions.find((item) => item.connectionId === connection.id);
         if (existing) {
           setSessionId(existing.id);
           setNameFilter(existing.nameFilter ?? "");
@@ -70,7 +70,7 @@ export function LiveTracker({ connection, onNavigate }: Props) {
       .catch((reason: unknown) => !cancelled && setError(errorMessage(reason)))
       .finally(() => !cancelled && setLoadingExisting(false));
     return () => { cancelled = true; };
-  }, [connection.name]);
+  }, [connection.id]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -135,7 +135,7 @@ export function LiveTracker({ connection, onNavigate }: Props) {
     setNotice(undefined);
     try {
       const created = await api.startTracking({
-        connectionName: connection.name,
+        connectionId: connection.id,
         nameFilter: nameFilter.trim() || undefined,
         enableTopicTaps,
         includeDeadLetter,
@@ -192,9 +192,9 @@ export function LiveTracker({ connection, onNavigate }: Props) {
   }
 
   function openEntity(kind: TrackedEntityKind, entityName: string, subscriptionName?: string) {
-    if (kind === "Queue") onNavigate({ kind: "queue", connectionName: connection.name, name: entityName });
-    else if (kind === "Topic") onNavigate({ kind: "topic", connectionName: connection.name, name: entityName });
-    else if (subscriptionName) onNavigate({ kind: "subscription", connectionName: connection.name, topicName: entityName, name: subscriptionName });
+    if (kind === "Queue") onNavigate({ kind: "queue", connectionId: connection.id, name: entityName });
+    else if (kind === "Topic") onNavigate({ kind: "topic", connectionId: connection.id, name: entityName });
+    else if (subscriptionName) onNavigate({ kind: "subscription", connectionId: connection.id, topicName: entityName, name: subscriptionName });
   }
 
   const visibleMessages = useMemo(() => {

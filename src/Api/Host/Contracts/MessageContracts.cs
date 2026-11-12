@@ -16,14 +16,14 @@ public sealed record SendMessagesRequest(
     IReadOnlyList<SendMessage> Messages);
 
 public sealed record PurgeJobRequest(
-    string ConnectionName,
+    string ConnectionId,
     string EntityName,
     string? SubscriptionName,
     SubQueue SubQueue,
     long TotalCount);
 
 public sealed record ResendJobRequest(
-    string ConnectionName,
+    string ConnectionId,
     string EntityName,
     string? SubscriptionName,
     SubQueue SubQueue,
@@ -31,7 +31,7 @@ public sealed record ResendJobRequest(
     long TotalCount);
 
 public sealed record DeleteMessageJobRequest(
-    string ConnectionName,
+    string ConnectionId,
     string EntityName,
     string? SubscriptionName,
     SubQueue SubQueue,

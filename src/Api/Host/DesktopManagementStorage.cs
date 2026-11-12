@@ -64,10 +64,14 @@ public sealed class DesktopManagementStorage : IManagementStorage
                                         DesktopManagementStorageJsonContext.Default.DictionaryStringServiceBusConnection)
                                     ?? NewConnectionDictionary();
 
-            await StoreCoreAsync(legacyConnections, cancellationToken);
-            return new Dictionary<string, ServiceBusConnection>(
-                legacyConnections,
-                StringComparer.OrdinalIgnoreCase);
+            var migratedConnections = NewConnectionDictionary();
+            foreach (var (_, connection) in legacyConnections)
+            {
+                migratedConnections[connection.Id] = connection;
+            }
+
+            await StoreCoreAsync(migratedConnections, cancellationToken);
+            return migratedConnections;
         }
         finally
         {
@@ -85,11 +89,34 @@ public sealed class DesktopManagementStorage : IManagementStorage
                        ?? new ConnectionStoreDocument(2, []);
         var secrets = await ReadSecretsAsync(cancellationToken);
         var connections = NewConnectionDictionary();
+        var migrated = false;
 
-        foreach (var (name, profile) in document.Connections)
+        foreach (var (key, profile) in document.Connections)
         {
-            secrets.TryGetValue(profile.SecretReference ?? name, out var connectionString);
-            connections[name] = profile.ToConnection(connectionString);
+            if (string.IsNullOrWhiteSpace(profile.Id))
+            {
+                migrated = true;
+            }
+
+            var secretKey = profile.SecretReference ?? profile.Id ?? key;
+            if (!secrets.TryGetValue(secretKey, out var connectionString) &&
+                !string.IsNullOrWhiteSpace(profile.Name))
+            {
+                secrets.TryGetValue(profile.Name, out connectionString);
+            }
+
+            var connection = profile.ToConnection(connectionString);
+            if (!string.Equals(key, connection.Id, StringComparison.OrdinalIgnoreCase))
+            {
+                migrated = true;
+            }
+
+            connections[connection.Id] = connection;
+        }
+
+        if (migrated)
+        {
+            await StoreCoreAsync(connections, cancellationToken);
         }
 
         return connections;
@@ -103,12 +130,12 @@ public sealed class DesktopManagementStorage : IManagementStorage
             StringComparer.OrdinalIgnoreCase);
         var secrets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var (name, connection) in connections)
+        foreach (var (_, connection) in connections)
         {
-            profiles[name] = StoredConnectionProfile.From(connection);
+            profiles[connection.Id] = StoredConnectionProfile.From(connection);
             if (!string.IsNullOrWhiteSpace(connection.ConnectionString))
             {
-                secrets[name] = connection.ConnectionString;
+                secrets[connection.Id] = connection.ConnectionString;
             }
         }
 
@@ -187,6 +214,7 @@ public sealed class DesktopManagementStorage : IManagementStorage
         Dictionary<string, StoredConnectionProfile> Connections);
 
     internal sealed record StoredConnectionProfile(
+        string? Id,
         string Name,
         string FullyQualifiedName,
         string? EntityPath,
@@ -200,6 +228,7 @@ public sealed class DesktopManagementStorage : IManagementStorage
     {
         public static StoredConnectionProfile From(ServiceBusConnection connection) =>
             new(
+                connection.Id,
                 connection.Name,
                 connection.FullyQualifiedName,
                 connection.EntityPath,
@@ -210,7 +239,7 @@ public sealed class DesktopManagementStorage : IManagementStorage
                 connection.TokenFilePath,
                 connection.Folder,
                 connection.AuthenticationType == ServiceBusAuthenticationType.ConnectionString
-                    ? connection.Name
+                    ? connection.Id
                     : null);
 
         public ServiceBusConnection ToConnection(string? connectionString)
@@ -227,7 +256,8 @@ public sealed class DesktopManagementStorage : IManagementStorage
                     Name,
                     connectionString,
                     TransportType,
-                    Folder);
+                    Folder,
+                    Id);
             }
 
             return ServiceBusConnection.CreatePasswordless(
@@ -238,7 +268,8 @@ public sealed class DesktopManagementStorage : IManagementStorage
                 TenantId,
                 ClientId,
                 TokenFilePath,
-                Folder);
+                Folder,
+                Id);
         }
     }
 }

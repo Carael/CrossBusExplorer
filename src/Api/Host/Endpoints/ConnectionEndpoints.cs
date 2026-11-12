@@ -20,25 +20,37 @@ public static class ConnectionEndpoints
             return result.Select(ConnectionResponse.From);
         });
 
-        group.MapGet("/{name}", async (
-            string name,
+        group.MapGet("/{id}", async (
+            string id,
             IConnectionManagement connections,
             CancellationToken cancellationToken) =>
-            ConnectionResponse.From(await connections.GetAsync(name, cancellationToken)));
+            ConnectionResponse.From(await connections.GetAsync(id, cancellationToken)));
 
-        group.MapPut("/{name}", async (
-            string name,
+        group.MapPut("/{id}", async (
+            string id,
             SaveConnectionRequest request,
             IConnectionManagement connections,
             CancellationToken cancellationToken) =>
         {
-            if (!name.Equals(request.Name, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(request.Id) &&
+                !id.Equals(request.Id, StringComparison.OrdinalIgnoreCase))
             {
                 return Results.BadRequest(new
                 {
-                    error = "The route and request connection names must match."
+                    error = "The route and request connection IDs must match."
                 });
             }
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return Results.BadRequest(new
+                {
+                    error = "Connection display name is required."
+                });
+            }
+
+            var displayName = request.Name.Trim();
+            var connectionId = id.Trim();
 
             ServiceBusConnection connection;
             if (request.AuthenticationType == ServiceBusAuthenticationType.ConnectionString)
@@ -48,7 +60,7 @@ public static class ConnectionEndpoints
                 {
                     try
                     {
-                        var existing = await connections.GetAsync(name, cancellationToken);
+                        var existing = await connections.GetAsync(connectionId, cancellationToken);
                         connectionString = existing.AuthenticationType ==
                                            ServiceBusAuthenticationType.ConnectionString
                             ? existing.ConnectionString
@@ -69,10 +81,11 @@ public static class ConnectionEndpoints
                 }
 
                 connection = ServiceBusConnectionStringHelper.GetServiceBusConnection(
-                    request.Name,
+                    displayName,
                     connectionString,
                     request.TransportType,
-                    request.Folder);
+                    request.Folder,
+                    connectionId);
             }
             else
             {
@@ -85,36 +98,37 @@ public static class ConnectionEndpoints
                 }
 
                 connection = ServiceBusConnection.CreatePasswordless(
-                    request.Name,
+                    displayName,
                     request.FullyQualifiedName,
                     request.AuthenticationType,
                     request.TransportType,
                     request.TenantId,
                     request.ClientId,
                     request.TokenFilePath,
-                    request.Folder);
+                    request.Folder,
+                    connectionId);
             }
 
             var saved = await connections.SaveAsync(connection, cancellationToken);
             return Results.Ok(ConnectionResponse.From(saved));
         });
 
-        group.MapDelete("/{name}", async (
-            string name,
+        group.MapDelete("/{id}", async (
+            string id,
             IConnectionManagement connections,
             CancellationToken cancellationToken) =>
         {
-            await connections.DeleteAsync(name, cancellationToken);
+            await connections.DeleteAsync(id, cancellationToken);
             return Results.NoContent();
         });
 
-        group.MapPost("/{name}/test", async (
-            string name,
+        group.MapPost("/{id}/test", async (
+            string id,
             IQueueService queues,
             CancellationToken cancellationToken) =>
         {
             var stopwatch = Stopwatch.StartNew();
-            await foreach (var _ in queues.GetAsync(name, cancellationToken))
+            await foreach (var _ in queues.GetAsync(id, cancellationToken))
             {
                 break;
             }

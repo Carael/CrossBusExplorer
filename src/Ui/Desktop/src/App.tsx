@@ -70,22 +70,22 @@ export function App() {
     mutationFn: (connection: SaveConnection) => api.saveConnection(cleanConnection(connection)),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["connections"] });
-      setSelection({ kind: "connection", connectionName: saved.name });
+      setSelection({ kind: "connection", connectionId: saved.id });
       setConnectionDialogOpen(false);
       setEditingConnection(undefined);
     },
   });
   const createEntity = useMutation({
-    mutationFn: async ({ kind, connectionName, name }: { kind: "queue" | "topic"; connectionName: string; name: string }) => {
+    mutationFn: async ({ kind, connectionId, name }: { kind: "queue" | "topic"; connectionId: string; name: string }) => {
       const created = kind === "queue"
-        ? await api.createQueue(connectionName, { name })
-        : await api.createTopic(connectionName, { name });
+        ? await api.createQueue(connectionId, { name })
+        : await api.createTopic(connectionId, { name });
       return { name: created.data?.info.name };
     },
     onSuccess: (result, request) => {
-      queryClient.invalidateQueries({ queryKey: [request.kind === "queue" ? "queues" : "topics", request.connectionName] });
+      queryClient.invalidateQueries({ queryKey: [request.kind === "queue" ? "queues" : "topics", request.connectionId] });
       if (result.name) {
-        setSelection({ kind: request.kind, connectionName: request.connectionName, name: result.name });
+        setSelection({ kind: request.kind, connectionId: request.connectionId, name: result.name });
       }
     },
   });
@@ -137,12 +137,12 @@ export function App() {
 
   useEffect(() => {
     if (!selection && connections.data?.length) {
-      setSelectionState({ kind: "connection", connectionName: connections.data[0].name });
+      setSelectionState({ kind: "connection", connectionId: connections.data[0].id });
     }
   }, [connections.data, selection]);
 
   const selectedConnection = useMemo(
-    () => connections.data?.find((item) => item.name === selection?.connectionName),
+    () => connections.data?.find((item) => item.id === selection?.connectionId),
     [connections.data, selection],
   );
 
@@ -171,14 +171,14 @@ export function App() {
           connections={connections.data ?? []}
           selection={selection}
           onSelect={setSelection}
-          onCreateEntity={async (kind, connectionName) => {
+          onCreateEntity={async (kind, connection) => {
             const name = await dialogs.prompt({
               title: `New ${kind}`,
-              message: `Create a ${kind} in ${connectionName}.`,
+              message: `Create a ${kind} in ${connection.name}.`,
               placeholder: `${kind} name`,
               confirmLabel: "Create",
             });
-            if (name) createEntity.mutate({ kind, connectionName, name });
+            if (name) createEntity.mutate({ kind, connectionId: connection.id, name });
           }}
         />
 
@@ -244,29 +244,32 @@ export function App() {
               action={<button className="button primary" onClick={() => { setEditingConnection(undefined); setConnectionDialogOpen(true); }}><Plus size={17} /> Add connection</button>}
             />
           ) : selection.kind === "connection" ? (
-            <ConnectionOverview connection={selectedConnection} onEdit={() => { setEditingConnection(selectedConnection); setConnectionDialogOpen(true); }} onDeleted={() => setSelection(undefined)} onOpenTracker={() => setSelection({ kind: "tracker", connectionName: selectedConnection.name })} />
+            <ConnectionOverview connection={selectedConnection} onEdit={() => { setEditingConnection(selectedConnection); setConnectionDialogOpen(true); }} onDeleted={() => setSelection(undefined)} onOpenTracker={() => setSelection({ kind: "tracker", connectionId: selectedConnection.id })} />
           ) : selection.kind === "tracker" ? (
-            <LiveTracker key={selection.connectionName} connection={selectedConnection} onNavigate={setSelection} />
+            <LiveTracker key={selection.connectionId} connection={selectedConnection} onNavigate={setSelection} />
           ) : selection.kind === "queue" ? (
             <QueueOverview
-              connectionName={selection.connectionName}
+              connectionId={selection.connectionId}
+              connectionName={selectedConnection.name}
               queueName={selection.name}
-              onDeleted={() => setSelection({ kind: "connection", connectionName: selection.connectionName })}
+              onDeleted={() => setSelection({ kind: "connection", connectionId: selection.connectionId })}
               onJobStarted={() => setJobsOpen(true)}
             />
           ) : selection.kind === "topic" ? (
             <TopicOverview
-              connectionName={selection.connectionName}
+              connectionId={selection.connectionId}
+              connectionName={selectedConnection.name}
               topicName={selection.name}
-              onDeleted={() => setSelection({ kind: "connection", connectionName: selection.connectionName })}
-              onSelectSubscription={(name) => setSelection({ kind: "subscription", connectionName: selection.connectionName, topicName: selection.name, name })}
+              onDeleted={() => setSelection({ kind: "connection", connectionId: selection.connectionId })}
+              onSelectSubscription={(name) => setSelection({ kind: "subscription", connectionId: selection.connectionId, topicName: selection.name, name })}
             />
           ) : (
             <SubscriptionOverview
-              connectionName={selection.connectionName}
+              connectionId={selection.connectionId}
+              connectionName={selectedConnection.name}
               topicName={selection.topicName}
               subscriptionName={selection.name}
-              onDeleted={() => setSelection({ kind: "topic", connectionName: selection.connectionName, name: selection.topicName })}
+              onDeleted={() => setSelection({ kind: "topic", connectionId: selection.connectionId, name: selection.topicName })}
               onJobStarted={() => setJobsOpen(true)}
             />
           )}
