@@ -18,6 +18,12 @@
   --danger: #dc3c4d;
   --danger-soft: #fff0f1;
   --shadow: 0 14px 38px rgba(23, 34, 49, 0.09);
+  --rail-bg: #ebeef3;
+  --rail-border: var(--border);
+  --rail-text: #5b6778;
+  --rail-active-bg: var(--accent-soft);
+  --rail-active-text: var(--accent);
+  --rail-indicator: var(--accent);
 }
 
 :root[data-theme="dark"] {
@@ -38,6 +44,12 @@
   --danger: #ff6677;
   --danger-soft: #44232a;
   --shadow: 0 14px 42px rgba(0, 0, 0, 0.28);
+  --rail-bg: #111820;
+  --rail-border: #26303b;
+  --rail-text: #8f9baa;
+  --rail-active-bg: #24313a;
+  --rail-active-text: #e9fffc;
+  --rail-indicator: #35c9b8;
 }
 
 * { box-sizing: border-box; }
@@ -46,12 +58,12 @@ button, input, select, textarea { font: inherit; }
 button { color: inherit; }
 
 .app-shell { display: flex; height: 100%; background: var(--bg); color: var(--text); }
-.activity-rail { width: 58px; flex: 0 0 58px; background: #111820; color: #b8c2ce; display: flex; flex-direction: column; align-items: center; padding: 10px 0; border-right: 1px solid #26303b; }
+.activity-rail { width: 58px; flex: 0 0 58px; background: var(--rail-bg); color: var(--rail-text); display: flex; flex-direction: column; align-items: center; padding: 10px 0; border-right: 1px solid var(--rail-border); }
 .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; color: #071514; background: linear-gradient(145deg, #58e2d0, #14a99a); margin-bottom: 14px; box-shadow: 0 7px 20px rgba(20, 184, 166, .24); }
 .rail-button, .icon-button { border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; border-radius: 8px; }
-.rail-button { width: 40px; height: 40px; margin: 2px 0; color: #8f9baa; }
-.rail-button:hover, .rail-button.active { color: #e9fffc; background: #24313a; }
-.rail-button.active { box-shadow: inset 3px 0 #35c9b8; }
+.rail-button { width: 40px; height: 40px; margin: 2px 0; color: var(--rail-text); }
+.rail-button:hover, .rail-button.active { color: var(--rail-active-text); background: var(--rail-active-bg); }
+.rail-button.active { box-shadow: inset 3px 0 var(--rail-indicator); }
 .rail-spacer { flex: 1; }
 .workspace { display: grid; grid-template-columns: 310px 6px minmax(0, 1fr); grid-template-rows: 100%; min-width: 0; min-height: 0; flex: 1; }
 

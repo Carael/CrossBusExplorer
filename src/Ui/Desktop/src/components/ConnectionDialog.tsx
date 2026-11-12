@@ -16,7 +16,7 @@ const emptyForm: SaveConnection = {
   authenticationType: "AzureCli",
   fullyQualifiedName: "",
   connectionString: "",
-  transportType: "AmqpTcp",
+  transportType: "AmqpWebSockets",
   tenantId: "",
   clientId: "",
   tokenFilePath: "",
@@ -287,8 +287,8 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
                   })
                 }
               >
-                <option value="AmqpTcp">AMQP over TCP</option>
                 <option value="AmqpWebSockets">AMQP over WebSockets</option>
+                <option value="AmqpTcp">AMQP over TCP</option>
               </select>
             </label>
 
