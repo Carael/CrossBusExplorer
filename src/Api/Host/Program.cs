@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using CrossBusExplorer.Host;
 using CrossBusExplorer.Host.Diagnostics;
 using CrossBusExplorer.Host.Endpoints;
@@ -21,7 +20,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, HostJsonSerializerContext.Default);
 });
 
 var diagnosticsLog = new DiagnosticsLog();
@@ -99,12 +98,15 @@ await app.StartAsync();
 
 var addresses = app.Urls.OrderBy(value => value).ToArray();
 var readyJson = JsonSerializer.Serialize(
-    new { addresses },
-    new JsonSerializerOptions
-    {
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
-    });
+    new HostReadyPayload(addresses),
+    HostJsonSerializerContext.Default.HostReadyPayload);
 Console.WriteLine($"CROSSBUS_READY {readyJson}");
 Console.Out.Flush();
 
 await app.WaitForShutdownAsync();
+
+internal sealed record HostReadyPayload(string[] Addresses);
+
+[JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
+[JsonSerializable(typeof(HostReadyPayload))]
+internal sealed partial class HostJsonSerializerContext : JsonSerializerContext;
