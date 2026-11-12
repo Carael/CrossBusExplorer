@@ -55,21 +55,49 @@ const authenticationOptions: Array<{
   },
 ];
 
+export function extractServiceBusName(rawValue: string): string {
+  const trimmed = rawValue.trim();
+  if (!trimmed) return "";
+
+  let endpoint = trimmed;
+  if (trimmed.includes("=")) {
+    const match = trimmed
+      .split(";")
+      .map((part) => part.trim())
+      .find((part) => /^endpoint\s*=/i.test(part));
+    if (!match) return "";
+    endpoint = match.replace(/^endpoint\s*=\s*/i, "").trim();
+  }
+
+  const host = endpoint
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//i, "")
+    .split(/[/?#;:]/)[0]
+    .trim();
+
+  if (!host) return "";
+  return host.split(".")[0].trim();
+}
+
 export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }: Props) {
   const [form, setForm] = useState<SaveConnection>(emptyForm);
+  const [nameManuallyEdited, setNameManuallyEdited] = useState(false);
 
   useEffect(() => {
-    if (open) setForm(initial ? {
-      name: initial.name,
-      authenticationType: initial.authenticationType,
-      fullyQualifiedName: initial.fullyQualifiedName,
-      connectionString: "",
-      transportType: initial.transportType,
-      tenantId: initial.tenantId ?? "",
-      clientId: initial.clientId ?? "",
-      tokenFilePath: initial.tokenFilePath ?? "",
-      folder: initial.folder,
-    } : emptyForm);
+    if (open) {
+      setNameManuallyEdited(Boolean(initial?.name));
+      setForm(initial ? {
+        name: initial.name,
+        authenticationType: initial.authenticationType,
+        fullyQualifiedName: initial.fullyQualifiedName,
+        connectionString: "",
+        transportType: initial.transportType,
+        tenantId: initial.tenantId ?? "",
+        clientId: initial.clientId ?? "",
+        tokenFilePath: initial.tokenFilePath ?? "",
+        folder: initial.folder,
+      } : emptyForm);
+    }
   }, [open, initial]);
 
   if (!open) return null;
@@ -137,7 +165,11 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
                 required
                 disabled={!!initial}
                 value={form.name}
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setNameManuallyEdited(value.trim().length > 0);
+                  setForm((current) => ({ ...current, name: value }));
+                }}
                 placeholder="Payments - production"
               />
             </label>
@@ -148,9 +180,25 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
                 <input
                   required
                   value={form.fullyQualifiedName}
-                  onChange={(event) =>
-                    setForm({ ...form, fullyQualifiedName: event.target.value })
-                  }
+                  onPaste={(event) => {
+                    if (initial || form.name.trim()) return;
+                    const extracted = extractServiceBusName(event.clipboardData.getData("text"));
+                    if (extracted) {
+                      setNameManuallyEdited(false);
+                      setForm((current) => ({ ...current, name: extracted }));
+                    }
+                  }}
+                  onChange={(event) => {
+                    const fullyQualifiedName = event.target.value;
+                    setForm((current) => {
+                      const shouldAutoFill = !initial && (!nameManuallyEdited || !current.name.trim());
+                      return {
+                        ...current,
+                        fullyQualifiedName,
+                        name: shouldAutoFill ? extractServiceBusName(fullyQualifiedName) : current.name,
+                      };
+                    });
+                  }}
                   placeholder="payments.servicebus.windows.net"
                 />
               </label>
@@ -161,9 +209,26 @@ export function ConnectionDialog({ open, busy, error, onClose, onSave, initial }
                   required={!initial?.hasStoredSecret}
                   rows={4}
                   value={form.connectionString}
-                  onChange={(event) =>
-                    setForm({ ...form, connectionString: event.target.value })
-                  }
+                  onPaste={(event) => {
+                    if (initial || form.name.trim()) return;
+                    const extracted = extractServiceBusName(event.clipboardData.getData("text"));
+                    if (extracted) {
+                      setNameManuallyEdited(false);
+                      setForm((current) => ({ ...current, name: extracted }));
+                    }
+                  }}
+                  onChange={(event) => {
+                    const connectionString = event.target.value;
+                    setForm((current) => {
+                      const shouldAutoFill = !initial && (!nameManuallyEdited || !current.name.trim());
+                      const extracted = extractServiceBusName(connectionString);
+                      return {
+                        ...current,
+                        connectionString,
+                        name: shouldAutoFill && (extracted || !connectionString.trim()) ? extracted : current.name,
+                      };
+                    });
+                  }}
                   placeholder={
                     initial?.hasStoredSecret
                       ? "•••••• stored in the local backend — leave blank to keep it"
