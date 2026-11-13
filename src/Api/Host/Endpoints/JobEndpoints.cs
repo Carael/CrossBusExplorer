@@ -62,7 +62,10 @@ public static class JobEndpoints
                                        request.SubQueue,
                                        request.DestinationEntityName,
                                        request.TotalCount,
-                                       cancellationToken))
+                                       cancellationToken,
+                                       request.ApplicationProperties is null
+                                           ? null
+                                           : new Dictionary<string, object?>(request.ApplicationProperties)))
                     {
                         resent = result.ResendCount;
                         progress.Report(Percentage(resent, request.TotalCount));

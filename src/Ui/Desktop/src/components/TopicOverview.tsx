@@ -1,12 +1,40 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clock3, Copy, FolderTree, Layers3, RefreshCw, Save, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Clock3,
+  Copy,
+  FileUp,
+  FolderTree,
+  Layers3,
+  MessageSquarePlus,
+  RefreshCw,
+  Save,
+  Star,
+  Trash2,
+  X,
+} from "lucide-react";
 import { api } from "../api";
+import { favoriteKey, toggleFavorite, useFavorites } from "../favorites";
 import { formatCount } from "../format";
-import type { TopicDetails } from "../types";
+import type { SendMessage, SubscriptionInfo, TopicDetails } from "../types";
 import { useRefetchInterval } from "./AutoRefresh";
 import { useDialogs } from "./Dialogs";
+import { MessageComposer, parseImportedMessageContent } from "./MessagesWorkspace";
 import { Capability, Metric } from "./QueueOverview";
+
+type SubscriptionSortKey = "name" | "status" | "active" | "deadLetter" | "accessed";
+type SubscriptionSort = { key: SubscriptionSortKey; direction: "asc" | "desc" };
+
+const subscriptionSortValue: Record<SubscriptionSortKey, (item: SubscriptionInfo) => string | number> = {
+  name: (item) => item.subscriptionName.toLocaleLowerCase(),
+  status: (item) => item.status.toLocaleLowerCase(),
+  active: (item) => item.activeMessagesCount,
+  deadLetter: (item) => item.deadLetterMessagesCount,
+  accessed: (item) => item.accessedAt ?? "",
+};
 
 export function TopicOverview({
   connectionId,
@@ -23,10 +51,58 @@ export function TopicOverview({
 }) {
   const queryClient = useQueryClient();
   const dialogs = useDialogs();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<"overview" | "subscriptions" | "settings">("overview");
+  const [subSort, setSubSort] = useState<SubscriptionSort>({ key: "name", direction: "asc" });
+  const [composer, setComposer] = useState<SendMessage>();
+  const [notice, setNotice] = useState<string>();
+  const favorites = useFavorites();
+  const isFavorite = favorites.has(favoriteKey("topic", connectionId, topicName));
   const refetchInterval = useRefetchInterval(connectionId);
   const topic = useQuery({ queryKey: ["topic", connectionId, topicName], queryFn: () => api.topic(connectionId, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
   const subscriptions = useQuery({ queryKey: ["subscriptions", connectionId, topicName], queryFn: () => api.subscriptions(connectionId, topicName), staleTime: 0, refetchOnMount: "always", refetchInterval, refetchIntervalInBackground: false });
+  const send = useMutation({
+    mutationFn: ({ message, destination = topicName }: { message: SendMessage; destination?: string }) =>
+      api.sendMessages(connectionId, destination, [message]),
+    onSuccess: (result, { destination = topicName }) => {
+      setComposer(undefined);
+      setNotice(`Sent ${result.count} message${result.count === 1 ? "" : "s"} to ${destination}.`);
+      subscriptions.refetch();
+    },
+  });
+  const sortedSubscriptions = useMemo(() => {
+    const items = subscriptions.data ?? [];
+    const value = subscriptionSortValue[subSort.key];
+    const factor = subSort.direction === "asc" ? 1 : -1;
+    return [...items].sort((left, right) => {
+      const a = value(left);
+      const b = value(right);
+      return (a < b ? -1 : a > b ? 1 : 0) * factor;
+    });
+  }, [subscriptions.data, subSort]);
+
+  function toggleSubSort(key: SubscriptionSortKey) {
+    setSubSort((current) => ({
+      key,
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  }
+
+  async function importFiles(files: FileList | null) {
+    if (!files?.length) return;
+    try {
+      const imported = await Promise.all(
+        Array.from(files).map(async (file) => parseImportedMessageContent(await file.text())),
+      );
+      const result = await api.sendMessages(connectionId, topicName, imported);
+      setNotice(`Imported and sent ${result.count} message${result.count === 1 ? "" : "s"} to ${topicName}.`);
+      subscriptions.refetch();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Unable to import messages.");
+    } finally {
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
   const clone = useMutation({
     mutationFn: (name: string) => api.cloneTopic(connectionId, topicName, name),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["topics", connectionId] }),
@@ -85,11 +161,23 @@ export function TopicOverview({
       <header className="page-header">
         <div><div className="breadcrumbs">{connectionName} / Topics / {topicName}</div><div className="title-line"><div className="resource-icon topic"><FolderTree size={22} /></div><div><div className="title-with-status"><h1>{topicName}</h1><span className={`status ${details.info.status.toLowerCase()}`}>{details.info.status}</span></div><p>Topic configuration and subscriptions</p></div></div></div>
         <div className="header-actions">
+          <button
+            className={`button secondary favorite-action ${isFavorite ? "active" : ""}`}
+            onClick={() => toggleFavorite("topic", connectionId, topicName)}
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-pressed={isFavorite}
+          >
+            <Star size={15} /> {isFavorite ? "Favorited" : "Favorite"}
+          </button>
+          <button className="button secondary" onClick={() => setComposer({ body: "" })}><MessageSquarePlus size={15} /> Send message</button>
+          <input ref={fileInput} type="file" multiple hidden onChange={(event) => importFiles(event.target.files)} />
+          <button className="button secondary" onClick={() => fileInput.current?.click()}><FileUp size={15} /> Import files</button>
           <button className="button secondary" onClick={promptClone} disabled={clone.isPending}><Copy size={15} /> Clone</button>
           <button className="button secondary" onClick={() => { topic.refetch(); subscriptions.refetch(); }}><RefreshCw size={15} /> Refresh</button>
           <button className="button danger-ghost" onClick={promptDelete}><Trash2 size={15} /> Delete</button>
         </div>
       </header>
+      {notice && <div className="notice success"><span>{notice}</span><button className="notice-close" onClick={() => setNotice(undefined)}><X size={13} /></button></div>}
       {error && <div className="notice error">{error.message}</div>}
 
       <div className="metric-grid compact-metrics">
@@ -109,14 +197,66 @@ export function TopicOverview({
         <section className="card table-card">
           <div className="card-heading"><div><span className="eyebrow">Subscriptions</span><h2>Consumers</h2></div><button className="button primary" onClick={promptSubscription}>Add subscription</button></div>
           {subscriptions.error ? <div className="notice error">{subscriptions.error.message}</div> : (
-            <table className="data-table"><thead><tr><th>Name</th><th>Status</th><th>Active</th><th>Dead letter</th><th>Last accessed</th></tr></thead><tbody>
-              {subscriptions.data?.map((item) => <tr key={item.subscriptionName} onDoubleClick={() => onSelectSubscription(item.subscriptionName)}><td><button className="table-link" onClick={() => onSelectSubscription(item.subscriptionName)}>{item.subscriptionName}</button></td><td><span className={`status ${item.status.toLowerCase()}`}>{item.status}</span></td><td>{formatCount(item.activeMessagesCount)}</td><td>{formatCount(item.deadLetterMessagesCount)}</td><td>{new Date(item.accessedAt).toLocaleString()}</td></tr>)}
-            </tbody></table>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <SubscriptionSortHeader label="Name" column="name" sort={subSort} onSort={toggleSubSort} />
+                  <SubscriptionSortHeader label="Status" column="status" sort={subSort} onSort={toggleSubSort} />
+                  <SubscriptionSortHeader label="Active" column="active" sort={subSort} onSort={toggleSubSort} />
+                  <SubscriptionSortHeader label="Dead letter" column="deadLetter" sort={subSort} onSort={toggleSubSort} />
+                  <SubscriptionSortHeader label="Last accessed" column="accessed" sort={subSort} onSort={toggleSubSort} />
+                </tr>
+              </thead>
+              <tbody>
+                {sortedSubscriptions.map((item) => (
+                  <tr key={item.subscriptionName} onDoubleClick={() => onSelectSubscription(item.subscriptionName)}>
+                    <td><button className="table-link" onClick={() => onSelectSubscription(item.subscriptionName)}>{item.subscriptionName}</button></td>
+                    <td><span className={`status ${item.status.toLowerCase()}`}>{item.status}</span></td>
+                    <td>{formatCount(item.activeMessagesCount)}</td>
+                    <td className={item.deadLetterMessagesCount > 0 ? "danger-text" : ""}>{formatCount(item.deadLetterMessagesCount)}</td>
+                    <td>{new Date(item.accessedAt).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </section>
       )}
       {tab === "settings" && <TopicSettings connectionId={connectionId} topicName={topicName} details={details} />}
+      {composer && (
+        <MessageComposer
+          initial={composer}
+          defaultDestination={topicName}
+          busy={send.isPending}
+          error={send.error?.message}
+          onClose={() => setComposer(undefined)}
+          onSend={(message, destination) => send.mutate({ message, destination })}
+        />
+      )}
     </div>
+  );
+}
+
+function SubscriptionSortHeader({
+  label,
+  column,
+  sort,
+  onSort,
+}: {
+  label: string;
+  column: SubscriptionSortKey;
+  sort: SubscriptionSort;
+  onSort: (key: SubscriptionSortKey) => void;
+}) {
+  const active = sort.key === column;
+  const Icon = !active ? ArrowUpDown : sort.direction === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <th aria-sort={active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}>
+      <button className="sort-header" onClick={() => onSort(column)}>
+        {label}
+        <Icon size={12} />
+      </button>
+    </th>
   );
 }
 

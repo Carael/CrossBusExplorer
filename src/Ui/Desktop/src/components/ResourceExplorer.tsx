@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   ChevronDown,
   ChevronRight,
   ChevronsDownUp,
@@ -12,11 +13,13 @@ import {
   RadioTower,
   RefreshCw,
   Search,
+  Star,
   Plus,
   Radar,
   Timer,
 } from "lucide-react";
 import { api } from "../api";
+import { favoriteKey, toggleFavorite, useFavorites } from "../favorites";
 import { formatCount } from "../format";
 import type { Connection, QueueDetails, ResourceSelection, SubscriptionDetails, TopicStructure } from "../types";
 import { syncQueryData, useAutoRefresh } from "./AutoRefresh";
@@ -59,6 +62,8 @@ function useTreeExpansion(initial: boolean, respondsToExpand = true) {
 
 export function ResourceExplorer({ connections, selection, onSelect, onCreateEntity }: Props) {
   const [filter, setFilter] = useState("");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [sortByDlq, setSortByDlq] = useState(false);
   const [command, setCommand] = useState<TreeCommand>({ id: 0, action: "collapse" });
 
   function broadcast(action: TreeCommand["action"]) {
@@ -91,15 +96,35 @@ export function ResourceExplorer({ connections, selection, onSelect, onCreateEnt
           </button>
         </div>
       </div>
-      <label className="search-box">
-        <Search size={15} />
-        <input
-          aria-label="Filter resources"
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          placeholder="Filter resources"
-        />
-      </label>
+      <div className="search-row">
+        <label className="search-box">
+          <Search size={15} />
+          <input
+            aria-label="Filter resources"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            placeholder="Filter resources"
+          />
+        </label>
+        <button
+          className={`icon-button filter-toggle ${favoritesOnly ? "active" : ""}`}
+          onClick={() => setFavoritesOnly((value) => !value)}
+          title={favoritesOnly ? "Show all queues and topics" : "Show favorite queues and topics only"}
+          aria-label="Filter by favorites"
+          aria-pressed={favoritesOnly}
+        >
+          <Star size={14} />
+        </button>
+        <button
+          className={`icon-button filter-toggle ${sortByDlq ? "active danger" : ""}`}
+          onClick={() => setSortByDlq((value) => !value)}
+          title={sortByDlq ? "Sort alphabetically" : "Sort by dead-letter count"}
+          aria-label="Sort by dead-letter count"
+          aria-pressed={sortByDlq}
+        >
+          <AlertTriangle size={14} />
+        </button>
+      </div>
       <TreeCommandContext.Provider value={command}>
         <nav className="resource-tree" aria-label="Service Bus resources">
           {connections.length === 0 ? (
@@ -111,6 +136,8 @@ export function ResourceExplorer({ connections, selection, onSelect, onCreateEnt
                 label={folder || "Default"}
                 connections={items}
                 filter={filter}
+                favoritesOnly={favoritesOnly}
+                sortByDlq={sortByDlq}
                 selection={selection}
                 onSelect={onSelect}
                 onCreateEntity={onCreateEntity}
@@ -127,6 +154,8 @@ function ConnectionFolder({
   label,
   connections,
   filter,
+  favoritesOnly,
+  sortByDlq,
   selection,
   onSelect,
   onCreateEntity,
@@ -134,6 +163,8 @@ function ConnectionFolder({
   label: string;
   connections: Connection[];
   filter: string;
+  favoritesOnly: boolean;
+  sortByDlq: boolean;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
   onCreateEntity: (kind: "queue" | "topic", connection: Connection) => void;
@@ -157,6 +188,8 @@ function ConnectionFolder({
             key={connection.id}
             connection={connection}
             filter={filter}
+            favoritesOnly={favoritesOnly}
+            sortByDlq={sortByDlq}
             selection={selection}
             onSelect={onSelect}
             onCreateEntity={onCreateEntity}
@@ -169,12 +202,16 @@ function ConnectionFolder({
 function ConnectionTree({
   connection,
   filter,
+  favoritesOnly,
+  sortByDlq,
   selection,
   onSelect,
   onCreateEntity,
 }: {
   connection: Connection;
   filter: string;
+  favoritesOnly: boolean;
+  sortByDlq: boolean;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
   onCreateEntity: (kind: "queue" | "topic", connection: Connection) => void;
@@ -205,7 +242,20 @@ function ConnectionTree({
       syncQueryData<QueueDetails>(queryClient, ["queue", connection.id, queue.name], queues.dataUpdatedAt, (details) => ({ ...details, info: queue }));
     }
   }, [queryClient, connection.id, queues.data, queues.dataUpdatedAt]);
+  const favorites = useFavorites();
   const normalizedFilter = filter.trim().toLocaleLowerCase();
+  const visibleQueues = (queues.data ?? [])
+    .filter((queue) => queue.name.toLocaleLowerCase().includes(normalizedFilter))
+    .filter((queue) => !favoritesOnly || favorites.has(favoriteKey("queue", connection.id, queue.name)))
+    .slice()
+    .sort((left, right) =>
+      sortByDlq
+        ? right.deadLetterMessagesCount - left.deadLetterMessagesCount || left.name.localeCompare(right.name)
+        : left.name.localeCompare(right.name),
+    );
+  const visibleTopicNames = flattenTopics(topics.data ?? [])
+    .filter((name) => name.toLocaleLowerCase().includes(normalizedFilter))
+    .filter((name) => !favoritesOnly || favorites.has(favoriteKey("topic", connection.id, name)));
 
   return (
     <div className="tree-connection">
@@ -273,32 +323,43 @@ function ConnectionTree({
             onCreate={() => onCreateEntity("queue", connection)}
           >
             {queues.error && <TreeError message={(queues.error as Error).message} />}
-            {queues.data
-              ?.filter((queue) => queue.name.toLocaleLowerCase().includes(normalizedFilter))
-              .map((queue) => (
-                <button
-                  key={queue.name}
-                  className={`entity-row ${selection?.kind === "queue" && selection.connectionId === connection.id && selection.name === queue.name ? "active" : ""}`}
-                  onClick={() =>
-                    onSelect({
-                      kind: "queue",
-                      connectionId: connection.id,
-                      name: queue.name,
-                    })
-                  }
-                >
-                  <CircleDot size={13} />
-                  <span className="entity-name" title={queue.name}>{queue.name}</span>
-                  <span className="count-badge" title="Active messages">
-                    {formatCount(queue.activeMessagesCount)}
-                  </span>
-                  {queue.deadLetterMessagesCount > 0 && (
-                    <span className="count-badge danger" title="Dead-letter messages">
-                      {formatCount(queue.deadLetterMessagesCount)}
+            {visibleQueues.map((queue) => {
+              const isFavorite = favorites.has(favoriteKey("queue", connection.id, queue.name));
+              return (
+                <div key={queue.name} className="tree-row queue-row">
+                  <button
+                    className={`entity-row ${selection?.kind === "queue" && selection.connectionId === connection.id && selection.name === queue.name ? "active" : ""}`}
+                    onClick={() =>
+                      onSelect({
+                        kind: "queue",
+                        connectionId: connection.id,
+                        name: queue.name,
+                      })
+                    }
+                  >
+                    <CircleDot size={13} />
+                    <span className="entity-name" title={queue.name}>{queue.name}</span>
+                    <span className="count-badge" title="Active messages">
+                      {formatCount(queue.activeMessagesCount)}
                     </span>
-                  )}
-                </button>
-              ))}
+                    {queue.deadLetterMessagesCount > 0 && (
+                      <span className="count-badge danger" title="Dead-letter messages">
+                        {formatCount(queue.deadLetterMessagesCount)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`tree-favorite ${isFavorite ? "active" : ""}`}
+                    onClick={() => toggleFavorite("queue", connection.id, queue.name)}
+                    title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    aria-label={isFavorite ? `Remove ${queue.name} from favorites` : `Add ${queue.name} to favorites`}
+                    aria-pressed={isFavorite}
+                  >
+                    <Star size={12} />
+                  </button>
+                </div>
+              );
+            })}
           </ResourceGroup>
 
           <ResourceGroup
@@ -312,9 +373,11 @@ function ConnectionTree({
           >
             {topics.error && <TreeError message={(topics.error as Error).message} />}
             <TopicTreeItems
-              folder={buildTopicTree(flattenTopics(topics.data ?? []).filter((name) => name.toLocaleLowerCase().includes(normalizedFilter)))}
+              folder={buildTopicTree(visibleTopicNames)}
               connectionId={connection.id}
               filter={normalizedFilter}
+              favoritesOnly={favoritesOnly}
+              sortByDlq={sortByDlq}
               selection={selection}
               onSelect={onSelect}
               autoRefreshMs={autoRefreshMs}
@@ -414,6 +477,8 @@ function countTopics(folder: TopicFolderNode): number {
 interface TopicItemProps {
   connectionId: string;
   filter: string;
+  favoritesOnly: boolean;
+  sortByDlq: boolean;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
   autoRefreshMs: number;
@@ -430,7 +495,7 @@ function TopicTreeItems({ folder, ...props }: TopicItemProps & { folder: TopicFo
 
 function TopicFolder({ folder, ...props }: TopicItemProps & { folder: TopicFolderNode }) {
   const [expanded, setExpanded] = useTreeExpansion(false);
-  const open = expanded || props.filter.length > 0;
+  const open = expanded || props.filter.length > 0 || props.favoritesOnly;
   const toggle = () => setExpanded((value) => !value);
 
   return (
@@ -454,6 +519,7 @@ function TopicLeaf({
   name,
   connectionId,
   filter,
+  sortByDlq,
   selection,
   onSelect,
   autoRefreshMs,
@@ -461,11 +527,15 @@ function TopicLeaf({
   name: string;
   connectionId: string;
   filter: string;
+  favoritesOnly?: boolean;
+  sortByDlq: boolean;
   selection?: ResourceSelection;
   onSelect: (selection: ResourceSelection) => void;
   autoRefreshMs: number;
 }) {
   const [expanded, setExpanded] = useTreeExpansion(false, false);
+  const favorites = useFavorites();
+  const isFavorite = favorites.has(favoriteKey("topic", connectionId, name));
   const label = name.slice(name.lastIndexOf("/") + 1);
   const subscriptions = useQuery({
     queryKey: ["subscriptions", connectionId, name],
@@ -480,6 +550,16 @@ function TopicLeaf({
       syncQueryData<SubscriptionDetails>(queryClient, ["subscription", connectionId, name, item.subscriptionName], subscriptions.dataUpdatedAt, (details) => ({ ...details, info: item }));
     }
   }, [queryClient, connectionId, name, subscriptions.data, subscriptions.dataUpdatedAt]);
+
+  const visibleSubscriptions = (subscriptions.data ?? [])
+    .filter((item) => item.subscriptionName.toLocaleLowerCase().includes(filter))
+    .slice()
+    .sort((left, right) =>
+      sortByDlq
+        ? right.deadLetterMessagesCount - left.deadLetterMessagesCount ||
+          left.subscriptionName.localeCompare(right.subscriptionName)
+        : left.subscriptionName.localeCompare(right.subscriptionName),
+    );
 
   return (
     <div>
@@ -498,32 +578,39 @@ function TopicLeaf({
           <CircleDot size={13} />
           <span className="entity-name" title={name}>{label}</span>
         </button>
+        <button
+          className={`tree-favorite ${isFavorite ? "active" : ""}`}
+          onClick={() => toggleFavorite("topic", connectionId, name)}
+          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={isFavorite ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
+          aria-pressed={isFavorite}
+        >
+          <Star size={12} />
+        </button>
       </div>
       {expanded && (
         <div className="subscription-list">
           {subscriptions.isFetching && !subscriptions.data && <div className="tree-loading">Loading subscriptions…</div>}
           {subscriptions.error && <TreeError message={subscriptions.error.message} />}
-          {subscriptions.data
-            ?.filter((item) => item.subscriptionName.toLocaleLowerCase().includes(filter))
-            .map((item) => (
-              <button
-                key={item.subscriptionName}
-                className={`entity-row ${selection?.kind === "subscription" && selection.connectionId === connectionId && selection.topicName === name && selection.name === item.subscriptionName ? "active" : ""}`}
-                onClick={() => onSelect({
-                  kind: "subscription",
-                  connectionId,
-                  topicName: name,
-                  name: item.subscriptionName,
-                })}
-              >
-                <Layers3 size={12} />
-                <span className="entity-name" title={item.subscriptionName}>{item.subscriptionName}</span>
-                <span className="count-badge">{formatCount(item.activeMessagesCount)}</span>
-                {item.deadLetterMessagesCount > 0 && (
-                  <span className="count-badge danger">{formatCount(item.deadLetterMessagesCount)}</span>
-                )}
-              </button>
-            ))}
+          {visibleSubscriptions.map((item) => (
+            <button
+              key={item.subscriptionName}
+              className={`entity-row ${selection?.kind === "subscription" && selection.connectionId === connectionId && selection.topicName === name && selection.name === item.subscriptionName ? "active" : ""}`}
+              onClick={() => onSelect({
+                kind: "subscription",
+                connectionId,
+                topicName: name,
+                name: item.subscriptionName,
+              })}
+            >
+              <Layers3 size={12} />
+              <span className="entity-name" title={item.subscriptionName}>{item.subscriptionName}</span>
+              <span className="count-badge">{formatCount(item.activeMessagesCount)}</span>
+              {item.deadLetterMessagesCount > 0 && (
+                <span className="count-badge danger">{formatCount(item.deadLetterMessagesCount)}</span>
+              )}
+            </button>
+          ))}
         </div>
       )}
     </div>

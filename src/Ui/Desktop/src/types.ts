@@ -154,6 +154,7 @@ export interface Rule {
 export type SubQueue = "None" | "DeadLetter" | "TransferDeadLetter";
 export type ReceiveType = "All" | "ByCount" | "Newest";
 export type ReceiveMode = "PeekLock" | "ReceiveAndDelete";
+export type UploadFileType = "Body" | "BodyWithApplicationProperties";
 
 export interface ServiceBusMessage {
   id: string;

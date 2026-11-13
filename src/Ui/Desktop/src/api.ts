@@ -8,6 +8,7 @@ import type {
   QueueInfo,
   BackendLogEntry,
   DesktopLogEntry,
+  ReceiveMode,
   ReceiveType,
   Rule,
   SaveConnection,
@@ -21,6 +22,7 @@ import type {
   TopicStructure,
   TrackingSession,
   TrackingUpdates,
+  UploadFileType,
 } from "./types";
 
 interface BridgeResponse {
@@ -234,15 +236,52 @@ export const api = {
       `/api/v1/connections/${segment(connectionId)}/messages/send`,
       { method: "POST", body: { entityName, messages } },
     ),
+  defaultExportFolder: () =>
+    request<{ folderPath: string }>("/api/v1/messages/export-folder"),
+  exportMessages: (
+    connectionId: string,
+    options: {
+      entityName: string;
+      subscriptionName?: string;
+      folderPath: string;
+      fileType: UploadFileType;
+      subQueue?: SubQueue;
+      mode?: ReceiveMode;
+      type?: ReceiveType;
+      messagesCount?: number;
+      fromSequenceNumber?: number;
+      messages?: ServiceBusMessage[];
+    },
+  ) =>
+    request<{ count: number; folderPath: string }>(
+      `/api/v1/connections/${segment(connectionId)}/messages/export`,
+      { method: "POST", body: options },
+    ),
   purgeMessages: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, totalCount: number) =>
     request<BackgroundJob>("/api/v1/jobs/purge", {
       method: "POST",
       body: { connectionId, entityName, subscriptionName, subQueue, totalCount },
     }),
-  resendMessages: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, destinationEntityName: string, totalCount: number) =>
+  resendMessages: (
+    connectionId: string,
+    entityName: string,
+    subscriptionName: string | undefined,
+    subQueue: SubQueue,
+    destinationEntityName: string,
+    totalCount: number,
+    applicationProperties?: Record<string, unknown>,
+  ) =>
     request<BackgroundJob>("/api/v1/jobs/resend", {
       method: "POST",
-      body: { connectionId, entityName, subscriptionName, subQueue, destinationEntityName, totalCount },
+      body: {
+        connectionId,
+        entityName,
+        subscriptionName,
+        subQueue,
+        destinationEntityName,
+        totalCount,
+        applicationProperties,
+      },
     }),
   deleteMessage: (connectionId: string, entityName: string, subscriptionName: string | undefined, subQueue: SubQueue, sequenceNumber: number) =>
     request<BackgroundJob>("/api/v1/jobs/delete-message", {

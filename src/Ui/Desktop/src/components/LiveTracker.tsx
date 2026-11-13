@@ -329,7 +329,9 @@ export function LiveTracker({ connection, onNavigate }: Props) {
                             <td>{formatCount(item.changeCount)}</td>
                             <td>{formatCount(item.capturedCount)}</td>
                             <td>{item.entityKind === "Topic" ? "—" : formatCount(item.activeCount)}</td>
-                            <td>{item.entityKind === "Topic" ? "—" : formatCount(item.deadLetterCount)}</td>
+                            <td className={item.entityKind !== "Topic" && item.deadLetterCount > 0 ? "danger-text" : ""}>
+                              {item.entityKind === "Topic" ? "—" : formatCount(item.deadLetterCount)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>

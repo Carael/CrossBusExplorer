@@ -128,7 +128,8 @@ public class MessageService : IMessageService
         SubQueue subQueue,
         string destinationTopicOrQueueName,
         long totalCount,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, object?>? applicationProperties = null)
     {
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
@@ -139,32 +140,76 @@ public class MessageService : IMessageService
             topicOrQueueName,
             subscriptionName,
             subQueue,
-            ReceiveMode.ReceiveAndDelete);
+            ReceiveMode.PeekLock);
 
         await using ServiceBusSender sender = client.CreateSender(destinationTopicOrQueueName);
 
-        var totalResend = 0;
-        int batchResendCount = -1;
+        long totalResend = 0;
 
-        while (totalResend <= totalCount && batchResendCount > 0 || batchResendCount == -1)
+        while (totalResend < totalCount)
         {
+            var maxMessages = (int)Math.Min(receiveBatch, totalCount - totalResend);
             IReadOnlyList<ServiceBusReceivedMessage> messages = await receiver.ReceiveMessagesAsync(
-                receiveBatch,
+                maxMessages,
                 TimeSpan.FromSeconds(10),
                 cancellationToken);
 
-            await SendMessagesInternalAsync(
+            if (messages.Count == 0)
+            {
+                break;
+            }
+
+            var batchResendCount = await ResendBatchAsync(
+                receiver,
                 sender,
-                messages.Select(m => new ServiceBusMessage(m)).ToList(),
+                messages,
+                applicationProperties,
                 cancellationToken);
 
-            batchResendCount = messages.Count;
             totalResend += batchResendCount;
 
             yield return new ResendResult(totalResend);
         }
 
         yield return new ResendResult(totalResend);
+    }
+
+    public async Task<Result> ExportMessagesAsync(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
+        long? fromSequenceNumber,
+        string folderPath,
+        UploadFileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var messages = await GetMessagesAsync(
+            connectionName,
+            queueOrTopicName,
+            subscriptionName,
+            subQueue,
+            mode,
+            type,
+            messagesCount,
+            fromSequenceNumber,
+            cancellationToken);
+
+        var entityLabel = string.IsNullOrWhiteSpace(subscriptionName)
+            ? queueOrTopicName
+            : $"{queueOrTopicName}_{subscriptionName}";
+
+        var exportedCount = await MessageExportFormatter.ExportMessagesToFolderAsync(
+            folderPath,
+            entityLabel,
+            messages,
+            fileType,
+            cancellationToken);
+
+        return new Result(exportedCount);
     }
 
     public async Task<Result> DeleteMessage(
@@ -422,6 +467,113 @@ public class MessageService : IMessageService
         finally
         {
             messageBatch?.Dispose();
+        }
+    }
+
+    private static async Task<int> ResendBatchAsync(
+        ServiceBusReceiver receiver,
+        ServiceBusSender sender,
+        IReadOnlyList<ServiceBusReceivedMessage> messages,
+        IReadOnlyDictionary<string, object?>? applicationProperties,
+        CancellationToken cancellationToken)
+    {
+        ServiceBusMessageBatch? messageBatch = null;
+        var currentBatchMessages = new List<ServiceBusReceivedMessage>(messages.Count);
+        var sentCount = 0;
+
+        try
+        {
+            messageBatch = await sender.CreateMessageBatchAsync(cancellationToken);
+
+            foreach (ServiceBusReceivedMessage receivedMessage in messages)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var serviceBusMessage = new ServiceBusMessage(receivedMessage);
+                MessageMappings.ApplyApplicationProperties(serviceBusMessage, applicationProperties);
+
+                if (!messageBatch.TryAddMessage(serviceBusMessage))
+                {
+                    if (messageBatch.Count == 0)
+                    {
+                        throw new MessageTooBigException();
+                    }
+
+                    await sender.SendMessagesAsync(messageBatch, cancellationToken);
+                    sentCount += currentBatchMessages.Count;
+                    await CompleteBatchMessagesAsync(receiver, currentBatchMessages);
+
+                    currentBatchMessages.Clear();
+                    messageBatch.Dispose();
+                    messageBatch = null;
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    messageBatch = await sender.CreateMessageBatchAsync(cancellationToken);
+                    if (!messageBatch.TryAddMessage(serviceBusMessage))
+                    {
+                        throw new MessageTooBigException();
+                    }
+                }
+
+                currentBatchMessages.Add(receivedMessage);
+            }
+
+            if (currentBatchMessages.Count > 0)
+            {
+                await sender.SendMessagesAsync(messageBatch, cancellationToken);
+                sentCount += currentBatchMessages.Count;
+                await CompleteBatchMessagesAsync(receiver, currentBatchMessages);
+            }
+
+            return sentCount;
+        }
+        catch (Exception ex)
+        {
+            await AbandonRemainingMessagesAsync(
+                receiver,
+                messages.Skip(sentCount));
+
+            if (ex is ArgumentException argumentException)
+            {
+                throw new ValidationException(ErrorCodes.InvalidArgument, argumentException.Message);
+            }
+
+            if (ex is ServiceBusException serviceBusException)
+            {
+                throw new ServiceBusOperationException(
+                    serviceBusException.Reason.ToString(),
+                    serviceBusException.Message);
+            }
+
+            throw;
+        }
+        finally
+        {
+            messageBatch?.Dispose();
+        }
+    }
+
+    private static Task CompleteBatchMessagesAsync(
+        ServiceBusReceiver receiver,
+        IReadOnlyList<ServiceBusReceivedMessage> messages) =>
+        Task.WhenAll(
+            messages.Select(
+                message => receiver.CompleteMessageAsync(message, CancellationToken.None)));
+
+    private static async Task AbandonRemainingMessagesAsync(
+        ServiceBusReceiver receiver,
+        IEnumerable<ServiceBusReceivedMessage> messages)
+    {
+        try
+        {
+            await Task.WhenAll(
+                messages.Select(
+                    message => receiver.AbandonMessageAsync(message, null, CancellationToken.None)));
+        }
+        catch
+        {
+            // Best-effort lock release; locks will otherwise expire on the broker.
         }
     }
 }

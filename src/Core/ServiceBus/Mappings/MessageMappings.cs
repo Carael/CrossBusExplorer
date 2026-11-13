@@ -124,7 +124,23 @@ public static class MessageMappings
         return sbMessage;
     }
 
-    private static object? ToAmqpValue(object? value)
+    public static void ApplyApplicationProperties(
+        ServiceBusMessage sbMessage,
+        IReadOnlyDictionary<string, object?>? applicationProperties)
+    {
+        if (applicationProperties is null)
+        {
+            return;
+        }
+
+        foreach (var applicationProperty in applicationProperties)
+        {
+            sbMessage.ApplicationProperties[applicationProperty.Key] =
+                ToAmqpValue(applicationProperty.Value);
+        }
+    }
+
+    internal static object? ToAmqpValue(object? value)
     {
         if (value is not JsonElement element)
         {
@@ -135,7 +151,7 @@ public static class MessageMappings
         {
             JsonValueKind.String => element.GetString(),
             JsonValueKind.Number => element.TryGetInt64(out var number)
-                ? number
+                ? (object)number
                 : element.GetDouble(),
             JsonValueKind.True => true,
             JsonValueKind.False => false,
