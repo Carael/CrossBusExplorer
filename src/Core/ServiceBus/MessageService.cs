@@ -128,7 +128,8 @@ public class MessageService : IMessageService
         SubQueue subQueue,
         string destinationTopicOrQueueName,
         long totalCount,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, object?>? applicationProperties = null)
     {
         var connection =
             await _connectionManagement.GetAsync(connectionName, cancellationToken);
@@ -162,6 +163,7 @@ public class MessageService : IMessageService
                 receiver,
                 sender,
                 messages,
+                applicationProperties,
                 cancellationToken);
 
             totalResend += batchResendCount;
@@ -170,6 +172,44 @@ public class MessageService : IMessageService
         }
 
         yield return new ResendResult(totalResend);
+    }
+
+    public async Task<Result> ExportMessagesAsync(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
+        long? fromSequenceNumber,
+        string folderPath,
+        UploadFileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var messages = await GetMessagesAsync(
+            connectionName,
+            queueOrTopicName,
+            subscriptionName,
+            subQueue,
+            mode,
+            type,
+            messagesCount,
+            fromSequenceNumber,
+            cancellationToken);
+
+        var entityLabel = string.IsNullOrWhiteSpace(subscriptionName)
+            ? queueOrTopicName
+            : $"{queueOrTopicName}_{subscriptionName}";
+
+        var exportedCount = await MessageExportFormatter.ExportMessagesToFolderAsync(
+            folderPath,
+            entityLabel,
+            messages,
+            fileType,
+            cancellationToken);
+
+        return new Result(exportedCount);
     }
 
     public async Task<Result> DeleteMessage(
@@ -434,6 +474,7 @@ public class MessageService : IMessageService
         ServiceBusReceiver receiver,
         ServiceBusSender sender,
         IReadOnlyList<ServiceBusReceivedMessage> messages,
+        IReadOnlyDictionary<string, object?>? applicationProperties,
         CancellationToken cancellationToken)
     {
         ServiceBusMessageBatch? messageBatch = null;
@@ -449,6 +490,7 @@ public class MessageService : IMessageService
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var serviceBusMessage = new ServiceBusMessage(receivedMessage);
+                MessageMappings.ApplyApplicationProperties(serviceBusMessage, applicationProperties);
 
                 if (!messageBatch.TryAddMessage(serviceBusMessage))
                 {

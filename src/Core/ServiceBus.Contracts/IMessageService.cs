@@ -34,6 +34,20 @@ public interface IMessageService
         SubQueue subQueue,
         string destinationTopicOrQueueName,
         long totalCount,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, object?>? applicationProperties = null);
+
+    Task<Result> ExportMessagesAsync(
+        string connectionName,
+        string queueOrTopicName,
+        string? subscriptionName,
+        SubQueue subQueue,
+        ReceiveMode mode,
+        ReceiveType type,
+        int? messagesCount,
+        long? fromSequenceNumber,
+        string folderPath,
+        UploadFileType fileType,
         CancellationToken cancellationToken);
 
     Task<Result> DeleteMessage(

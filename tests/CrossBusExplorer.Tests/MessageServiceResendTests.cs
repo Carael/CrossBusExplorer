@@ -183,6 +183,56 @@ public sealed class MessageServiceResendTests
             receiver.AbandonedMessages.Select(m => m.SequenceNumber).OrderBy(s => s));
     }
 
+    [Fact]
+    public async Task ResendAsync_WithApplicationProperties_AppliesAndOverridesPropertiesOnSentMessages()
+    {
+        var originalProperties = new Dictionary<string, object>
+        {
+            ["existing"] = "keep-me",
+            ["routingKey"] = "old-route"
+        };
+
+        var messages = new[]
+        {
+            ServiceBusModelFactory.ServiceBusReceivedMessage(
+                body: BinaryData.FromString("body-1"),
+                messageId: "msg-1",
+                sequenceNumber: 1,
+                properties: originalProperties)
+        };
+
+        var receiver = new FakeServiceBusReceiver([messages]);
+        var sender = new FakeServiceBusSender();
+        var client = new FakeServiceBusClient(receiver, sender);
+        var service = CreateMessageService(client);
+
+        using var jsonDoc = System.Text.Json.JsonDocument.Parse("""{"routingKey":"new-route","retryCount":3,"requeued":true}""");
+        var customProps = new Dictionary<string, object?>
+        {
+            ["routingKey"] = jsonDoc.RootElement.GetProperty("routingKey").Clone(),
+            ["retryCount"] = jsonDoc.RootElement.GetProperty("retryCount").Clone(),
+            ["requeued"] = jsonDoc.RootElement.GetProperty("requeued").Clone()
+        };
+
+        await foreach (var _ in service.ResendAsync(
+                           "conn-1",
+                           "orders-dlq",
+                           null,
+                           SubQueue.DeadLetter,
+                           "orders-topic",
+                           1,
+                           CancellationToken.None,
+                           customProps))
+        {
+        }
+
+        var sentMessage = Assert.Single(sender.SentMessages);
+        Assert.Equal("keep-me", sentMessage.ApplicationProperties["existing"]);
+        Assert.Equal("new-route", sentMessage.ApplicationProperties["routingKey"]);
+        Assert.Equal(3L, sentMessage.ApplicationProperties["retryCount"]);
+        Assert.Equal(true, sentMessage.ApplicationProperties["requeued"]);
+    }
+
     private static MessageService CreateMessageService(ServiceBusClient client) =>
         new(new FakeConnectionManagement(), new FakeClientFactory(client));
 
@@ -307,6 +357,7 @@ public sealed class MessageServiceResendTests
         private readonly Dictionary<ServiceBusMessageBatch, List<ServiceBusMessage>> _batchItems = [];
 
         public List<string> SentMessageIds { get; } = [];
+        public List<ServiceBusMessage> SentMessages { get; } = [];
         public Func<ServiceBusMessageBatch, CancellationToken, Task>? OnSendBatchAsync { get; init; }
 
         public override ValueTask<ServiceBusMessageBatch> CreateMessageBatchAsync(
@@ -334,6 +385,7 @@ public sealed class MessageServiceResendTests
             cancellationToken.ThrowIfCancellationRequested();
             if (_batchItems.TryGetValue(messageBatch, out var items))
             {
+                SentMessages.AddRange(items);
                 SentMessageIds.AddRange(items.Select(m => m.MessageId));
             }
         }

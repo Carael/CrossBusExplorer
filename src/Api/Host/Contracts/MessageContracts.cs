@@ -28,7 +28,27 @@ public sealed record ResendJobRequest(
     string? SubscriptionName,
     SubQueue SubQueue,
     string DestinationEntityName,
-    long TotalCount);
+    long TotalCount,
+    IDictionary<string, object?>? ApplicationProperties = null);
+
+public sealed record ExportMessagesRequest(
+    string EntityName,
+    string? SubscriptionName,
+    string FolderPath,
+    UploadFileType FileType,
+    SubQueue SubQueue = SubQueue.None,
+    ReceiveMode Mode = ReceiveMode.PeekLock,
+    ReceiveType Type = ReceiveType.ByCount,
+    int? MessagesCount = 50,
+    long? FromSequenceNumber = null,
+    IReadOnlyList<Message>? Messages = null);
+
+public sealed record ExportMessagesResponse(
+    long Count,
+    string FolderPath);
+
+public sealed record DefaultExportFolderResponse(
+    string FolderPath);
 
 public sealed record DeleteMessageJobRequest(
     string ConnectionId,

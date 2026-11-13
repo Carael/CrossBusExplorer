@@ -9,9 +9,11 @@ import {
   RefreshCw,
   Save,
   ShieldAlert,
+  Star,
   Trash2,
 } from "lucide-react";
 import { api } from "../api";
+import { favoriteKey, toggleFavorite, useFavorites } from "../favorites";
 import { formatCount } from "../format";
 import type { QueueDetails, QueueInfo } from "../types";
 import { syncQueryData, useRefetchInterval } from "./AutoRefresh";
@@ -34,6 +36,8 @@ export function QueueOverview({
   const queryClient = useQueryClient();
   const dialogs = useDialogs();
   const [tab, setTab] = useState<"overview" | "messages" | "settings">("overview");
+  const favorites = useFavorites();
+  const isFavorite = favorites.has(favoriteKey("queue", connectionId, queueName));
   const queue = useQuery({
     queryKey: ["queue", connectionId, queueName],
     queryFn: () => api.queue(connectionId, queueName),
@@ -99,6 +103,14 @@ export function QueueOverview({
           </div>
         </div>
         <div className="header-actions">
+          <button
+            className={`button secondary favorite-action ${isFavorite ? "active" : ""}`}
+            onClick={() => toggleFavorite("queue", connectionId, queueName)}
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-pressed={isFavorite}
+          >
+            <Star size={16} /> {isFavorite ? "Favorited" : "Favorite"}
+          </button>
           <button className="button secondary" onClick={cloneQueue} disabled={clone.isPending}><Copy size={16} /> Clone</button>
           <button className="button secondary" onClick={() => queue.refetch()}><RefreshCw size={16} /> Refresh</button>
           <button className="button danger-ghost" onClick={deleteQueue} disabled={remove.isPending}><Trash2 size={16} /> Delete</button>
